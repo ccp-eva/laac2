@@ -1,0 +1,252 @@
+---
+title: "Social_relations_analysis"
+output: html_document
+---
+
+```{r, include = F}
+knitr::opts_chunk$set(echo=F, warning=FALSE, message=FALSE, size="small")
+
+opts <- options(knitr.kable.NA = "")
+```
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(ggpubr)
+library(brms)
+library(coda)
+library(broom.mixed)
+library(tidybayes)
+library(readxl)
+
+estimate_mode <- function(s) {
+  d <- density(s)
+  return(d$x[which.max(d$y)])
+}
+
+hdi_upper<- function(s){
+  m <- HPDinterval(mcmc(s))
+  return(m["var1","upper"])
+}
+
+hdi_lower<- function(s){
+  m <- HPDinterval(mcmc(s))
+  return(m["var1","lower"])
+}
+
+```
+
+```{r}
+# read in data files
+data_trial <- read.csv("../data/laac2_data_trial.csv") 
+data_task <- read.csv("../data/laac2_data_task.csv") 
+
+```
+
+
+```{r}
+#get date ranges for each time point
+raw_data_date <- data_trial %>%
+  mutate(date = as.Date(as.character(date), format="%Y%m%d"))%>%
+  select(date, time_point,group)%>%
+  group_by(group,time_point)%>%
+  summarise(end_date = min(date))%>%
+  mutate(time_point = as.numeric(time_point))%>%
+  dplyr::arrange(group,-time_point)%>%
+  mutate(start_date = ifelse(time_point == 1, as.character(as.Date("2022-04-06", format="%Y-%m-%d")), as.character(end_date[-1])))%>%
+  #mutate(dif = time_length(interval(start_date, end_date), "days"))
+  mutate(end_date = as.Date(end_date-1, format = "%Y-%m-%d"),
+         start_date = as.Date(start_date, format = "%Y-%m-%d"),
+         time_point = factor(time_point))%>%
+  group_by(time_point, group)%>%
+  summarise(date = seq(start_date, end_date, by = "days"))%>%
+  dplyr::rename(species = group)%>%
+  mutate(species = paste(str_replace(species,"_","-"),"s",sep =""),
+         species = str_replace(species,"ss","s"))
+```
+
+
+```{r}
+# ## get a list of all possible dyady for all possible time points
+dyads <- list.files(path = "../data/social_relation_data",
+                       pattern = "*.xlsx",
+                       full.names = T)%>%
+  map_df(~read_xlsx(.))%>%
+  mutate(species = tolower(str_remove(`Configuration Name`, "LAAC ")),
+         species = ifelse(species == "orangutans", "orangs", species),
+         session = SessionID,
+         date = as.Date(substr(as.character(DateTime),0,10),format="%Y-%m-%d"),
+         focal = `Focal Name`,
+         associates = `All Occurrence Behavior Social Modifier`,
+         associates = str_remove(associates, "\\."),
+         focal = str_remove(focal, "\\."))%>%
+  #filter(date2 != "2020-08-21")%>%
+  transform(associates = strsplit(associates,","))%>%
+  unnest(associates)%>%
+  select(species,focal,associates)%>%
+  gather(type, focal, -species)%>%
+  filter(!is.na(focal))%>%
+  distinct(species, focal)%>%
+  mutate(associates = focal)%>%
+  group_by(species)%>%
+  tidyr::expand(focal,associates,c(1:n_distinct(data_trial$time_point)))%>%
+  mutate(time_point = factor(`c(1:n_distinct(data_trial$time_point))`))%>%
+  select(-`c(1:n_distinct(data_trial$time_point))`)%>%
+  filter(focal != associates)
+
+```
+
+
+```{r}
+# ## read in the data from the observational scans
+obs_data <- list.files(path = "../data/social_relation_data",
+                       pattern = "*.xlsx",
+                       full.names = T)%>%
+  map_df(~read_xlsx(.))%>%
+  mutate(species = tolower(str_remove(`Configuration Name`, "LAAC ")),
+         species = ifelse(species == "orangutans", "orangs", species),
+         session = SessionID,
+         date = as.Date(substr(as.character(DateTime),0,10),format="%Y-%m-%d"),
+         focal = `Focal Name`,
+         associates = `All Occurrence Behavior Social Modifier`, 
+         associates = str_remove(associates, "\\."),
+         focal = str_remove(focal, "\\."))%>%
+  transform(associates = strsplit(associates,","))%>%
+  unnest(associates)%>%
+  select(species,session,date, focal,associates)%>%
+  filter(date > as.Date("2022-04-05",format="%Y-%m-%d"),
+         date < as.Date("2023-11-10",format="%Y-%m-%d"))%>%
+  left_join(raw_data_date)%>%
+  filter(!is.na(time_point))%>%
+  group_by(species,time_point)%>%
+  mutate(n = length(unique(date)))%>% #compute the number of observations
+  group_by(species,focal, associates,time_point)%>%
+  summarise(count = n(), # count how often a combination of focal and associate occurred for a time point
+            n = max(n))%>%# include the number of observations for that time point
+  mutate(count = ifelse(is.na(associates),0,count))%>%
+  rowwise() %>%
+  filter(!is.na(associates))%>% # remove rows without associates
+  ungroup()
+```
+
+
+
+```{r}
+# ## merge scan data with the dyads
+raw_srm_data <- dyads %>%
+  left_join(obs_data)%>%
+  group_by(species, time_point)%>%
+  mutate(n = max(n, na.rm = T))%>%
+  mutate(count = ifelse(is.na(count),0,count))%>%
+  rowwise() %>%
+  mutate(dyad = paste(sort(c(focal, associates)), collapse = "_"))%>% # create ordered dyad column
+  ungroup()
+#
+# ## prepare data for model run
+srm_model_data <- raw_srm_data%>%
+  group_by(time_point)%>%
+  distinct(dyad, .keep_all = T)%>% # remove duplicate dyads to avoid counting same dyad twice
+  ungroup()%>%
+  filter(!count > n) # remove rows with more counts than observations
+```
+
+
+
+```{r}
+# ## run social relations model
+#
+# ### specify priors
+prior <-  c(prior(normal(0,2), class = Intercept),
+            prior(normal(0,2), class = b),
+            prior(normal(0,1), class = sd)
+            )
+
+### run model
+
+#### phase 1
+srm_1 <-  brm(count | trials(n) ~ species + (0 + time_point | mm(focal, associates)) + ( 0 + time_point | dyad),
+           family = binomial(link = "logit"),
+           data = srm_model_data,
+           prior = prior,
+           control = list(adapt_delta = 0.95, 
+                          max_treedepth = 20),
+           threads = threading(8),
+           backend = "cmdstanr",
+           warmup = 2000,
+           iter   = 6000,
+           cores = 5, 
+           chains = 5)
+
+
+### save output
+saveRDS(srm_1, "./saves/srm_1.rds")
+
+### load model results(too large to put on GitHub)
+srm_1 <-  readRDS("./saves/srm_1.rds")
+
+
+### get species info for each subject
+subject_data <-  raw_srm_data%>%
+  ungroup()%>%
+  select(species, focal, associates)%>%
+  gather(role, subject,-species)%>%
+  distinct(subject, .keep_all = T)%>%
+  select(-role)%>%
+  arrange(species)%>%
+  mutate(subject = tolower(subject))%>%
+  mutate_at(.vars = vars(ends_with("s")),
+            .funs = funs(sub("s", "", .)))%>%
+  mutate(species = str_replace(species, "-", "_"))
+
+## extract model estimates for each subject
+### phase 1
+subject_draws_1 <-  spread_draws(srm_1, r_mmfocalassociates[subject,time_point])%>% # extract posterior draws for each subject and time point
+  dplyr::rename(estimate = r_mmfocalassociates)%>%
+  mutate(subject = tolower(subject))%>%
+  left_join(subject_data) # merge with subject information to get species in
+
+### phase 2
+subject_draws_2 <-  spread_draws(srm_2, r_mmfocalassociates[subject,time_point])%>% # extract posterior draws for each subject and time point
+  dplyr::rename(estimate = r_mmfocalassociates)%>%
+  mutate(subject = tolower(subject))%>%
+  left_join(subject_data) # merge with subject information to get species in
+
+## summaries subject draws to put on GitHub
+subject_estimates <- bind_rows(
+  subject_draws_1,
+  subject_draws_2)%>%
+  ungroup()%>%
+  mutate(time_point = as.numeric(str_remove(time_point, "time_point")))%>%
+  group_by(species, subject,time_point)%>%
+  summarise(mean = estimate_mode(estimate),
+            uci = hdi_upper(estimate),
+            lci = hdi_lower(estimate))
+
+## save subject draws to put on GitHub
+write_csv(subject_estimates, "./saves/srm_estimates.csv")
+
+subject_estimates <- read_csv("./saves/srm_estimates.csv")
+
+## generate plot
+plot_est <-  subject_estimates%>%
+  ungroup()%>%
+  mutate(species_order = as.numeric(as.factor(species)),
+         subject = factor(subject),
+         subject = reorder(subject, species_order))
+
+
+psrm <- plot_est%>%
+  filter(species == "orangutan" 
+         )%>%
+mutate(subject = str_to_title(subject))%>%
+ggplot(.,aes(y = mean, x = factor(time_point), col = subject)) +
+  geom_point(alpha = .5)+
+  geom_vline(xintercept = 14.5)+
+  #geom_pointrange(aes(y = mean, ymin = lci, ymax = uci), alpha = .5, position = position_dodge(width = .5))+
+  geom_line(data = .%>%filter(time_point>14),aes(group = subject),alpha = .5)+
+  geom_line(data = .%>%filter(time_point<15),aes(group = subject),alpha = .5)+
+  #facet_grid(~species)+
+  theme_minimal()+
+  scale_color_viridis_d(name ="Subject")+
+  labs(x = "Time point", y = "Sociality estimate")
+```
+
