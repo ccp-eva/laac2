@@ -17,6 +17,7 @@ library(coda)
 library(broom.mixed)
 library(tidybayes)
 library(readxl)
+library(ggrepel)
 
 estimate_mode <- function(s) {
   d <- density(s)
@@ -46,6 +47,8 @@ data_task <- read.csv("../data/laac2_data_task.csv")
 ```{r}
 #get date ranges for each time point
 raw_data_date <- data_trial %>%
+  mutate(subject = ifelse(subject == "shanga", "changa", subject))%>%
+  filter(subject != "robert", subject != "dorien")%>%
   mutate(date = as.Date(as.character(date), format="%Y%m%d"))%>%
   select(date, time_point,group)%>%
   group_by(group,time_point)%>%
@@ -83,6 +86,8 @@ dyads <- list.files(path = "../data/social_relation_data",
   transform(associates = strsplit(associates,","))%>%
   unnest(associates)%>%
   select(species,focal,associates)%>%
+  mutate(focal = ifelse(focal == "Shanga", "Changa", focal),
+         associates = ifelse(associates == "Shanga", "Changa", associates))%>%
   gather(type, focal, -species)%>%
   filter(!is.na(focal))%>%
   distinct(species, focal)%>%
@@ -91,8 +96,9 @@ dyads <- list.files(path = "../data/social_relation_data",
   tidyr::expand(focal,associates,c(1:n_distinct(data_trial$time_point)))%>%
   mutate(time_point = factor(`c(1:n_distinct(data_trial$time_point))`))%>%
   select(-`c(1:n_distinct(data_trial$time_point))`)%>%
-  filter(focal != associates)
-
+  filter(focal != associates)%>%
+  filter(focal != "Robert", focal != "Dorien", 
+         associates != "Robert", associates != "Dorien")
 ```
 
 
@@ -113,6 +119,8 @@ obs_data <- list.files(path = "../data/social_relation_data",
   transform(associates = strsplit(associates,","))%>%
   unnest(associates)%>%
   select(species,session,date, focal,associates)%>%
+  mutate(focal = ifelse(focal == "Shanga", "Changa", focal),
+         associates = ifelse(associates == "Shanga", "Changa", associates))%>%
   filter(date > as.Date("2022-04-05",format="%Y-%m-%d"),
          date < as.Date("2023-11-10",format="%Y-%m-%d"))%>%
   left_join(raw_data_date)%>%
@@ -125,7 +133,9 @@ obs_data <- list.files(path = "../data/social_relation_data",
   mutate(count = ifelse(is.na(associates),0,count))%>%
   rowwise() %>%
   filter(!is.na(associates))%>% # remove rows without associates
-  ungroup()
+  ungroup()%>%
+  filter(focal != "Robert", focal != "Dorien", 
+         associates != "Robert", associates != "Dorien")
 ```
 
 
@@ -147,6 +157,9 @@ srm_model_data <- raw_srm_data%>%
   distinct(dyad, .keep_all = T)%>% # remove duplicate dyads to avoid counting same dyad twice
   ungroup()%>%
   filter(!count > n) # remove rows with more counts than observations
+
+sort(unique(srm_model_data$focal))
+sort(unique(srm_model_data$associates))
 ```
 
 
@@ -178,11 +191,16 @@ srm_1 <-  brm(count | trials(n) ~ species + (0 + time_point | mm(focal, associat
 
 
 ### save output
-saveRDS(srm_1, "./saves/srm_1.rds")
+saveRDS(srm_1, "../saves/srm_1.rds")
 
 ### load model results(too large to put on GitHub)
-srm_1 <-  readRDS("./saves/srm_1.rds")
+srm_1 <-  readRDS("../saves/srm_1.rds")
 
+```
+
+
+
+```{r}
 
 ### get species info for each subject
 subject_data <-  raw_srm_data%>%
@@ -204,16 +222,9 @@ subject_draws_1 <-  spread_draws(srm_1, r_mmfocalassociates[subject,time_point])
   mutate(subject = tolower(subject))%>%
   left_join(subject_data) # merge with subject information to get species in
 
-### phase 2
-subject_draws_2 <-  spread_draws(srm_2, r_mmfocalassociates[subject,time_point])%>% # extract posterior draws for each subject and time point
-  dplyr::rename(estimate = r_mmfocalassociates)%>%
-  mutate(subject = tolower(subject))%>%
-  left_join(subject_data) # merge with subject information to get species in
 
 ## summaries subject draws to put on GitHub
-subject_estimates <- bind_rows(
-  subject_draws_1,
-  subject_draws_2)%>%
+subject_estimates <- subject_draws_1%>%
   ungroup()%>%
   mutate(time_point = as.numeric(str_remove(time_point, "time_point")))%>%
   group_by(species, subject,time_point)%>%
@@ -222,9 +233,9 @@ subject_estimates <- bind_rows(
             lci = hdi_lower(estimate))
 
 ## save subject draws to put on GitHub
-write_csv(subject_estimates, "./saves/srm_estimates.csv")
+write_csv(subject_estimates, "../saves/srm_estimates.csv")
 
-subject_estimates <- read_csv("./saves/srm_estimates.csv")
+subject_estimates <- read_csv("../saves/srm_estimates.csv")
 
 ## generate plot
 plot_est <-  subject_estimates%>%
@@ -234,19 +245,18 @@ plot_est <-  subject_estimates%>%
          subject = reorder(subject, species_order))
 
 
-psrm <- plot_est%>%
-  filter(species == "orangutan" 
-         )%>%
-mutate(subject = str_to_title(subject))%>%
-ggplot(.,aes(y = mean, x = factor(time_point), col = subject)) +
-  geom_point(alpha = .5)+
+plot_est%>%
+  filter(species == "bonobo")%>%
+ggplot(.,aes(y = mean, x = time_point, col = subject)) +
+  geom_point(alpha = .5,show_guide=F)+
   geom_vline(xintercept = 14.5)+
   #geom_pointrange(aes(y = mean, ymin = lci, ymax = uci), alpha = .5, position = position_dodge(width = .5))+
-  geom_line(data = .%>%filter(time_point>14),aes(group = subject),alpha = .5)+
-  geom_line(data = .%>%filter(time_point<15),aes(group = subject),alpha = .5)+
-  #facet_grid(~species)+
+  geom_line(aes(group = subject),alpha = .5, show.legend = F)+
+  geom_text_repel(data = .%>%filter(time_point == 10, species == "bonobo")%>% distinct(subject, .keep_all = T), aes(label = subject), guide = "none",show_guide=F,max.overlaps = Inf)+
+  facet_grid(~species)+
+  xlim(c(0,11))+
   theme_minimal()+
   scale_color_viridis_d(name ="Subject")+
-  labs(x = "Time point", y = "Sociality estimate")
+  labs(x = "Time point", y = "Sociality estimate") 
 ```
 
