@@ -5,7 +5,7 @@
 
 ## Tasks
 
-* `population`: 12 trials, binary outcome (`0` or `1`)
+* `population`: 12 trials, binary outcome (`0` or `1`) - two conditions: `straight` and `crossed` with `crossed` potentially more difficult. 
 * `reasoning` : 12 trials, binary outcome (`0` or `1`)     
 * `communication` : 12 trials, binary outcome (`0` or `1`)   
 * `visible_food` : 12 trials, binary outcome (`0` or `1`)
