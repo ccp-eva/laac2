@@ -9,7 +9,8 @@
 
 saves/srm_1.rds
 
-
+docs/*
+outputs/*
 
 # DO NOT CHANGE THE CONTENT THAT FOLLOWS HERE ...
 #   EXCEPT IF YOU PLAN TO UPDATE THE TEMPLATE
