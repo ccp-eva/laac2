@@ -29,7 +29,6 @@ opts <- options(knitr.kable.NA = "")
 library(png)
 library(grid)
 library(xtable)
-library(tidyverse)
 library(tidybayes)
 library(ggridges)
 library(glue)
@@ -51,6 +50,7 @@ library(projpred)
 library(bayesplot)
 library(loo)
 library(directlabels)
+library(tidyverse)
 
 source("../utils/custom_facet.R")
 
@@ -78,12 +78,16 @@ hdi_lower<- function(s){
   m <- HPDinterval(mcmc(s))
   return(m["var1","lower"])
 }
+
+read_csv("../saves/srm_estimates.csv")%>%mutate(subject = ifelse(subject == "changa", "shanga", subject))
 ```
 
 ```{r}
 # read in data files
 data_task <- read.csv("../data/laac2_data_task.csv")
+
 data_trial <- read.csv("../data/laac2_data_trial.csv")
+
 
 ```
 
@@ -809,7 +813,7 @@ ggsave("../visuals/compare_cor_imp_sem.png", height = 8, width = 10, scale = 1.5
 
 ```{r}
 df_trials <- data_trial%>%
-  group_by(subject, time_point,group,test_tp, task, rank, sex, rearing, age, time_in_leipzig, observer, sick_severity,test_day, le_present, le_mean, le_max, dist_present, dist_mean, dist_max, time_outdoors)%>%
+  group_by(subject, time_point,group,test_tp, task, rank, sex, rearing, age, time_in_leipzig, observer, sick_severity,test_day, le_present, le_mean, le_max, dist_present, dist_mean, dist_max, time_outdoors, sociality)%>%
   summarise(sick_severity = mean(sick_severity), 
             p = sum(code), 
             n = length(code))%>%
@@ -818,10 +822,31 @@ df_trials <- data_trial%>%
 
 
 ```{r}
+grp_size <- read_csv("../saves/srm_estimates.csv")%>%
+  group_by(species)%>%
+  summarise(n = n_distinct(subject))%>%
+  pivot_wider(names_from = species, values_from = n)
+  
+
+df_trials <- df_trials %>%
+  # relative rank of ape within species (varies between time points)
+  group_by(group, time_point) %>%
+  mutate(
+    rel_rank = case_when(
+      group == "a_chimp" ~ percent_rank(grp_size$a_chimp:1)[rank],
+      group == "b_chimp" ~ percent_rank(grp_size$b_chimp:1)[rank],
+      group == "bonobos" ~ percent_rank(grp_size$bonobo:1)[rank],
+      group == "gorillas" ~ percent_rank(grp_size$gorilla:1)[rank],
+      group == "orangs" ~ percent_rank(grp_size$orang:1)[rank]
+    )
+  ) %>%
+  ungroup()
+
 df_trials_final <- df_trials %>%
   ungroup()%>%
   mutate(across(c(sick_severity,
                   test_tp,
+                  rel_rank,
                   le_mean,
                   dist_mean,
                   time_outdoors,
@@ -840,29 +865,10 @@ df_trials_final <- df_trials %>%
                 as_factor)) %>%
   mutate(observer = fct_relevel(observer, "no")) %>%
   mutate(rearing = fct_recode(rearing, "hand" = "unknown"))%>%
-  left_join(read_csv("../saves/srm_estimates.csv")%>%select(subject, time_point, mean)%>%dplyr::rename("sociality" = "mean"))
-  
-
-
-grp_size <- data_trial%>%
-  group_by(group)%>%
-  summarise(n = n_distinct(subject))%>%
-  pivot_wider(names_from = group, values_from = n)
-  
-
-df_trials_final <- df_trials_final %>%
-  # relative rank of ape within species (varies between time points)
-  group_by(group, time_point) %>%
-  mutate(
-    rel_rank = case_when(
-      group == "a_chimp" ~ percent_rank(grp_size$a_chimp:1)[rank],
-      group == "b_chimp" ~ percent_rank(grp_size$b_chimp:1)[rank],
-      group == "bonobos" ~ percent_rank(grp_size$bonobos:1)[rank],
-      group == "gorillas" ~ percent_rank(grp_size$gorillas:1)[rank],
-      group == "orangs" ~ percent_rank(grp_size$orangs:1)[rank]
-    )
-  ) %>%
-  ungroup()
+  left_join(read_csv("../saves/srm_estimates.csv")%>%
+              mutate(subject = ifelse(subject == "changa", "shanga", subject))%>%
+              select(subject, time_point, mean)%>%
+              dplyr::rename("sociality" = "mean"))
 
 ```
 
