@@ -814,9 +814,6 @@ df_trials <- data_trial%>%
             p = sum(code), 
             n = length(code))%>%
   mutate(observer = ifelse(is.na(observer), "no", "yes"))
-
-data_trial%>%
-  filter(group == "gorillas")
 ```
 
 
@@ -897,6 +894,42 @@ m_att <- brm(fm,
               chains = 4,
               seed = 2024)
 
+m_com <- brm(fm,
+             family = binomial,
+             data = df_trials_final%>%filter(task == "communication"),
+              warmup = 1000, 
+              iter = 4000, 
+              cores = 4, 
+              chains = 4,
+              seed = 2024)
+
+m_inh <- brm(fm,
+             family = binomial,
+             data = df_trials_final%>%filter(task == "inhibit_searched"),
+              warmup = 1000, 
+              iter = 4000, 
+              cores = 4, 
+              chains = 4,
+              seed = 2024)
+
+m_pop <- brm(fm,
+             family = binomial,
+             data = df_trials_final%>%filter(task == "population"),
+              warmup = 1000, 
+              iter = 4000, 
+              cores = 4, 
+              chains = 4,
+              seed = 2024)
+
+m_vis <- brm(fm,
+             family = binomial,
+             data = df_trials_final%>%filter(task == "visible_food"),
+              warmup = 1000, 
+              iter = 4000, 
+              cores = 4, 
+              chains = 4,
+              seed = 2024)
+
 ```
 
 ```{r}
@@ -917,19 +950,92 @@ s_terms <- c("1", all_fixed_effects,
                     " + (1 | subject)"))
 ```
 
-#### Direct causal inference
 
 ```{r, warning = FALSE}
+
+doParallel::registerDoParallel(40)
+
 cvs_att <- cv_varsel(m_att,
-                        search_terms = s_terms,
-                        cv_method = "LOO", method = "forward",
-                        seed = 2020)
-# 
-# saveRDS(cvs_cau_p1,"./saves/cvs_cau.rds")
-# 
-# cvs_cau <- readRDS("./saves/cvs_cau.rds")
+                     search_terms = s_terms,
+                     validate_search = T,
+                     cv_method = "LOO", 
+                     method = "forward",
+                     parallel = TRUE,
+                     seed = 2024)
+ 
+saveRDS(cvs_att,"./saves/cvs_att.rds")
+
+doParallel::registerDoParallel(40)
+
+cvs_com <- cv_varsel(m_com,
+                     search_terms = s_terms,
+                     validate_search = T,
+                     cv_method = "LOO", 
+                     method = "forward",
+                     parallel = TRUE,
+                     seed = 2024)
+ 
+saveRDS(cvs_com,"./saves/cvs_com.rds")
+
+doParallel::registerDoParallel(40)
+
+cvs_inh <- cv_varsel(m_inh,
+                     search_terms = s_terms,
+                     validate_search = T,
+                     cv_method = "LOO", 
+                     method = "forward",
+                     parallel = TRUE,
+                     seed = 2024)
+ 
+saveRDS(cvs_inh,"./saves/cvs_inh.rds")
+
+doParallel::registerDoParallel(40)
+
+cvs_pop <- cv_varsel(m_pop,
+                     search_terms = s_terms,
+                     validate_search = T,
+                     cv_method = "LOO", 
+                     method = "forward",
+                     parallel = TRUE,
+                     seed = 2024)
+ 
+saveRDS(cvs_pop,"./saves/cvs_pop.rds")
+
+
+doParallel::registerDoParallel(40)
+
+cvs_vis <- cv_varsel(m_vis,
+                     search_terms = s_terms,
+                     validate_search = T,
+                     cv_method = "LOO", 
+                     method = "forward",
+                     parallel = TRUE,
+                     seed = 2024)
+ 
+saveRDS(cvs_vis,"./saves/cvs_vis.rds")
 
 ```
+
+```{r}
+
+# cvs_cau <- readRDS("./saves/cvs_cau.rds")
+```
+
+
+```{r}
+plot(cvs_att, stats = "elpd", ranking_nterms_max = NA)
+plot(cvs_att, stats = "elpd", deltas = TRUE)
+
+smmry <- summary(cvs_att, stats = "elpd", type = c("mean", "se", "diff", "diff.se"),
+                 deltas = T)
+
+print(smmry, digits = 1)
+
+rk <- ranking(cvs_att)
+
+pr_rk <- cv_proportions(rk)
+```
+
 
 # old
 
