@@ -79,7 +79,6 @@ hdi_lower<- function(s){
   return(m["var1","lower"])
 }
 
-read_csv("../saves/srm_estimates.csv")%>%mutate(subject = ifelse(subject == "changa", "shanga", subject))
 ```
 
 ```{r}
@@ -813,10 +812,20 @@ ggsave("../visuals/compare_cor_imp_sem.png", height = 8, width = 10, scale = 1.5
 
 ```{r}
 df_trials <- data_trial%>%
-  group_by(subject, time_point,group,test_tp, task, rank, sex, rearing, age, time_in_leipzig, observer, sick_severity,test_day, le_present, le_mean, le_max, dist_present, dist_mean, dist_max, time_outdoors, sociality)%>%
+  #filter(task != "inhibit_searched")%>%
+  mutate(code2 = ifelse(task == "inhibit_searched" & code > 0, 0, 1),
+       code = ifelse(task == "inhibit_searched", code2, code),
+        )%>%
+  group_by(subject, time_point,group,test_tp, task, rank, sex, rearing, age, time_in_leipzig, observer, sick_severity,test_day, le_present, le_mean, le_max, dist_present, dist_mean, dist_max, time_outdoors)%>%
   summarise(sick_severity = mean(sick_severity), 
             p = sum(code), 
             n = length(code))%>%
+  mutate(observer = ifelse(is.na(observer), "no", "yes"))
+
+
+df_trials_inh <- data_trial%>%
+  filter(task == "inhibit_searched")%>%
+  group_by(subject, time_point,group,test_tp, task, rank, sex, rearing, age, time_in_leipzig, observer, sick_severity,test_day, le_present, le_mean, le_max, dist_present, dist_mean, dist_max, time_outdoors)%>%
   mutate(observer = ifelse(is.na(observer), "no", "yes"))
 ```
 
@@ -829,6 +838,20 @@ grp_size <- read_csv("../saves/srm_estimates.csv")%>%
   
 
 df_trials <- df_trials %>%
+  # relative rank of ape within species (varies between time points)
+  group_by(group, time_point) %>%
+  mutate(
+    rel_rank = case_when(
+      group == "a_chimp" ~ percent_rank(grp_size$a_chimp:1)[rank],
+      group == "b_chimp" ~ percent_rank(grp_size$b_chimp:1)[rank],
+      group == "bonobos" ~ percent_rank(grp_size$bonobo:1)[rank],
+      group == "gorillas" ~ percent_rank(grp_size$gorilla:1)[rank],
+      group == "orangs" ~ percent_rank(grp_size$orang:1)[rank]
+    )
+  ) %>%
+  ungroup()
+
+df_trials_inh <- df_trials_inh%>%
   # relative rank of ape within species (varies between time points)
   group_by(group, time_point) %>%
   mutate(
@@ -870,13 +893,45 @@ df_trials_final <- df_trials %>%
               select(subject, time_point, mean)%>%
               dplyr::rename("sociality" = "mean"))
 
+df_trials_final_inh <- df_trials_inh %>%
+  ungroup()%>%
+  mutate(across(c(sick_severity,
+                  test_tp,
+                  rel_rank,
+                  le_mean,
+                  dist_mean,
+                  time_outdoors,
+                  age,
+                  time_in_leipzig),
+                ~scale(., center = T, scale = F))) %>%
+  mutate(across(c(
+                  subject,
+                  group,
+                  sex,
+                  test_day,
+                  le_present,
+                  dist_present,
+                  rearing,
+                  observer),
+                as_factor)) %>%
+  mutate(observer = fct_relevel(observer, "no")) %>%
+  mutate(rearing = fct_recode(rearing, "hand" = "unknown"))%>%
+  left_join(read_csv("../saves/srm_estimates.csv")%>%
+              mutate(subject = ifelse(subject == "changa", "shanga", subject))%>%
+              select(subject, time_point, mean)%>%
+              dplyr::rename("sociality" = "mean"))%>%
+  left_join(read_csv("../data/LAAC_inhibit_searched_long_format.csv")%>%
+  select(date, time_point, subject, trial, error.ny))%>%
+  mutate(ot = log(1/3), 
+         tp_fac = factor(time_point))
+
 ```
 
 
 ```{r}
 # formula for reference models
 fm <- formula(p|trials(n) ~ sick_severity +
-                #test_tp + 
+                test_tp + 
                 test_day +
                 rel_rank +
                 observer +
@@ -918,6 +973,28 @@ m_inh <- brm(fm,
               chains = 4,
               seed = 2024)
 
+m_inh_long <- brm(error.ny ~ offset(ot)+
+                sick_severity +
+                test_tp +
+                test_day +
+                rel_rank +
+                observer +
+                age + time_in_leipzig +
+                sex + group +
+                rearing +
+                le_mean + dist_mean +
+                time_outdoors +
+                sociality +
+                time_point +
+                (1|subject),
+             family = bernoulli(),
+             data = df_trials_final_inh,
+              warmup = 1000,
+              iter = 4000,
+              cores = 4,
+              chains = 4,
+              seed = 2024)
+
 m_pop <- brm(fm,
              family = binomial,
              data = df_trials_final%>%filter(task == "population"),
@@ -940,7 +1017,7 @@ m_vis <- brm(fm,
 
 ```{r}
 all_fixed_effects <- c("sick_severity",
-                       #"test_tp", 
+                       "test_tp", 
                        "test_day", "time_point",
                        "rel_rank",
                        "observer",
@@ -954,6 +1031,16 @@ all_fixed_effects <- c("sick_severity",
 s_terms <- c("1", all_fixed_effects,
              paste0(paste(all_fixed_effects, collapse = " + "),
                     " + (1 | subject)"))
+
+# delay random intercept to last place so that it doesn't soak up all the variance
+s_terms_inh <- c("1", all_fixed_effects,
+             paste0(paste(all_fixed_effects, collapse = " + "),
+                " + (1 | subject)"),
+                  paste0(paste(all_fixed_effects, collapse = " + "), 
+                          "+ (time_point|subject)"))
+
+
+
 ```
 
 
@@ -969,7 +1056,7 @@ cvs_att <- cv_varsel(m_att,
                      parallel = TRUE,
                      seed = 2024)
  
-saveRDS(cvs_att,"./saves/cvs_att.rds")
+saveRDS(cvs_att,"../saves/cvs_att.rds")
 
 doParallel::registerDoParallel(40)
 
@@ -981,9 +1068,10 @@ cvs_com <- cv_varsel(m_com,
                      parallel = TRUE,
                      seed = 2024)
  
-saveRDS(cvs_com,"./saves/cvs_com.rds")
+saveRDS(cvs_com,"../saves/cvs_com.rds")
 
 doParallel::registerDoParallel(40)
+
 
 cvs_inh <- cv_varsel(m_inh,
                      search_terms = s_terms,
@@ -993,7 +1081,19 @@ cvs_inh <- cv_varsel(m_inh,
                      parallel = TRUE,
                      seed = 2024)
  
-saveRDS(cvs_inh,"./saves/cvs_inh.rds")
+saveRDS(cvs_inh,"../saves/cvs_inh.rds")
+
+doParallel::registerDoParallel(40)
+
+cvs_inh_long <- cv_varsel(m_inh,
+                     search_terms = s_terms_inh,
+                     validate_search = T,
+                     cv_method = "LOO",
+                     method = "forward",
+                     parallel = TRUE,
+                     seed = 2024)
+
+saveRDS(cvs_inh_long,"../saves/cvs_inh_long.rds")
 
 doParallel::registerDoParallel(40)
 
@@ -1005,7 +1105,7 @@ cvs_pop <- cv_varsel(m_pop,
                      parallel = TRUE,
                      seed = 2024)
  
-saveRDS(cvs_pop,"./saves/cvs_pop.rds")
+saveRDS(cvs_pop,"../saves/cvs_pop.rds")
 
 
 doParallel::registerDoParallel(40)
@@ -1018,28 +1118,30 @@ cvs_vis <- cv_varsel(m_vis,
                      parallel = TRUE,
                      seed = 2024)
  
-saveRDS(cvs_vis,"./saves/cvs_vis.rds")
+saveRDS(cvs_vis,"../saves/cvs_vis.rds")
 
 ```
 
 ```{r}
+cvs_com <- readRDS("../saves/cvs_com.rds")
 
-# cvs_cau <- readRDS("./saves/cvs_cau.rds")
 ```
 
 
 ```{r}
-plot(cvs_att, stats = "elpd", ranking_nterms_max = NA)
-plot(cvs_att, stats = "elpd", deltas = TRUE)
+plot(cvs_vis, stats = "elpd", ranking_nterms_max = NA)
+plot(cvs_vis, stats = "elpd", deltas = TRUE)
 
-smmry <- summary(cvs_att, stats = "elpd", type = c("mean", "se", "diff", "diff.se"),
+smmry <- summary(cvs_com, stats = "elpd", type = c("mean", "se", "diff", "diff.se"),
                  deltas = T)
 
 print(smmry, digits = 1)
 
-rk <- ranking(cvs_att)
+rk <- ranking(cvs_com)
 
 pr_rk <- cv_proportions(rk)
+
+plot(pr_rk)
 ```
 
 
