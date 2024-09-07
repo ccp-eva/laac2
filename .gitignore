@@ -7,6 +7,12 @@
 # Put your project-specific ignores here:
 
 
+saves/cvs_att.rds
+saves/cvs_com.rds
+saves/cvs_inh.rds
+saves/cvs_vis.rds
+saves/cvs_pop.rds
+
 saves/srm_1.rds
 
 docs/*

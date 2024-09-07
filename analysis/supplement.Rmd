@@ -44,6 +44,7 @@ library(tidyboot)
 library(MplusAutomation)
 library(kableExtra)
 library(knitr)
+library(ggstance)
 #library(magick)
 #library(pdftools)
 library(projpred)
@@ -51,6 +52,7 @@ library(bayesplot)
 library(loo)
 library(directlabels)
 library(tidyverse)
+library(cowplot)
 
 source("../utils/custom_facet.R")
 
@@ -83,24 +85,71 @@ hdi_lower<- function(s){
 
 ```{r}
 # read in data files
-data_task <- read.csv("../data/laac2_data_task.csv")
+data_task <- read.csv("../data/laac2_data_task.csv")%>%
+  mutate(task = recode(task,
+       "population" = "Population-to-sample",
+       "communication" = "Communicative-cues",
+       "reasoning" = "Logical-reasoning",
+       "visible_food" = "Ignore-visible-food",
+       "inhibit_searched" = "Self-ordered-search",
+       "attention" = "Attention-following"
+  ))
 
-data_trial <- read.csv("../data/laac2_data_trial.csv")
-
+data_trial <- read.csv("../data/laac2_data_trial.csv")%>%
+  mutate(task = recode(task,
+       "population" = "Population-to-sample",
+       "communication" = "Communicative-cues",
+       "reasoning" = "Logical-reasoning",
+       "visible_food" = "Ignore-visible-food",
+       "inhibit_searched" = "Self-ordered-search",
+       "attention" = "Attention-following"
+  ))
 
 ```
 
 # Sample size
+```{r}
+ tpn <- data_trial%>%
+     mutate(group = as.character(group), 
+         species = ifelse(grepl("chimp",group),"chimpanzee", group), 
+         species = factor(species))%>%
+   group_by(time_point)%>%
+   mutate(min_date = min(date))%>%
+   group_by(time_point,group,.drop=FALSE)%>%
+  summarise(n = length(unique(subject)),
+            date = min(min_date))%>%
+  group_by(time_point)%>%
+  mutate(total_n = sum(n),
+         date = as.Date(as.character(min(date)), "%Y%m%d"))%>%
+   group_by(group)%>%
+   mutate(end = date, 
+          start = lag(as.character(end)))%>%
+   mutate(start = ifelse(is.na(start),"2022-04-28",start),
+          start = as.Date(start, format = "%Y-%m-%d"))
+
+```
+
 
 ```{r}
-data_task %>%
-  group_by(group,time_point)%>%
-  summarise(n = n_distinct(subject))%>%
-  ggplot(., aes(x = factor(time_point), y= n,  fill = group))+
-  geom_bar(stat = "identity",position = "stack")+
-  scale_fill_ptol(name = "Group")+
-  labs(x = "Time point", y = "Sample size")+
-  theme_minimal()
+cols <- c(ptol_pal()(5),"black")
+
+ggplot(tpn, aes(x = date, y = n, col = group))+
+  geom_point(alpha = .6)+
+  geom_line(data = tpn, alpha = .6)+
+  geom_point(aes(y = total_n), col = "black", alpha = .6)+
+  geom_line(data = tpn,aes(y = total_n), col = "black", alpha = .6)+
+  theme_minimal()+
+  ylim(0,48)+
+  labs(y = "Sample Size", x = "")+
+  scale_color_manual(name = "Group", 
+                   limits = c("a_chimp", "b_chimp", "bonobos", "gorillas", "orangs", "total"),
+                   labels =c("Chimpanzee gr. A", "Chimpanzee gr. B", "Bonobo", "Gorilla", "Orangutan", "Total"),
+                   values = cols)+
+  scale_x_date(date_breaks = "2 month",
+             date_labels = "%b")+
+  scale_fill_manual(values = c("grey", NA))+
+  guides(fill = F)+
+  theme(panel.border = element_rect(colour = "black", fill=NA, size = .5))
 ```
 
 # Performance based on Data
@@ -124,13 +173,13 @@ time_plot_2 <- data_task%>%
   #mutate(time_point = factor(time_point))%>%
   group_by(task, time_point)%>%
   tidyboot_mean(col = performance, na.rm = TRUE)%>%
-  mutate(chance = ifelse(task == "inhibit_searched", NA,ifelse(task == "communication", 1/3,0.5)))
+  mutate(chance = ifelse(task == "Self-ordered-search", NA,ifelse(task == "Communicative-cues", 1/3,0.5)))
 
 ggplot()+
   facet_wrap(~task, ncol = 3, scales = "free_y")+
   #geom_vline(data = time_plot_2,aes(xintercept = 14.5), lty = 1, col = "black", alpha = 1, size = 1)+
   geom_hline(data = time_plot_2,aes(yintercept = chance), lty = 2, col = "black", alpha = .75)+
-   geom_jitter(data = time_plot_0, aes(x = factor(time_point), y = mean,  col = group), alpha = .25, width = 0.2)+
+   geom_jitter(data = time_plot_0, aes(x = factor(time_point), y = mean,  col = group), alpha = .1, width = 0.2)+
   geom_point(data = time_plot_1, aes(x = factor(time_point), y = mean,  col = group), alpha = .6)+
   geom_line(data = time_plot_1, aes(x = factor(time_point), y = mean, col = group, group = group), alpha = .6)+
   geom_pointrange(data = time_plot_2, aes(x = factor(time_point), y = mean, ymin = ci_lower, ymax = ci_upper),pch = 4)+
@@ -141,9 +190,12 @@ ggplot()+
   #geom_line(data = switch_data, aes(x = time_point, y = mean, group = phase), alpha = .5)+
   guides(size = F)+
   #scale_shape(name = "Switching Phase")+
-  scale_color_ptol(name = "Group")+
-  #cale_x_continuous(breaks = c(1:max(time_plot_2$time_point)))+
-  theme(legend.position = "bottom", panel.border = element_rect(colour = "black", fill=NA, size = .5))
+    scale_color_manual(name = "Group", 
+                   limits = c("a_chimp", "b_chimp", "bonobos", "gorillas", "orangs"),
+                   labels =c("Chimpanzee gr. A", "Chimpanzee gr. B", "Bonobo", "Gorilla", "Orangutan"),
+                   values = cols)+
+  #scale_x_continuous(breaks = c(1:max(time_plot_2$time_point)))+
+  theme(legend.position = "right", panel.border = element_rect(colour = "black", fill=NA, size = .5))
 
 ```
 
@@ -178,6 +230,7 @@ lstvf <- readModels("../outputs/laac2_LST_food_equalSvar.out")
 # latent state trait models equal variances varying means
 
 lstav <- readModels("../outputs/laac2_LST_attent_equalSvar_means.out")
+lstav_short <- readModels("../outputs/laac2_LST_attent_equalSvar_means_short.out")
 lstcv <- readModels("../outputs/laac2_LST_comm_equal_Svar_means.out")
 lstpv <- readModels("../outputs/laac2_LST_population_equalSvar_means.out")
 lstrv <- readModels("../outputs/laac2_LST_reason_equalSvar_means.out")
@@ -186,6 +239,7 @@ lstvv <- readModels("../outputs/laac2_LST_food_equalSvar_means.out")
 
 
 
+lstav$input
 ```
 
 
@@ -204,9 +258,17 @@ plse <- bind_rows(
           # lsg$parameters$unstandardized%>%mutate(task = "gaze_following")
 )%>%
 filter(paramHeader == "Means")%>%
-  mutate(time_point = factor(as.numeric(gsub("[^0-9.-]", "", param))),
+  mutate(time_point = as.numeric(gsub("[^0-9.-]", "", param)),
          estimate = "Latent state mean",
-         ref = 0)
+         ref = 0)%>%
+  mutate(task = recode(task,
+       "pop-to-sample" = "Population-to-sample",
+       "communication" = "Communicative-cues",
+       "reasoning" = "Logical-reasoning",
+       "visible-food" = "Ignore-visible-food",
+       "inhibit-searched" = "Self-ordered-search",
+       "attention" = "Attention-following"
+  ))
 
 
 plsr <- bind_rows(
@@ -221,49 +283,56 @@ plsr <- bind_rows(
           # lsg$parameters$unstandardized%>%mutate(task = "gaze_following")
 )%>%
   slice(which(row_number() %% 2 == 1))%>%
-  mutate(time_point = factor(as.numeric(str_remove(param, "P1"))),
+  mutate(time_point = as.numeric(str_remove(param, "P1")),
          estimate = "Reliability",
-         ref = NA)
-
-bind_rows(plse, plsr)%>%
-  ggplot(aes(x = time_point, y = est, col = task))+
-  geom_hline(aes(yintercept = ref), lty = 2, alpha = .75)+
-  labs(x = "Time point",y = "Estimate")+
-  geom_line(aes(group = task),position = position_dodge(width = 0.2), alpha = .75)+
-  geom_pointrange(aes(ymin = lower_2.5ci, ymax = upper_2.5ci),position = position_dodge(width = 0.2), alpha = .75)+
-  scale_color_colorblind(name = "Task")+
-  facet_grid(task ~estimate)+
-  facet_wrap_custom(estimate~., scales = "free_y", ncol = 1, scale_overrides = list(
-    scale_override(1, scale_y_continuous(limits = c(-4, 2.5))),
-    scale_override(2, scale_y_continuous(limits = c(0, 1)))
-  ))+
-  theme_bw()
-
-
-plse%>%
-  ggplot(aes(x = time_point, y = est, col = task))+
-  geom_hline(aes(yintercept = 0), lty = 2, alpha = .75)+
-  labs(x = "Time point",y = "Latent State Mean")+
-  geom_line(aes(group = task),position = position_dodge(width = 0.2), alpha = .75)+
-  geom_pointrange(aes(ymin = lower_2.5ci, ymax = upper_2.5ci),position = position_dodge(width = 0.2), alpha = .75)+
-  scale_color_colorblind(name = "Task")+
-  facet_wrap(~task)+
-  #ylim(-4, 2.5)+
-  theme_bw()
+         ref = NA)%>%
+  mutate(task = recode(task,
+       "pop-to-sample" = "Population-to-sample",
+       "communication" = "Communicative-cues",
+       "reasoning" = "Logical-reasoning",
+       "visible-food" = "Ignore-visible-food",
+       "inhibit-searched" = "Self-ordered-search",
+       "attention" = "Attention-following"
+  ))
 ```
 
 ```{r}
-plsr%>%
-  ggplot(aes(x = time_point, y = est, col = task))+
-  #geom_hline(aes(yintercept = ref), lty = 2, alpha = .75)+
-  labs(x = "Time point",y = "Reliability")+
-  geom_line(aes(group = task),position = position_dodge(width = 0.2), alpha = .75)+
-  geom_pointrange(aes(ymin = lower_2.5ci, ymax = upper_2.5ci),position = position_dodge(width = 0.2), alpha = .75)+
-  scale_color_colorblind(name = "Task")+
-  facet_wrap(~task)+
-  ylim(0,1)+
-  theme_bw()
+lsm <- ggplot(plse, aes(x = time_point, y = est))+
+  geom_hline(aes(yintercept = ref), lty = 3, alpha = .75)+
+  labs(x = "Time point",y = "Latent state mean")+
+  geom_line(alpha = .75)+
+  #geom_line(data = lsep%>%filter(time_point > 14), aes(group = task, x = time_point),position = position_dodge(width = 0.2), alpha = .75)+
+  geom_pointrange(aes(ymin = lower_2.5ci, ymax = upper_2.5ci, pch = sig), alpha = .75, fatten = 3)+
+  facet_grid(~task)+
+  scale_shape_manual(values = c(16,4), name = "", labels = c("includes 0", "different from 0"))+
+  #geom_vline(xintercept = 14.5, size = 1)+
+  scale_x_continuous(breaks = c(1,10), labels = c(1,10))+
+  theme_few()+
+  theme(legend.direction = "vertical", legend.position = c(0.075, 0.9), legend.box = "horizontal", legend.background = element_blank(), strip.background = element_blank(),
+  strip.text.y = element_blank(), axis.title.x = element_blank(), axis.ticks.x = element_blank(), axis.text.x = element_blank())
 ```
+
+```{r}
+lsrel <- ggplot(plsr, aes(x = time_point, y = est))+
+  labs(x = "Time point",y = "Reliability")+
+  geom_line(aes(x = time_point), alpha = .75)+
+  #geom_line(data = lsep%>%filter(time_point > 14), aes(group = task, x = time_point),position = position_dodge(width = 0.2), alpha = .75)+
+  geom_pointrange(aes(ymin = lower_2.5ci, ymax = upper_2.5ci),alpha = .75, fatten = 2)+
+  facet_grid(~task)+
+  #scale_shape_manual(values = c(16,4), name = "", labels = c("includes 0", "different from 0"))+
+  #geom_vline(xintercept = 14.5, size = 1)+
+  scale_x_continuous(breaks = c(1,10), labels = c(1,10))+
+  scale_y_continuous(breaks = c(0,1), limits = c(0,1))+
+  theme_few()+
+  theme(strip.placement = "outside", strip.text = element_blank())
+```
+
+```{r}
+plot_grid(lsm, lsrel, nrow = 2, labels = c("A", "B"), align = "v", rel_heights = c(1,1))
+
+ggsave("../visuals/latent_states_reliability.pdf", width = 180, height = 80, units = "mm", scale = 1.75, bg = "white")
+```
+
 
 
 ```{r}
@@ -277,16 +346,15 @@ cor <- bind_rows(
 )%>%
   mutate(paramHeader = str_replace(paramHeader, "\\.WITH",""),
          paramHeader = factor(as.numeric(str_replace(paramHeader, "S",""))),
-          param = factor(as.numeric(str_replace(param, "S",""))))#%>%
-  # mutate(task = recode(task,
-  #   gaze_following = "Gaze following",
-  #   causality = "Causal inference",
-  #   inference = "Inference by exclusion",
-  #   delay_of_gratification = "Delay of gratification",
-  #   quantity = "Quantity discrimination",
-  #   switching = "Strategy switching"
-  # ),
-  # task = factor(task, levels = c("Gaze following", "Causal inference","Inference by exclusion" ,"Quantity discrimination","Strategy switching", "Delay of gratification")))
+          param = factor(as.numeric(str_replace(param, "S",""))))%>%
+  mutate(task = recode(task,
+       "pop-to-sample" = "Population-to-sample",
+       "communication" = "Communicative-cues",
+       "reasoning" = "Logical-reasoning",
+       "visible-food" = "Ignore-visible-food",
+       "inhibit-searched" = "Self-ordered-search",
+       "attention" = "Attention-following"
+  ))
 
 cor%>%
   ggplot(aes(y = paramHeader, x = param, fill = est))+
@@ -303,76 +371,6 @@ cor%>%
   theme(legend.position = c(0.9,0.85), legend.direction = "vertical", legend.title = element_blank(), legend.background = element_blank())
 ```
 # LST Models
-
-## Varying variances
-
-```{r}
-bind_rows(
-  lstc$parameters$unstandardized%>%
-  filter(paramHeader == "Variances")%>%
-  select(param, est)%>%
-  pivot_wider(names_from = param, values_from = est)%>%
-  pivot_longer(cols = c(2:11), names_to = "time_point", values_to = "est")%>%
-  mutate(consistency = `T`/(est + `T`))%>%select(time_point, consistency)%>%mutate(task = "communication"),
-  
-  lstv$parameters$unstandardized%>%
-  filter(paramHeader == "Variances")%>%
-  select(param, est)%>%
-  pivot_wider(names_from = param, values_from = est)%>%
-  pivot_longer(cols = c(2:11), names_to = "time_point", values_to = "est")%>%
-  mutate(consistency = `T`/(est + `T`))%>%select(time_point, consistency)%>%mutate(task = "visible-food"),
-  
-  lstr$parameters$unstandardized%>%
-  filter(paramHeader == "Variances")%>%
-  select(param, est)%>%
-  pivot_wider(names_from = param, values_from = est)%>%
-  pivot_longer(cols = c(2:11), names_to = "time_point", values_to = "est")%>%
-  mutate(consistency = `T`/(est + `T`))%>%select(time_point, consistency)%>%mutate(task = "reasoning"),
-  
-  
-  lstp$parameters$unstandardized%>%
-  filter(paramHeader == "Variances")%>%
-  select(param, est)%>%
-  pivot_wider(names_from = param, values_from = est)%>%
-  pivot_longer(cols = c(2:11), names_to = "time_point", values_to = "est")%>%
-  mutate(consistency = `T`/(est + `T`))%>%select(time_point, consistency)%>%mutate(task = "pop-to-sample"),
-  
-  
-  lsti$parameters$unstandardized%>%
-  filter(paramHeader == "Variances")%>%
-  select(param, est)%>%
-  pivot_wider(names_from = param, values_from = est)%>%
-  pivot_longer(cols = c(2:11), names_to = "time_point", values_to = "est")%>%
-  mutate(consistency = `T`/(est + `T`))%>%select(time_point, consistency)%>%mutate(task = "inhibit-searched"),
-  
-  lsta$parameters$unstandardized%>%
-  filter(paramHeader == "Variances")%>%
-  select(param, est)%>%
-  pivot_wider(names_from = param, values_from = est)%>%
-  pivot_longer(cols = c(3:12), names_to = "time_point", values_to = "est")%>%
-  mutate(consistency = ifelse(time_point %in% c("S1", "S2", "S3", "S4", "S5"), `T1`/(est + `T1`), `T2`/(est + `T2`)))%>%select(time_point, consistency)%>%mutate(task = "attention"),
-  
-  
-)%>%mutate(time_point = factor(as.numeric(gsub("[^0-9.-]", "", time_point))))%>%
-  # mutate(task = recode(task,
-  #   gaze_following = "Gaze following",
-  #   causality = "Causal inference",
-  #   inference = "Inference by exclusion",
-  #   delay_of_gratification = "Delay of gratification",
-  #   quantity = "Quantity discrimination",
-  #   switching = "Strategy switching"
-  # ),
-  # task = factor(task, levels = c("Gaze following", "Causal inference","Inference by exclusion" ,"Quantity discrimination","Strategy switching", "Delay of gratification")))%>%
-  ggplot(aes(x = time_point, y = consistency, col = task))+
-  geom_point(position = position_dodge(width = .9), size = 2)+
-  geom_line(aes(group = task),position = position_dodge(width = 0.9), alpha = .75)+
-  theme_bw()+
-  ylim(0,1)+
-  facet_wrap(~task)+
-  labs(x = "Time point", y = "Consistency")+
-  #scale_x_discrete(limits=rev)+
-  scale_color_colorblind(name = "Task")
-```
 
 ## Fixed variances, fixed means
 
@@ -440,15 +438,6 @@ bind_rows(
   select(task, value, param,lower_2.5ci, upper_2.5ci)
 )
 
-ggplot(lstf_con_rel, aes(x = param, y = value, col = param))+
-  geom_pointrange(aes(ymin= lower_2.5ci, ymax = upper_2.5ci))+
-  theme_bw()+
-  ylim(0,1)+
-  facet_wrap(~task)+
-  guides(col = "none")+
-  ggtitle("Fixed variances, fixed means")+
-  labs(x = "Time point", y = "Parameter estimate")+
-  scale_color_colorblind(name = "Parameter")
 ```
 
 
@@ -517,16 +506,6 @@ bind_rows(
   dplyr::rename(value = est)%>%
   select(task, value, param,lower_2.5ci, upper_2.5ci)
 )
-
-ggplot(lstv_con_rel, aes(x = param, y = value, col = param))+
-  geom_pointrange(aes(ymin= lower_2.5ci, ymax = upper_2.5ci))+
-  theme_bw()+
-  ylim(0,1)+
-  facet_wrap(~task)+
-  ggtitle("Fixed variances, varying means")+
-  guides(col = "none")+
-  labs(x = "Time point", y = "Parameter estimate")+
-  scale_color_colorblind(name = "Parameter")
 ```
 
 ## Comparison fixed and varying means
@@ -538,115 +517,23 @@ lstv_con_rel%>%mutate(type = "varying means")
 )%>%
   ggplot(aes(x = param, y = value, col = param, pch = type))+
   geom_pointrange(aes(ymin= lower_2.5ci, ymax = upper_2.5ci), position = position_dodge(width = 0.9))+
-  theme_bw()+
+  theme_few()+
   ylim(0,1)+
-  facet_wrap(~task)+
+  facet_grid(~task)+
   guides(col = "none")+
   labs(x = "Time point", y = "Parameter estimate")+
-  scale_color_colorblind(name = "Parameter")
+  scale_color_colorblind(name = "Parameter")+
+  theme(legend.direction = "vertical", legend.position = c(0.4,0.2), legend.box = "horizontal", legend.background = element_blank(), strip.background = element_blank(),
+  strip.text.y = element_blank(), axis.title.x = element_blank(), axis.ticks.x = element_blank(), axis.text.x = element_blank())
 ```
 
 ```{r}
 ggsave("../visuals/comp_fix_vary_means.png", height = 3, width = 5, scale = 1.5)
 ```
 
+Reliability for attention is higher when only considering the later time points `r lstav_short$parameters$r2%>%filter(param == "P17")%>%pull(est)`
+
 # Task level correlations
-
-## Raw data
-
-```{r}
-data_task_r1 <- read_csv("../../laac/data/laac_data_task.csv")%>%
-  filter(time_point > 14)
-
-cor_dat <- bind_rows(
-  
-data_task_r1%>%
-  filter(!grepl("switch", task))%>%
-  group_by(subject, task)%>%
-  summarise(perf = mean(performance, na.rm = T))%>%
-  left_join(
-    data_task_r1%>%
-      dplyr::rename(task_1 = task)%>%
-      group_by(subject, task_1)%>%
-      summarise(perf_1 = mean(performance, na.rm = T))
-    )%>%
-  select(subject, task, task_1, perf, perf_1)%>%
-  filter(!grepl("switch", task_1))%>%
-  ungroup()%>%
-  filter(task != task_1),
-  
-    
-data_task%>%
-  group_by(subject, task)%>%
-  summarise(perf = mean(performance, na.rm = T))%>%
-  left_join(
-    data_task_r1%>%
-      dplyr::rename(task_1 = task)%>%
-      group_by(subject, task_1)%>%
-      summarise(perf_1 = mean(performance, na.rm = T))
-    )%>%
-  select(subject, task, task_1, perf, perf_1)%>%
-  ungroup()%>%
-  filter(!grepl("switch", task_1)),
-
-data_task_r1%>%
-  group_by(subject, task)%>%
-  summarise(perf = mean(performance, na.rm = T))%>%
-  left_join(
-    data_task%>%
-      dplyr::rename(task_1 = task)%>%
-      group_by(subject, task_1)%>%
-      summarise(perf_1 = mean(performance, na.rm = T))
-    )%>%
-  select(subject, task, task_1, perf, perf_1)%>%
-  ungroup()%>%
-  filter(!grepl("switch", task)),
-
-data_task%>%
-  group_by(subject, task)%>%
-  summarise(perf = mean(performance, na.rm = T))%>%
-  left_join(
-    data_task%>%
-      dplyr::rename(task_1 = task)%>%
-      group_by(subject, task_1)%>%
-      summarise(perf_1 = mean(performance, na.rm = T))
-    )%>%
-  select(subject, task, task_1, perf, perf_1)%>%
-  ungroup()%>%
-  filter(task != task_1)
-
-)%>%
-  ungroup()%>%
-  na.omit()%>%
-  dplyr::group_by(task, task_1)%>%
-  summarise(cor = cor.test(perf, perf_1)$estimate, 
-            pval = cor.test(perf, perf_1)$p.value)%>%
-  na.omit()%>%
-  rowwise()%>%
-  mutate(id = paste(sort(c(task, task_1)), collapse = " - "))%>%
-  dplyr::ungroup()%>%
-  dplyr::distinct(id, .keep_all = T)%>%
-  mutate(sigd = ifelse(pval < 0.05, "bold", "plain"))
-
-pcor_dat <- ggplot(cor_dat, aes(y = task, x = task_1, fill = cor))+
-  geom_tile(color = "white")+
-  labs(x = "", y = "")+
-  scale_fill_gradient2(low = "#CC6677", high = "#117733", mid = "white", 
-  midpoint = 0, limit = c(-1,1), space = "Lab", 
-  name="Correlation")+
-  ggtitle("Sum score based correlations")+
-  geom_text(aes(label = round(cor, 2), fontface = sigd), size = 3)+
-  scale_x_discrete(guide = guide_axis(angle = 90))+
-  #scale_y_discrete(limits=rev, breaks = c(1:10))+
-  #scale_x_discrete(breaks = c(1:9))+
-  theme_few()
-  #theme(legend.position = c(0.9,0.85), legend.direction = "vertical", legend.title = element_blank(), legend.background = element_blank())
-```
-
-```{r}
-ggsave("../visuals/task_level_cor.png", height = 5, width = 6, scale = 1.5)
-```
-
 
 ## Model based
 
@@ -658,34 +545,34 @@ cor_mod <- cor_mod_raw$parameters$stdyx.standardized%>%filter(grepl("WITH",param
   filter(paramHeader != "INF1", 
          param!= "INF1")%>%
   mutate(paramHeader = recode(paramHeader,
-    ATTENT = "attention",
-    GAZE = "gaze_following",
-    CAUSE = "causality",
-    INF2 = "inference",
-    DELAY = "delay_of_gratification",
-    COMM = "communication",
-    SEARCH = "inhibit_searched",
-    POP = "population",
-    QUANT = "quantity",
-    REASON = "reasoning",
-    FOOD = "visible_food"
+    ATTENT = "Attention-following",
+    GAZE = "Gaze following",
+    CAUSE = "Causal inference",
+    INF2 = "Inference by exclusion",
+    DELAY = "Delay of gratification",
+    COMM = "Communicative-cues",
+    SEARCH = "Self-ordered-search",
+    POP = "Population-to-sample",
+    QUANT = "Quantity discrimination",
+    REASON = "Logical-reasoning",
+    FOOD = "Ignore-visible-food"
   ),
   param = recode(param,
-    ATTENT = "attention",
-    GAZE = "gaze_following",
-    CAUSE = "causality",
-    INF2 = "inference",
-    DELAY = "delay_of_gratification",
-    COMM = "communication",
-    SEARCH = "inhibit_searched",
-    POP = "population",
-    QUANT = "quantity",
-    REASON = "reasoning",
-    FOOD = "visible_food"
+    ATTENT = "Attention-following",
+    GAZE = "Gaze following",
+    CAUSE = "Causal inference",
+    INF2 = "Inference by exclusion",
+    DELAY = "Delay of gratification",
+    COMM = "Communicative-cues",
+    SEARCH = "Self-ordered-search",
+    POP = "Population-to-sample",
+    QUANT = "Quantity discrimination",
+    REASON = "Logical-reasoning",
+    FOOD = "Ignore-visible-food"
   ))%>%
   rowwise()%>%
-  mutate(id = paste(sort(c(paramHeader, param)), collapse = "-"))%>%
-  separate(id, into = c("task", "task_1"), sep = "-")%>%
+  mutate(id = paste(sort(c(paramHeader, param)), collapse = "_"))%>%
+  separate(id, into = c("task", "task_1"), sep = "_")%>%
   arrange(task, task_1)%>%
   mutate(sig = ifelse(pval < 0.05, "bold", "plain"))
 
@@ -695,118 +582,14 @@ pcor_mod <- ggplot(cor_mod, aes(y = task, x = task_1, fill = est))+
   scale_fill_gradient2(low = "#CC6677", high = "#117733", mid = "white", 
   midpoint = 0, limit = c(-1,1), space = "Lab", 
   name="Correlation")+
-  ggtitle("Model based correlations")+
+  #ggtitle("Model based correlations")+
   geom_text(aes(label = round(est, 2), fontface = sig), size = 3)+
   scale_x_discrete(guide = guide_axis(angle = 90))+
   #scale_y_discrete(limits=rev, breaks = c(1:10))+
   #scale_x_discrete(breaks = c(1:9))+
-  theme_few()
-  #theme(legend.position = c(0.9,0.85), legend.direction = "vertical", legend.title = element_blank(), legend.background = element_blank())
+  theme_few()+
+  theme(legend.position = c(0.2,0.75), legend.direction = "horizontal", legend.title = element_blank(), legend.background = element_blank())
 ```
-
-```{r}
-pdif <- cor_mod%>%
-  left_join(cor_dat%>%select(-pval))%>%
-  mutate(dif = est-cor, 
-         dif_sig = ifelse(sig == sigd, "plain", "bold"))%>%
-  ggplot(aes(y = task, x = task_1, fill = dif))+
-  geom_tile(color = "white")+
-  labs(x = "", y = "")+
-  scale_fill_gradient2(low = "#CC6677", high = "orange", mid = "white", 
-  midpoint = 0, limit = c(-0.5,0.5), space = "Lab", 
-  name="Difference")+
-  ggtitle("Difference: Model - Sum score")+
-  geom_text(aes(label = round(dif, 2), fontface = dif_sig), size = 3)+
-  scale_x_discrete(guide = guide_axis(angle = 90))+
-  #scale_y_discrete(limits=rev, breaks = c(1:10))+
-  #scale_x_discrete(breaks = c(1:9))+
-  theme_few()
-```
-
-```{r}
-ggarrange(
-  ggarrange(pcor_mod, pcor_dat), 
-  ggarrange(NULL, pdif, NULL, widths = c(0.25, 0.5, 0.25), nrow = 1), 
-  nrow = 2)
-```
-```{r}
-ggsave("../visuals/compare_cor.png", height = 10, width = 12, scale = 1.25)
-```
-
-```{r}
-
-cor_comp <- cor_mod%>%
-  select(task, task_1, est)%>%
-  mutate(task = recode(task,
-    gaze_following = "Gaze following",
-    causality = "Causal inference",
-    inference = "Inference by exclusion",
-    delay_of_gratification = "Delay of grat.",
-    quantity = "Quantity discrimination"
-  ))%>%
-  mutate(task_1 = recode(task_1,
-    gaze_following = "Gaze following",
-    causality = "Causal inference",
-    inference = "Inference by exclusion",
-    delay_of_gratification = "Delay of grat.",
-    quantity = "Quantity discrimination"
-  ))%>%
-  left_join(readRDS("../../laac2/outputs/cor_mod_laac1.rds"))%>%
-  na.omit()%>%
-  mutate(dif = est - est_r1)
-
-pcor_imp <- ggplot(cor_comp, aes(y = task, x = task_1, fill = est))+
-  geom_tile(color = "white")+
-  labs(x = "", y = "")+
-  scale_fill_gradient2(low = "#CC6677", high = "#117733", mid = "white", 
-  midpoint = 0, limit = c(-1,1), space = "Lab", 
-  name="Correlation")+
-  ggtitle("Imputation based correlations")+
-  geom_text(aes(label = round(est, 2)), size = 3)+
-  scale_x_discrete(guide = guide_axis(angle = 90))+
-  #scale_y_discrete(limits=rev, breaks = c(1:10))+
-  #scale_x_discrete(breaks = c(1:9))+
-  theme_few()
-
-
-pcor_sem <- ggplot(cor_comp, aes(y = task, x = task_1, fill = est_r1))+
-  geom_tile(color = "white")+
-  labs(x = "", y = "")+
-  scale_fill_gradient2(low = "#CC6677", high = "#117733", mid = "white", 
-  midpoint = 0, limit = c(-1,1), space = "Lab", 
-  name="Correlation")+
-  ggtitle("SEM based correlations")+
-  geom_text(aes(label = round(est_r1, 2)), size = 3)+
-  scale_x_discrete(guide = guide_axis(angle = 90))+
-  #scale_y_discrete(limits=rev, breaks = c(1:10))+
-  #scale_x_discrete(breaks = c(1:9))+
-  theme_few()
-
-pcor_dif_imp <- ggplot(cor_comp,aes(y = task, x = task_1, fill = dif))+
-  geom_tile(color = "white")+
-  labs(x = "", y = "")+
-  scale_fill_gradient2(low = "#CC6677", high = "orange", mid = "white", 
-  midpoint = 0, limit = c(-0.5,0.5), space = "Lab", 
-  name="Difference")+
-  ggtitle("Difference: Imputation - SEM")+
-  geom_text(aes(label = round(dif, 2)), size = 3)+
-  scale_x_discrete(guide = guide_axis(angle = 90))+
-  #scale_y_discrete(limits=rev, breaks = c(1:10))+
-  #scale_x_discrete(breaks = c(1:9))+
-  theme_few()
-  
-```
-```{r}
-ggarrange(
-  ggarrange(pcor_imp, pcor_sem), 
-  ggarrange(NULL, pcor_dif_imp, NULL, widths = c(0.25, 0.5, 0.25), nrow = 1), 
-  nrow = 2)
-```
-
-```{r}
-ggsave("../visuals/compare_cor_imp_sem.png", height = 8, width = 10, scale = 1.5)
-```
-
 
 # Predictors
 
@@ -820,12 +603,6 @@ df_trials <- data_trial%>%
   summarise(sick_severity = mean(sick_severity), 
             p = sum(code), 
             n = length(code))%>%
-  mutate(observer = ifelse(is.na(observer), "no", "yes"))
-
-
-df_trials_inh <- data_trial%>%
-  filter(task == "inhibit_searched")%>%
-  group_by(subject, time_point,group,test_tp, task, rank, sex, rearing, age, time_in_leipzig, observer, sick_severity,test_day, le_present, le_mean, le_max, dist_present, dist_mean, dist_max, time_outdoors)%>%
   mutate(observer = ifelse(is.na(observer), "no", "yes"))
 ```
 
@@ -851,20 +628,6 @@ df_trials <- df_trials %>%
   ) %>%
   ungroup()
 
-df_trials_inh <- df_trials_inh%>%
-  # relative rank of ape within species (varies between time points)
-  group_by(group, time_point) %>%
-  mutate(
-    rel_rank = case_when(
-      group == "a_chimp" ~ percent_rank(grp_size$a_chimp:1)[rank],
-      group == "b_chimp" ~ percent_rank(grp_size$b_chimp:1)[rank],
-      group == "bonobos" ~ percent_rank(grp_size$bonobo:1)[rank],
-      group == "gorillas" ~ percent_rank(grp_size$gorilla:1)[rank],
-      group == "orangs" ~ percent_rank(grp_size$orang:1)[rank]
-    )
-  ) %>%
-  ungroup()
-
 df_trials_final <- df_trials %>%
   ungroup()%>%
   mutate(across(c(sick_severity,
@@ -875,35 +638,7 @@ df_trials_final <- df_trials %>%
                   time_outdoors,
                   age,
                   time_in_leipzig),
-                ~scale(., center = T, scale = F))) %>%
-  mutate(across(c(
-                  subject,
-                  group,
-                  sex,
-                  test_day,
-                  le_present,
-                  dist_present,
-                  rearing,
-                  observer),
-                as_factor)) %>%
-  mutate(observer = fct_relevel(observer, "no")) %>%
-  mutate(rearing = fct_recode(rearing, "hand" = "unknown"))%>%
-  left_join(read_csv("../saves/srm_estimates.csv")%>%
-              mutate(subject = ifelse(subject == "changa", "shanga", subject))%>%
-              select(subject, time_point, mean)%>%
-              dplyr::rename("sociality" = "mean"))
-
-df_trials_final_inh <- df_trials_inh %>%
-  ungroup()%>%
-  mutate(across(c(sick_severity,
-                  test_tp,
-                  rel_rank,
-                  le_mean,
-                  dist_mean,
-                  time_outdoors,
-                  age,
-                  time_in_leipzig),
-                ~scale(., center = T, scale = F))) %>%
+                ~scale(., center = T, scale = T))) %>%
   mutate(across(c(
                   subject,
                   group,
@@ -920,11 +655,7 @@ df_trials_final_inh <- df_trials_inh %>%
               mutate(subject = ifelse(subject == "changa", "shanga", subject))%>%
               select(subject, time_point, mean)%>%
               dplyr::rename("sociality" = "mean"))%>%
-  left_join(read_csv("../data/LAAC_inhibit_searched_long_format.csv")%>%
-  select(date, time_point, subject, trial, error.ny))%>%
-  mutate(ot = log(1/3), 
-         tp_fac = factor(time_point))
-
+  mutate(time_point = scale(time_point, center = T, scale = T))
 ```
 
 
@@ -973,28 +704,6 @@ m_inh <- brm(fm,
               chains = 4,
               seed = 2024)
 
-m_inh_long <- brm(error.ny ~ offset(ot)+
-                sick_severity +
-                test_tp +
-                test_day +
-                rel_rank +
-                observer +
-                age + time_in_leipzig +
-                sex + group +
-                rearing +
-                le_mean + dist_mean +
-                time_outdoors +
-                sociality +
-                time_point +
-                (1|subject),
-             family = bernoulli(),
-             data = df_trials_final_inh,
-              warmup = 1000,
-              iter = 4000,
-              cores = 4,
-              chains = 4,
-              seed = 2024)
-
 m_pop <- brm(fm,
              family = binomial,
              data = df_trials_final%>%filter(task == "population"),
@@ -1031,14 +740,6 @@ all_fixed_effects <- c("sick_severity",
 s_terms <- c("1", all_fixed_effects,
              paste0(paste(all_fixed_effects, collapse = " + "),
                     " + (1 | subject)"))
-
-# delay random intercept to last place so that it doesn't soak up all the variance
-s_terms_inh <- c("1", all_fixed_effects,
-             paste0(paste(all_fixed_effects, collapse = " + "),
-                " + (1 | subject)"),
-                  paste0(paste(all_fixed_effects, collapse = " + "), 
-                          "+ (time_point|subject)"))
-
 
 
 ```
@@ -1085,17 +786,6 @@ saveRDS(cvs_inh,"../saves/cvs_inh.rds")
 
 doParallel::registerDoParallel(40)
 
-cvs_inh_long <- cv_varsel(m_inh,
-                     search_terms = s_terms_inh,
-                     validate_search = T,
-                     cv_method = "LOO",
-                     method = "forward",
-                     parallel = TRUE,
-                     seed = 2024)
-
-saveRDS(cvs_inh_long,"../saves/cvs_inh_long.rds")
-
-doParallel::registerDoParallel(40)
 
 cvs_pop <- cv_varsel(m_pop,
                      search_terms = s_terms,
@@ -1122,27 +812,733 @@ saveRDS(cvs_vis,"../saves/cvs_vis.rds")
 
 ```
 
+## Communicative cues
+
 ```{r}
 cvs_com <- readRDS("../saves/cvs_com.rds")
 
+com_varselp <- summary(cvs_com, stats = c('elpd', 'rmse'))$perf_sub%>%
+  as_tibble()%>%
+  pivot_longer(cols = c(elpd,rmse), values_to = "value", names_to = "stat")%>%
+  pivot_longer(cols = c(elpd.se,rmse.se), values_to = "se", names_to = "se_term")%>%
+  rowwise()%>%
+  filter(grepl(stat,se_term))%>%
+  select(-se_term)%>%
+  mutate(ranking_fulldata = factor(ifelse(ranking_fulldata == "(Intercept)","none",ranking_fulldata)),
+         select = ifelse(ranking_fulldata  %in% c("(1 | subject)", "group", "time_point"), "yes", "no"))
+
+saveRDS(com_varselp, "../saves/cvs_com_summary.rds")
+
+com_varselp <- readRDS("../saves/cvs_com_summary.rds")%>%
+  mutate(ranking_fulldata = recode(ranking_fulldata,
+    time_in_leipzig = "Time spent in research",
+    rearing = "Rearing history",
+    group = "Group",
+    observer = "Observer present",
+    observer_mod = "Observer present",
+    sex = "Sex",
+    rel_rank = "Rank",
+    rank = "Rank",
+    age = "Age",
+    sick_severity = "Sickness severity",
+    test_tp = "Study participation (day)",
+    test_day = "Study participation (time point)",
+    time_outdoors = "Time spent outdoors",
+    time_point = "Time point",
+    dist_mean = "Disturbance",
+    le_mean = "Life event",
+    sociality = "Sociality",
+    a_chimp = "Chimpanzee group A",
+    b_chimp = "Chimpanzee group B",
+    bonobos = "Bonobo",
+    orangs = "Orangutan",
+    gorilla = "Gorilla",
+    f = "Female", 
+    m = "Male",
+    hand = "Hand-reared",
+    mother = "Mother-reared",
+    `(1 | subject)` = "(1 | Subject)"
+  ))
+
+
+pcomsel <- com_varselp%>%
+ggplot(aes(x = size, y = value))+
+  #geom_hline(data = ref_com_p1, aes(yintercept = value), lty = 3)+
+  geom_line(col = "black", alpha = .5)+
+  geom_pointrange(aes(ymin = value - se, ymax = value + se, col = select), size = 0.5, pch = 4)+
+  facet_grid(stat~., scale = "free_y")+
+  scale_color_manual(name = "relevant", values = c("black", "firebrick"))+
+  labs(y = "", x = "Predictors")+
+  scale_x_continuous(labels = unique(com_varselp$ranking_fulldata), breaks = unique(com_varselp$size))+
+  theme_few()+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = c(0.5,0.9), legend.direction = "horizontal")
+
+
 ```
 
 
 ```{r}
-plot(cvs_vis, stats = "elpd", ranking_nterms_max = NA)
-plot(cvs_vis, stats = "elpd", deltas = TRUE)
+com_sol_terms <- c("time_point","group")
+proj_com_cv <- project(cvs_com,  solution_terms = com_sol_terms)
 
-smmry <- summary(cvs_com, stats = "elpd", type = c("mean", "se", "diff", "diff.se"),
-                 deltas = T)
+proj_samples_com <- as.matrix(proj_com_cv)%>%
+  as_tibble()%>%
+  pivot_longer(cols =c(2:6), names_to = "pred", values_to = "value")%>%
+  filter(!pred%in%c("test_tp", "sigma", "Intercept"))%>%
+  mutate(factor = ifelse(grepl("group", pred), "group", "other predictors"),
+         pred = str_remove(pred,"b_"),
+         pred = str_remove(pred,"group"),
+         pred = str_remove(pred,"rel_"),
+         species = ifelse(factor == "group", pred,factor))
 
-print(smmry, digits = 1)
+saveRDS(proj_samples_com,"../saves/proj_cvs_com.rds")
 
-rk <- ranking(cvs_com)
+proj_samples_com <- readRDS("../saves/proj_cvs_com.rds")%>%
+  filter(!grepl("Intercept",pred))%>%
+  mutate(pred = recode(pred,
+    time_in_leipzig = "Time spent in research",
+    rearing = "Rearing history",
+    group = "Group",
+    observer = "Observer present",
+    observer_mod = "Observer present",
+    sex = "Sex",
+    rel_rank = "Rank",
+    rank = "Rank",
+    age = "Age",
+    time_point = "Time point",
+    sick_severity = "Sickness severity",
+    test_tp = "Study participation (day)",
+    test_day = "Study participation (time point)",
+    time_outdoors = "Time spent outdoors",
+    dist_mean = "Disturbance",
+    le_mean = "Life event",
+    sociality = "Sociality",
+    a_chimp = "Chimpanzee group A",
+    b_chimp = "Chimpanzee group B",
+    bonobos = "Bonobo",
+    orangs = "Orangutan",
+    gorilla = "Gorilla",
+    sexf = "Sex (female)",
+    rearinghand = "Rearing (hand-reared)",
+    observer_modyes = "Observer present",
+    `(1 | subject)` = "(1 | Subject)"
+  ))%>%
+  mutate(factor = recode(factor,
+    group = "Group",
+    sex = "Sex",
+    rearing = "Rearing history"
+  ))
+  
 
-pr_rk <- cv_proportions(rk)
-
-plot(pr_rk)
+pcpro <- ggplot(proj_samples_com, aes(x = value, y = pred)) +
+  geom_vline(xintercept = 0, lty = 2, alpha = .75)+
+  geom_density_ridges(alpha = .5, scale = .7) +
+  facet_grid(factor~., scales = "free", space = "free")+
+  labs(y = "", x = "Estimate")+
+  theme_minimal()+
+  theme(panel.border = element_rect(color = "black",fill = NA,size = 1))
 ```
+## Attention-following
+
+```{r}
+cvs_att <- readRDS("../saves/cvs_att.rds")
+
+att_varselp <- summary(cvs_att, stats = c('elpd', 'rmse'))$perf_sub%>%
+  as_tibble()%>%
+  pivot_longer(cols = c(elpd,rmse), values_to = "value", names_to = "stat")%>%
+  pivot_longer(cols = c(elpd.se,rmse.se), values_to = "se", names_to = "se_term")%>%
+  rowwise()%>%
+  filter(grepl(stat,se_term))%>%
+  select(-se_term)%>%
+  mutate(ranking_fulldata = factor(ifelse(ranking_fulldata == "(Intercept)","none",ranking_fulldata)),
+         select = ifelse(ranking_fulldata  %in% c("(1 | subject)", "group", "time_point", "time_in_leipzig"), "yes", "no"))
+
+saveRDS(att_varselp, "../saves/cvs_att_summary.rds")
+
+
+att_varselp <- readRDS("../saves/cvs_att_summary.rds")%>%
+  mutate(ranking_fulldata = recode(ranking_fulldata,
+    time_in_leipzig = "Time spent in research",
+    rearing = "Rearing history",
+    group = "Group",
+    observer = "Observer present",
+    observer_mod = "Observer present",
+    sex = "Sex",
+    rel_rank = "Rank",
+    rank = "Rank",
+    age = "Age",
+    sick_severity = "Sickness severity",
+    test_tp = "Study participation (day)",
+    test_day = "Study participation (time point)",
+    time_outdoors = "Time spent outdoors",
+    time_point = "Time point",
+    dist_mean = "Disturbance",
+    le_mean = "Life event",
+    sociality = "Sociality",
+    a_chimp = "Chimpanzee group A",
+    b_chimp = "Chimpanzee group B",
+    bonobos = "Bonobo",
+    orangs = "Orangutan",
+    gorilla = "Gorilla",
+    f = "Female", 
+    m = "Male",
+    hand = "Hand-reared",
+    mother = "Mother-reared",
+    `(1 | subject)` = "(1 | Subject)"
+  ))
+
+
+pattsel <- att_varselp%>%
+ggplot(aes(x = size, y = value))+
+  #geom_hline(data = ref_com_p1, aes(yintercept = value), lty = 3)+
+  geom_line(col = "black", alpha = .5)+
+  geom_pointrange(aes(ymin = value - se, ymax = value + se, col = select), size = 0.5, pch = 4)+
+  facet_grid(stat~., scale = "free_y")+
+  scale_color_manual(name = "relevant", values = c("black", "firebrick"))+
+  labs(y = "", x = "Predictors")+
+  scale_x_continuous(labels = unique(att_varselp$ranking_fulldata), breaks = unique(att_varselp$size))+
+  theme_few()+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = c(0.5,0.9), legend.direction = "horizontal")
+
+```
+
+
+```{r}
+att_sol_terms <- c("time_point","group", "time_in_leipzig")
+proj_att_cv <- project(cvs_att,  solution_terms = att_sol_terms)
+
+proj_samples_att <- as.matrix(proj_att_cv)%>%
+  as_tibble()%>%
+  pivot_longer(cols =c(2:7), names_to = "pred", values_to = "value")%>%
+  filter(!pred%in%c("test_tp", "sigma", "Intercept"))%>%
+  mutate(factor = ifelse(grepl("group", pred), "group", "other predictors"),
+         pred = str_remove(pred,"b_"),
+         pred = str_remove(pred,"group"),
+         pred = str_remove(pred,"rel_"),
+         species = ifelse(factor == "group", pred,factor))
+
+saveRDS(proj_samples_att,"../saves/proj_cvs_att.rds")
+
+proj_samples_att <- readRDS("../saves/proj_cvs_att.rds")%>%
+  filter(!grepl("Intercept",pred))%>%
+  mutate(pred = recode(pred,
+    time_in_leipzig = "Time spent in research",
+    rearing = "Rearing history",
+    group = "Group",
+    observer = "Observer present",
+    observer_mod = "Observer present",
+    sex = "Sex",
+    rel_rank = "Rank",
+    rank = "Rank",
+    age = "Age",
+    time_point = "Time point",
+    sick_severity = "Sickness severity",
+    test_tp = "Study participation (day)",
+    test_day = "Study participation (time point)",
+    time_outdoors = "Time spent outdoors",
+    dist_mean = "Disturbance",
+    le_mean = "Life event",
+    sociality = "Sociality",
+    a_chimp = "Chimpanzee group A",
+    b_chimp = "Chimpanzee group B",
+    bonobos = "Bonobo",
+    orangs = "Orangutan",
+    gorilla = "Gorilla",
+    sexf = "Sex (female)",
+    rearinghand = "Rearing (hand-reared)",
+    observer_modyes = "Observer present",
+    `(1 | subject)` = "(1 | Subject)"
+  ))%>%
+  mutate(factor = recode(factor,
+    group = "Group",
+    sex = "Sex",
+    rearing = "Rearing history"
+  ))
+  
+
+pattpro <- ggplot(proj_samples_att, aes(x = value, y = pred)) +
+  geom_vline(xintercept = 0, lty = 2, alpha = .75)+
+  geom_density_ridges(alpha = .5, scale = .7) +
+  facet_wrap(~factor, scales = "free")+
+  labs(y = "", x = "Estimate")+
+  theme_minimal()+
+  theme(panel.border = element_rect(color = "black",fill = NA,size = 1))
+```
+
+## Self-ordered-search
+
+```{r}
+cvs_inh <- readRDS("../saves/cvs_inh.rds")
+
+inh_varselp <- summary(cvs_inh, stats = c('elpd', 'rmse'))$perf_sub%>%
+  as_tibble()%>%
+  pivot_longer(cols = c(elpd,rmse), values_to = "value", names_to = "stat")%>%
+  pivot_longer(cols = c(elpd.se,rmse.se), values_to = "se", names_to = "se_term")%>%
+  rowwise()%>%
+  filter(grepl(stat,se_term))%>%
+  select(-se_term)%>%
+  mutate(ranking_fulldata = factor(ifelse(ranking_fulldata == "(Intercept)","none",ranking_fulldata)),
+         select = ifelse(ranking_fulldata  %in% c("(1 | subject)", "group", "time_point", "time_in_leipzig", "rearing", "observer", "age", "sex" ), "yes", "no"))
+
+saveRDS(inh_varselp, "../saves/cvs_inh_summary.rds")
+
+inh_varselp <- readRDS("../saves/cvs_inh_summary.rds")%>%
+  mutate(ranking_fulldata = recode(ranking_fulldata,
+    time_in_leipzig = "Time spent in research",
+    rearing = "Rearing history",
+    group = "Group",
+    observer = "Observer present",
+    observer_mod = "Observer present",
+    sex = "Sex",
+    rel_rank = "Rank",
+    rank = "Rank",
+    age = "Age",
+    sick_severity = "Sickness severity",
+    test_tp = "Study participation (day)",
+    test_day = "Study participation (time point)",
+    time_outdoors = "Time spent outdoors",
+    time_point = "Time point",
+    dist_mean = "Disturbance",
+    le_mean = "Life event",
+    sociality = "Sociality",
+    a_chimp = "Chimpanzee group A",
+    b_chimp = "Chimpanzee group B",
+    bonobos = "Bonobo",
+    orangs = "Orangutan",
+    gorilla = "Gorilla",
+    f = "Female", 
+    m = "Male",
+    hand = "Hand-reared",
+    mother = "Mother-reared",
+    `(1 | subject)` = "(1 | Subject)"
+  ))
+
+
+pinhsel <- inh_varselp%>%
+ggplot(aes(x = size, y = value))+
+  #geom_hline(data = ref_com_p1, aes(yintercept = value), lty = 3)+
+  geom_line(col = "black", alpha = .5)+
+  geom_pointrange(aes(ymin = value - se, ymax = value + se, col = select), size = 0.5, pch = 4)+
+  facet_grid(stat~., scale = "free_y")+
+  scale_color_manual(name = "relevant", values = c("black", "firebrick"))+
+  labs(y = "", x = "Predictors")+
+  scale_x_continuous(labels = unique(inh_varselp$ranking_fulldata), breaks = unique(inh_varselp$size))+
+  theme_few()+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = c(0.5,0.9), legend.direction = "horizontal")
+
+```
+
+
+```{r}
+inh_sol_terms <- c("group", "time_point", "time_in_leipzig", "rearing", "observer", "age", "sex")
+proj_inh_cv <- project(cvs_inh,  solution_terms = inh_sol_terms)
+
+proj_samples_inh <- as.matrix(proj_inh_cv)%>%
+  as_tibble()%>%
+  pivot_longer(cols =c(2:11), names_to = "pred", values_to = "value")%>%
+  filter(!pred%in%c("test_tp", "sigma", "Intercept"))%>%
+  mutate(factor = ifelse(grepl("group", pred), "group", "other predictors"),
+         pred = str_remove(pred,"b_"),
+         pred = str_remove(pred,"group"),
+         pred = str_remove(pred,"rel_"),
+         species = ifelse(factor == "group", pred,factor))
+
+saveRDS(proj_samples_inh,"../saves/proj_cvs_inh.rds")
+
+proj_samples_inh <- readRDS("../saves/proj_cvs_inh.rds")%>%
+  filter(!grepl("Intercept",pred))%>%
+  mutate(pred = recode(pred,
+    time_in_leipzig = "Time spent in research",
+    rearing = "Rearing history",
+    group = "Group",
+    observer = "Observer present",
+    observer_mod = "Observer present",
+    sex = "Sex",
+    rel_rank = "Rank",
+    rank = "Rank",
+    age = "Age",
+    time_point = "Time point",
+    sick_severity = "Sickness severity",
+    test_tp = "Study participation (day)",
+    test_day = "Study participation (time point)",
+    time_outdoors = "Time spent outdoors",
+    dist_mean = "Disturbance",
+    le_mean = "Life event",
+    sociality = "Sociality",
+    a_chimp = "Chimpanzee group A",
+    b_chimp = "Chimpanzee group B",
+    bonobos = "Bonobo",
+    orangs = "Orangutan",
+    gorilla = "Gorilla",
+    sexf = "Sex (female)",
+    rearinghand = "Rearing (hand-reared)",
+    observeryes = "Observer present",
+    `(1 | subject)` = "(1 | Subject)"
+  ))%>%
+  mutate(factor = recode(factor,
+    group = "Group",
+    sex = "Sex",
+    rearing = "Rearing history"
+  ))
+  
+
+pinhpro <- ggplot(proj_samples_inh, aes(x = value, y = pred)) +
+  geom_vline(xintercept = 0, lty = 2, alpha = .75)+
+  geom_density_ridges(alpha = .5, scale = .7) +
+  facet_wrap(~factor, scales = "free")+
+  labs(y = "", x = "Estimate")+
+  theme_minimal()+
+  theme(panel.border = element_rect(color = "black",fill = NA,size = 1))
+```
+
+## Population-to-sample
+
+```{r}
+cvs_pop <- readRDS("../saves/cvs_pop.rds")
+
+pop_varselp <- summary(cvs_pop, stats = c('elpd', 'rmse'))$perf_sub%>%
+  as_tibble()%>%
+  pivot_longer(cols = c(elpd,rmse), values_to = "value", names_to = "stat")%>%
+  pivot_longer(cols = c(elpd.se,rmse.se), values_to = "se", names_to = "se_term")%>%
+  rowwise()%>%
+  filter(grepl(stat,se_term))%>%
+  select(-se_term)%>%
+  mutate(ranking_fulldata = factor(ifelse(ranking_fulldata == "(Intercept)","none",ranking_fulldata)),
+         select = ifelse(ranking_fulldata  %in% c("(1 | subject)", "time_in_leipzig", "group", "rearing", "sex", "rel_rank"), "yes", "no"))
+
+saveRDS(pop_varselp, "../saves/cvs_pop_summary.rds")
+
+pop_varselp <- readRDS("../saves/cvs_pop_summary.rds")%>%
+  mutate(ranking_fulldata = recode(ranking_fulldata,
+                                   time_in_leipzig = "Time spent in research",
+                                   rearing = "Rearing history",
+                                   group = "Group",
+                                   observer = "Observer present",
+                                   observer_mod = "Observer present",
+                                   sex = "Sex",
+                                   rel_rank = "Rank",
+                                   rank = "Rank",
+                                   age = "Age",
+                                   sick_severity = "Sickness severity",
+                                   test_tp = "Study participation (day)",
+                                   test_day = "Study participation (time point)",
+                                   time_outdoors = "Time spent outdoors",
+                                   time_point = "Time point",
+                                   dist_mean = "Disturbance",
+                                   le_mean = "Life event",
+                                   sociality = "Sociality",
+                                   a_chimp = "Chimpanzee group A",
+                                   b_chimp = "Chimpanzee group B",
+                                   bonobos = "Bonobo",
+                                   orangs = "Orangutan",
+                                   gorilla = "Gorilla",
+                                   f = "Female", 
+                                   m = "Male",
+                                   hand = "Hand-reared",
+                                   mother = "Mother-reared",
+                                   `(1 | subject)` = "(1 | Subject)"
+  ))
+
+
+ppopsel <- pop_varselp%>%
+  ggplot(aes(x = size, y = value))+
+  #geom_hline(data = ref_com_p1, aes(yintercept = value), lty = 3)+
+  geom_line(col = "black", alpha = .5)+
+  geom_pointrange(aes(ymin = value - se, ymax = value + se, col = select), size = 0.5, pch = 4)+
+  facet_grid(stat~., scale = "free_y")+
+  scale_color_manual(name = "relevant", values = c("black", "firebrick"))+
+  labs(y = "", x = "Predictors")+
+  scale_x_continuous(labels = unique(pop_varselp$ranking_fulldata), breaks = unique(pop_varselp$size))+
+  theme_few()+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = c(0.5,0.9), legend.direction = "horizontal")
+
+```
+
+
+```{r}
+pop_sol_terms <- c("time_in_leipzig", "group", "rearing", "sex", "rel_rank")
+proj_pop_cv <- project(cvs_pop,  solution_terms = pop_sol_terms)
+
+proj_samples_pop <- as.matrix(proj_pop_cv)%>%
+  as_tibble()%>%
+  pivot_longer(cols =c(2:9), names_to = "pred", values_to = "value")%>%
+  filter(!pred%in%c("test_tp", "sigma", "Intercept"))%>%
+  mutate(factor = ifelse(grepl("group", pred), "group", "other predictors"),
+         pred = str_remove(pred,"b_"),
+         pred = str_remove(pred,"group"),
+         pred = str_remove(pred,"rel_"),
+         species = ifelse(factor == "group", pred,factor))
+
+saveRDS(proj_samples_pop,"../saves/proj_cvs_pop.rds")
+
+proj_samples_pop <- readRDS("../saves/proj_cvs_pop.rds")%>%
+  filter(!grepl("Intercept",pred))%>%
+  mutate(pred = recode(pred,
+                       time_in_leipzig = "Time spent in research",
+                       rearing = "Rearing history",
+                       group = "Group",
+                       observer = "Observer present",
+                       observer_mod = "Observer present",
+                       sex = "Sex",
+                       rel_rank = "Rank",
+                       rank = "Rank",
+                       age = "Age",
+                       time_point = "Time point",
+                       sick_severity = "Sickness severity",
+                       test_tp = "Study participation (day)",
+                       test_day = "Study participation (time point)",
+                       time_outdoors = "Time spent outdoors",
+                       dist_mean = "Disturbance",
+                       le_mean = "Life event",
+                       sociality = "Sociality",
+                       a_chimp = "Chimpanzee group A",
+                       b_chimp = "Chimpanzee group B",
+                       bonobos = "Bonobo",
+                       orangs = "Orangutan",
+                       gorilla = "Gorilla",
+                       sexf = "Sex (female)",
+                       rearinghand = "Rearing (hand-reared)",
+                       observer_modyes = "Observer present",
+                       `(1 | subject)` = "(1 | Subject)"
+  ))%>%
+  mutate(factor = recode(factor,
+                         group = "Group",
+                         sex = "Sex",
+                         rearing = "Rearing history"
+  ))
+
+
+ppoppro <- ggplot(proj_samples_pop, aes(x = value, y = pred)) +
+  geom_vline(xintercept = 0, lty = 2, alpha = .75)+
+  geom_density_ridges(alpha = .5, scale = .7) +
+  facet_wrap(~factor, scales = "free")+
+  labs(y = "", x = "Estimate")+
+  theme_minimal()+
+  theme(panel.border = element_rect(color = "black",fill = NA,size = 1))
+```
+
+## Ignore-visible-food
+
+
+```{r}
+cvs_vis <- readRDS("../saves/cvs_vis.rds")
+
+vis_varselp <- summary(cvs_vis, stats = c('elpd', 'rmse'))$perf_sub%>%
+  as_tibble()%>%
+  pivot_longer(cols = c(elpd,rmse), values_to = "value", names_to = "stat")%>%
+  pivot_longer(cols = c(elpd.se,rmse.se), values_to = "se", names_to = "se_term")%>%
+  rowwise()%>%
+  filter(grepl(stat,se_term))%>%
+  select(-se_term)%>%
+  mutate(ranking_fulldata = factor(ifelse(ranking_fulldata == "(Intercept)","none",ranking_fulldata)),
+         select = ifelse(ranking_fulldata  %in% c("(1 | subject)", "time_point", "group", "sex", "time_in_leipzig", "rearing"), "yes", "no"))
+
+saveRDS(vis_varselp, "../saves/cvs_vis_summary.rds")
+
+vis_varselp <- readRDS("../saves/cvs_vis_summary.rds")%>%
+  mutate(ranking_fulldata = recode(ranking_fulldata,
+                                   time_in_leipzig = "Time spent in research",
+                                   rearing = "Rearing history",
+                                   group = "Group",
+                                   observer = "Observer present",
+                                   observer_mod = "Observer present",
+                                   sex = "Sex",
+                                   rel_rank = "Rank",
+                                   rank = "Rank",
+                                   age = "Age",
+                                   sick_severity = "Sickness severity",
+                                   test_tp = "Study participation (day)",
+                                   test_day = "Study participation (time point)",
+                                   time_outdoors = "Time spent outdoors",
+                                   time_point = "Time point",
+                                   dist_mean = "Disturbance",
+                                   le_mean = "Life event",
+                                   sociality = "Sociality",
+                                   a_chimp = "Chimpanzee group A",
+                                   b_chimp = "Chimpanzee group B",
+                                   bonobos = "Bonobo",
+                                   orangs = "Orangutan",
+                                   gorilla = "Gorilla",
+                                   f = "Female", 
+                                   m = "Male",
+                                   hand = "Hand-reared",
+                                   mother = "Mother-reared",
+                                   `(1 | subject)` = "(1 | Subject)"
+  ))
+
+
+pvissel <- vis_varselp%>%
+  ggplot(aes(x = size, y = value))+
+  #geom_hline(data = ref_com_p1, aes(yintercept = value), lty = 3)+
+  geom_line(col = "black", alpha = .5)+
+  geom_pointrange(aes(ymin = value - se, ymax = value + se, col = select), size = 0.5, pch = 4)+
+  facet_grid(stat~., scale = "free_y")+
+  scale_color_manual(name = "relevant", values = c("black", "firebrick"))+
+  labs(y = "", x = "Predictors")+
+  scale_x_continuous(labels = unique(vis_varselp$ranking_fulldata), breaks = unique(vis_varselp$size))+
+  theme_few()+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = c(0.5,0.6), legend.direction = "horizontal")
+
+```
+
+
+```{r}
+vis_sol_terms <- c("time_point", "group", "sex", "time_in_leipzig", "rearing")
+proj_vis_cv <- project(cvs_vis,  solution_terms = vis_sol_terms)
+
+proj_samples_vis <- as.matrix(proj_vis_cv)%>%
+  as_tibble()%>%
+  pivot_longer(cols =c(2:9), names_to = "pred", values_to = "value")%>%
+  filter(!pred%in%c("test_tp", "sigma", "Intercept"))%>%
+  mutate(factor = ifelse(grepl("group", pred), "group", "other predictors"),
+         pred = str_remove(pred,"b_"),
+         pred = str_remove(pred,"group"),
+         pred = str_remove(pred,"rel_"),
+         species = ifelse(factor == "group", pred,factor))
+
+saveRDS(proj_samples_vis,"../saves/proj_cvs_vis.rds")
+
+proj_samples_vis <- readRDS("../saves/proj_cvs_vis.rds")%>%
+  filter(!grepl("Intercept",pred))%>%
+  mutate(pred = recode(pred,
+                       time_in_leipzig = "Time spent in research",
+                       rearing = "Rearing history",
+                       group = "Group",
+                       observer = "Observer present",
+                       observer_mod = "Observer present",
+                       sex = "Sex",
+                       rel_rank = "Rank",
+                       rank = "Rank",
+                       age = "Age",
+                       time_point = "Time point",
+                       sick_severity = "Sickness severity",
+                       test_tp = "Study participation (day)",
+                       test_day = "Study participation (time point)",
+                       time_outdoors = "Time spent outdoors",
+                       dist_mean = "Disturbance",
+                       le_mean = "Life event",
+                       sociality = "Sociality",
+                       a_chimp = "Chimpanzee group A",
+                       b_chimp = "Chimpanzee group B",
+                       bonobos = "Bonobo",
+                       orangs = "Orangutan",
+                       gorilla = "Gorilla",
+                       sexf = "Sex (female)",
+                       rearinghand = "Rearing (hand-reared)",
+                       observer_modyes = "Observer present",
+                       `(1 | subject)` = "(1 | Subject)"
+  ))%>%
+  mutate(factor = recode(factor,
+                         group = "Group",
+                         sex = "Sex",
+                         rearing = "Rearing history"
+  ))
+
+
+pvispro <- ggplot(proj_samples_vis, aes(x = value, y = pred)) +
+  geom_vline(xintercept = 0, lty = 2, alpha = .75)+
+  geom_density_ridges(alpha = .5, scale = .7) +
+  facet_wrap(~factor, scales = "free")+
+  labs(y = "", x = "Estimate")+
+  theme_minimal()+
+  theme(panel.border = element_rect(color = "black",fill = NA,size = 1))
+```
+
+## Summary
+
+```{r}
+ro <- bind_rows(
+  com_varselp%>%mutate(task = "Communicative-cues"),
+  vis_varselp%>%mutate(task = "Ignore-visible-food"),
+  att_varselp%>%mutate(task = "Attention-following"),
+  inh_varselp%>%mutate(task = "Self-ordered-search"),
+  pop_varselp%>%mutate(task = "Population-to-sample")
+
+)%>%
+  filter(stat == "elpd", 
+         ranking_fulldata != "none",
+         ranking_fulldata != "day2",
+         ranking_fulldata != "(1|subject)",
+         ranking_fulldata != "(1 | Subject)",
+         ranking_fulldata != "(time_point | subject)",
+         ranking_fulldata != "(time point | Subject)")%>%
+  select(size, ranking_fulldata, task, select)%>%
+  group_by(ranking_fulldata)%>%
+  mutate(sum = sum(size))%>%
+  ungroup()%>%
+  droplevels()%>%
+  mutate(type = ifelse(
+    ranking_fulldata == "Time spent in research" | ranking_fulldata == "Rearing history" | ranking_fulldata == "Group" | ranking_fulldata == "Sex"| ranking_fulldata == "Age", "Stable characteristic", ifelse(
+      ranking_fulldata == "Rank" | ranking_fulldata == "Sickness severity" | ranking_fulldata == "Sociality" ,"Variable characteristic", ifelse(
+        ranking_fulldata == "Time spent outdoors" | ranking_fulldata == "Disturbance" | ranking_fulldata == "Life event", "Group life", "Testing arrangement"
+      )
+    )
+  ))
+
+
+ppicomp <- ggplot(ro,aes(x = fct_reorder(ranking_fulldata,sum), y = size, col = type ))+
+  geom_line(aes(group = task), alpha = .5, col = "black")+
+  geom_point(aes(pch = select), size = 2, stroke = 1)+
+  theme_minimal()+
+  facet_wrap(~task, ncol = 1)+
+  labs(x = "", y = "Rank based on PPI model")+
+  scale_color_brewer(palette="Set1", name = "")+
+  scale_linetype(name = "")+
+  scale_shape_manual(name = "", values =  c(1,4), labels = c("Irrelevant", "Relevant"))+
+  scale_y_reverse(breaks = c(15,10,5,1), limits = c(16,0))+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.box = "vertical",
+        legend.direction = "vertical",
+        legend.position = "right", 
+        legend.spacing.y = unit(0, 'cm'),
+        #legend.spacing.x = unit(0, 'cm'),
+        panel.border  = element_rect(colour = "black",fill = NA)
+        )
+
+```
+
+```{r}
+ggsave("../visuals/pred_rank.png", height = 8, width = 10, scale = 1, bg = "white")
+```
+
+
+```{r}
+proj_samples_sum <- bind_rows(
+  proj_samples_com%>%mutate(task = "Communicative-cues"),
+  proj_samples_vis%>%mutate(task = "Ignore-visible-food"),
+  proj_samples_att%>%mutate(task = "Attention-following"),
+  proj_samples_inh%>%mutate(task = "Self-ordered-search"),
+  proj_samples_pop%>%mutate(task = "Population-to-sample")
+)%>%
+  group_by(task,factor, pred)%>%
+  summarise(mean = mean(value),
+            lci = hdi_lower(value),
+            uci = hdi_upper(value))%>%
+  mutate(factor = ifelse(factor == "other predictors", "Other predictors", factor))
+
+
+ggplot(proj_samples_sum, aes(x = mean, y = pred, col = task))+
+  geom_vline(xintercept = 0, lty = 3, alpha = 0.75)+
+  geom_pointrange(aes(xmin = lci, xmax = uci), position = position_dodge(width = -0.3))+
+  facet_wrap(factor~., scales = "free_y")+
+  scale_color_colorblind()+
+  labs(x = "", y = "")+
+  theme_minimal()+
+  theme(#axis.text.x = element_text(angle = 45, hjust = 1),
+        #legend.box = "vertical",
+        #legend.direction = "vertical",
+        #legend.position = "right", 
+        #legend.spacing.y = unit(0, 'cm'),
+        #legend.spacing.x = unit(0, 'cm'),
+        panel.border  = element_rect(colour = "black",fill = NA)
+        )
+```
+
 
 
 # old
@@ -2627,7 +3023,7 @@ ggplot(aes(x = size, y = value))+
   scale_x_continuous(labels = unique(cvarselp$solution_terms), breaks = unique(cvarselp$size))+
   theme_few()+
   theme(axis.text.x = element_text(angle = 45, hjust = 1),
-        legend.position = c(0.5,0.9), legend.direction = "horizontal")
+        legend.position = c(0.5,0.6), legend.direction = "horizontal")
 
 
 ```
@@ -2776,7 +3172,7 @@ ggplot(aes(x = size, y = value))+
   scale_x_continuous(labels = unique(ivarselp$solution_terms), breaks = unique(ivarselp$size))+
   theme_few()+
   theme(axis.text.x = element_text(angle = 45, hjust=1),
-        legend.position = c(0.5,0.9), legend.direction = "horizontal")
+        legend.position = c(0.5,0.6), legend.direction = "horizontal")
 ```
 
 ```{r}
@@ -2926,7 +3322,7 @@ ggplot(aes(x = size, y = value))+
   scale_x_continuous(labels = unique(gvarselp$solution_terms), breaks = unique(gvarselp$size))+
   theme_few()+
   theme(axis.text.x = element_text(angle = 45, hjust=1),
-        legend.position = c(0.5,0.9), legend.direction = "horizontal")
+        legend.position = c(0.5,0.6), legend.direction = "horizontal")
 ```
 
 ```{r}
