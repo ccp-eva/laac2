@@ -107,6 +107,8 @@ data_trial <- read.csv("../data/laac2_data_trial.csv")%>%
   ))
 ```
 
+Hallo Nico!
+
 # Overview
 
 This document supplements the paper "The structure and predictability of individual differences in great ape cognition across domains". Some text passages and figures are the same in the supplementary material and the main paper. This redundancy is intended and ensures that the supplementary material is self-contained and readable. 
