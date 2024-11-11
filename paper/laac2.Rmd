@@ -1,0 +1,204 @@
+---
+title             : "Individual differences in great ape cognition across time and domains: stability, structure, and origins"
+shorttitle        : "Individual differences in great ape cognition"
+
+author: 
+  - name          : "Manuel Bohn"
+    affiliation   : "1,2"
+    corresponding : yes    # Define only one corresponding author
+    address       : "Universitätsallee 1, 21335 Lüneburg, Germany"
+    email         : "manuel.bohn@leuphana.de"
+    role:         # Contributorship roles (e.g., CRediT, https://casrai.org/credit/)
+      - Conceptualization
+      - Formal Analysis
+      - Writing - Original Draft Preparation
+      - Writing - Review & Editing
+  - name          : "Christoph Völter"
+    affiliation   : "2"
+    role:
+      - Conceptualization
+      - Writing - Original Draft Preparation
+      - Writing - Review & Editing
+  
+  - name          : "Johanna Eckert"
+    affiliation   : "2"
+    role:
+      - Conceptualization
+      - Writing - Original Draft Preparation
+      - Writing - Review & Editing
+      
+  - name          : "Daniel Hanus"
+    affiliation   : "2"
+    role:
+      - Conceptualization
+      - Writing - Original Draft Preparation
+      - Writing - Review & Editing
+      
+  - name          : "Nico Eisbrenner"
+    affiliation   : "2"
+    role:
+      - Formal Analysis
+      - Writing - Original Draft Preparation
+      - Writing - Review & Editing
+  - name          : "Jana Holtmann"
+    affiliation   : "3"
+    role:
+      - Formal Analysis
+      - Writing - Original Draft Preparation
+      - Writing - Review & Editing
+  - name          : "Daniel Haun"
+    affiliation   : "2"
+    role:
+      - Conceptualization
+      - Writing - Review & Editing
+
+affiliation:
+  - id            : "1"
+    institution   : "Institute of Psychology in Education, Leuphana University Lüneburg"
+  - id            : "2"
+    institution   : "Department of Comparative Cultural Psychology, Max Planck Institute for Evolutionary Anthropology, Leipzig, Germany"
+  - id            : "3"
+    institution   : "Wilhelm Wundt Institute of Psychology, Leipzig University, Leipzig, Germany"
+
+authornote: |
+  Manuel Bohn was supported by a Jacobs Foundation Research Fellowship (2022-1484-00). We are grateful to thank all children and caregivers for participating in the study. We thank the Max Planck Society for the Advancement of Science.
+
+abstract: |
+  200 words 
+  
+keywords          : "keywords"
+
+bibliography      : "r-references.bib"
+
+floatsintext      : no
+linenumbers       : yes
+draft             : no
+mask              : no
+
+figurelist        : no
+tablelist         : no
+footnotelist      : no
+
+classoption       : "man"
+output            : papaja::apa6_pdf
+---
+
+```{r setup, include = FALSE}
+library("papaja")
+r_refs("r-references.bib")
+library(tidyverse)
+```
+
+# Introduction
+
+
+# Methods
+
+```{r}
+# read in data files
+data_task <- read.csv("../data/laac2_data_task.csv")%>%
+  mutate(task = recode(task,
+       "population" = "Population-to-sample",
+       "communication" = "Communicative-cues",
+       "reasoning" = "Logical-reasoning",
+       "visible_food" = "Ignore-visible-food",
+       "inhibit_searched" = "Self-ordered-search",
+       "attention" = "Attention-following"
+  ))
+
+data_trial <- read.csv("../data/laac2_data_trial.csv")%>%
+  mutate(task = recode(task,
+       "population" = "Population-to-sample",
+       "communication" = "Communicative-cues",
+       "reasoning" = "Logical-reasoning",
+       "visible_food" = "Ignore-visible-food",
+       "inhibit_searched" = "Self-ordered-search",
+       "attention" = "Attention-following"
+  ))
+```
+
+## Participants
+
+```{r}
+participants <- data_trial%>%
+  mutate(group = as.character(group), 
+         species = ifelse(grepl("chimp",group),"chimpanzee", group), 
+         species = factor(species))%>%
+  group_by(species)%>%
+  mutate(minage = round(min(age),1),
+         maxage = round(max(age),1))%>%
+  group_by(species, sex, minage,maxage)%>%
+  summarise(n = length(unique(subject)))
+
+
+ tpn <- data_trial%>%
+     mutate(group = as.character(group), 
+         species = ifelse(grepl("chimp",group),"chimpanzee", group), 
+         species = factor(species))%>%
+   group_by(time_point)%>%
+   mutate(min_date = min(date))%>%
+   group_by(time_point,group,.drop=FALSE)%>%
+  summarise(n = length(unique(subject)),
+            date = min(min_date))%>%
+  group_by(time_point)%>%
+  mutate(total_n = sum(n),
+         date = as.Date(as.character(min(date)), "%Y%m%d"))%>%
+   group_by(group)%>%
+   mutate(end = date, 
+          start = lag(as.character(end)))%>%
+   mutate(start = ifelse(is.na(start),"2022-04-28",start),
+          start = as.Date(start, format = "%Y-%m-%d"))%>%
+  ungroup()%>%
+  add_row(group = "total")
+```
+
+A total of `r sum(participants$n)` great apes participated at least in one tasks at one time point. This included `r participants%>%filter(species == "bonobos")%>%pull(n)%>%sum()` Bonobos (*pan paniscus*, `r participants%>%filter(species == "bonobos", sex == "f")%>%pull(n)` females, age `r participants%>%filter(species == "bonobos", sex == "f")%>%pull(minage)` to `r participants%>%filter(species == "bonobos", sex == "f")%>%pull(maxage)`), `r participants%>%filter(species == "chimpanzee")%>%pull(n)%>%sum()` Chimpanzees (*pan troglodytes*, `r participants%>%filter(species == "chimpanzee", sex == "f")%>%pull(n)` females, age `r participants%>%filter(species == "chimpanzee", sex == "f")%>%pull(minage)` to `r participants%>%filter(species == "chimpanzee", sex == "f")%>%pull(maxage)`), `r participants%>%filter(species == "gorillas")%>%pull(n)%>%sum()` Gorillas (*gorilla gorilla*, `r participants%>%filter(species == "gorillas", sex == "f")%>%pull(n)` females, age `r participants%>%filter(species == "gorillas", sex == "f")%>%pull(minage)` to `r participants%>%filter(species == "gorillas", sex == "f")%>%pull(maxage)`), and `r participants%>%filter(species == "gorillas")%>%pull(n)%>%sum()` Orangutans (*pongo abelii*, `r participants%>%filter(species == "orangs", sex == "f")%>%pull(n)` females, age `r participants%>%filter(species == "orangs", sex == "f")%>%pull(minage)` to `r participants%>%filter(species == "orangs", sex == "f")%>%pull(maxage)`). The sample size at the different time points ranged from `r min(tpn$total_n, na.rm = T)` to `r max(tpn$total_n, na.rm = T)` for the different species (see supplementary material for details). All apes participated in cognitive research on a regular basis. Apes were housed at the Wolfgang Köhler Primate Research Center located in Zoo Leipzig, Germany. They lived in groups, with one group per species and two chimpanzee groups (group A and B). Research was noninvasive and strictly adhered to the legal requirements in Germany. Animal husbandry and research complied with the European Association of Zoos and Aquaria Minimum Standards for the Accommodation and Care of Animals in Zoos and Aquaria as well as the World Association of Zoos and Aquariums Ethical Guidelines for the Conduct of Research on Animals by Zoos and Aquariums. Participation was voluntary, all food was given in addition to the daily diet, and water was available ad libitum throughout the study. The study was approved by an internal ethics committee at the Max Planck Institute for Evolutionary Anthropology.
+
+## Procedure
+
+Apes were tested in familiar sleeping or observation rooms by a single experimenter. The basic setup comprised a sliding table positioned in front of a mesh or a clear plexiglas panel. The experimenter sat on a small stool and used an occluder to cover the table (see Figure \@ref(fig:setup)).
+
+```{r setup, include = T, fig.cap = "Setup used for the six tasks. A) population-to-sample, B) logical-reasoning, C) communicative-cues, D) ignore-visible-food, E) self-ordered-search and F) attention-following. Text at the bottom shows order of task presentation and trial numbers", out.width="100%"}
+knitr::include_graphics("../visuals/setup.png") 
+```
+
+The study involved a total of six cognitive tasks. These were based on published procedures in the field of comparative psychology. The original publications often include control conditions to rule out alternative, cognitively less demanding ways to solve the tasks. We did not include such controls here and only ran the experimental conditions. For each task, we refer to these papers if they want to know more about control conditions and/or a detailed discussion of the nature of the underlying cognitive mechanisms. Example videos for each task can be found in the associated online repository. In the following, we give a brief description of each task. Additional details can be found in the supplementary material.
+
+### Attention-following
+
+The Attention-following task was loosely modeled after @kaminski2004body. The setup consisted of two identical cups placed on the sliding table and a large opaque screen that was longer than the width of the sliding table (Supplementary Figure \@ref(fig:setup)F). The experimenter placed both cups on the table and showed the ape that they were empty. Then, the experimenter baited both cups in view of the ape and placed the opaque screen in the center between the two cups, perpendicular to the mesh. Next, the experimenter moved to one side and looked at the cup in front of them. Then, the experimenter pushed the sliding table forward and the ape was allowed to choose one of the cups by pointing at it. If the ape chose the cup that the experimenter was looking at, they received the food item. If they choose the other cup, they did not. We coded whether the ape chose the side the experimenter was looking at (correct choice) or not. Apes received twelve trials. The side at which the experimenter looked was counterbalanced with same number of looks to each side and looks to the same side not more than two times in a row. We assumed that apes follow the experimenters focus of attention to determine whether or not their request could be seen and thus be successful.
+
+### Communicative-cues
+
+This task was modeled after @schmid2017great. Three identical cups were placed equidistantly on a sliding table directly in front of the ape (Figure \@ref(fig:setup)C). In the beginning of a trial, the experimenter showed the ape that all cups are empty. After placing an occluder between the subject and the cups, the experimenter held up one food item and moved it behind the occluder, visiting all three cups but baiting only one. Next, the occluder was lifted and E looked at the ape (ostensive cue), called the name, and looked at one of the cups, while holding on to it with one hand and tapping it with the other (continuous looking, 3 times tapping). Finally, the experimenter pushed the sliding table forward for the ape to make a choice. If the ape chose the baited cup, they received the reward – if not, not. We coded as correct choice if the ape chose the indicated cup. Apes received twelve trials. The location of the indicated cup was counterbalanced, with each cup being the target equally often and the same target not more than two times in a row. We assumed that apes use the experimenter's communicative cues to determine where the food is hidden.
+
+### Ignore-visible-food
+
+The task was modeled after @volter2022inhibitory. The task involved two opaque cups with an additional, sealed but transparent, compartment attached to the front of each cup (facing the ape). For one cup, the compartment contained a preferred food item that was clearly visible, for the other cup, the compartment was empty (Figure \@ref(fig:setup)D). In the beginning of the trial, the two cups were placed upside down on the sliding table so that the ape could see that the opaque compartments of both cups were empty. Next, the experimenter baited one of the cups in full view of the subject. In non-conflict trials, the baited cup was the cup with the food item in the transparent compartment. In conflict trials, the baited cup was the cup with the empty compartment. After baiting the experimenter pushed the sliding table forwards and the ape could chose by pointing. If the baited cup was chosen, the ape received the food. Apes received 14 trials, twelve conflict trials and two non-conflict trials (1st and 8th trial). Only conflict trials were analyzed. The location of the cup with the baited compartment was counterbalanced, with the cup not being in the same location more than twice in a row. We assumed that apes need to inhibit selecting the visible food item and instead use their short-term memory to remember where the food was hidden. 
+
+### Logical-reasoning
+
+The task was modeled after @hanus2014maths. Three identical cups were presented side-by-side on a sliding table, with the cup in the middle sometimes positioned closer to the left cup and sometimes closer to the right. (Supplementary Figure \@ref(fig:setup)B). Two half-open boxes served as occluders to block the ape’s view when shuffling the cups. Each trial started by showing the ape that all three cups (one on one side of the table, two on the other) were empty. After placing the occluders over both sides of the table, the experimenter put one piece of food on top of each occluder. Next, the experimenter hid each piece of food under the cup(s) behind the occluders. In case of the occluder with the two cups, the food was randomly placed under one of the two cups while both cups were visited and even shuffled. Finally, both occluders were lifted and the table pushed forwards, allowing the ape to choose one of the three cups, from which they then received the content. We coded whether the ape chose the certain cup (i.e. the cup from the side of the table with only one cup). Apes received 12 trials. The side with one cup was counterbalanced, with the same constellation appearing not more than two times in a row on the same side. We assumed that apes would infer that the cup from the tray with only one cup certainly contains food while the other cups contain food only in 50% of cases.  
+
+### Population-to-sample
+
+The task was modeled after @eckert2018intuitive. During the test, apes saw two transparent buckets filled with pellets and carrot pieces (the carrot pieces had roughly the same size and shape as the pellets). Each bucket contained 80 food items. The distribution of pellets to carrot pieces was 4:1 in bucket A, and 1:4 in bucket B. Pellets are preferred food items in comparison to carrots. The experimenter placed both buckets on a table, one left, one right (Figure \@ref(fig:setup)A). In the beginning of a trial, the experimenter picked up the bucket on the right side, tilted it forward so the ape could see inside, placed it back on the table and turned it around 360°. The same procedure was repeated with the other bucket. Next, the experimenter looked at the ceiling, inserted each hand in the bucket in front of it and drew one item from the bucket without the ape seeing which type (E picked always of the majority type). The food items remained hidden in the experimenter's fists. Next, the experimenter extended the arms (in parallel) towards the ape who was then allowed to make a choice by pointing to one of the fists. The ape received the chosen sample. In half of the trials, the experimenter crossed arms when moving the fists towards the ape to ensure that the apes made a choice between samples and not just chose the side where the favorable population was still visible. In between trials, the buckets were refilled to restore the original distributions. Apes received twelve trials. We coded whether the ape chose the sample from the population with the higher number of high quality food items. The location of the buckets (left and right) was counterbalanced, with the buckets in the same location no more than two times in a row. The crossing of the hands was also counterbalanced with no more than two crossings in a row. We assumed that apes reasoned about the probability of the sample being a high quality item based on observing the ratio in the population.
+
+### Self-ordered-search
+
+The task was modeled after @volter2019chimpanzees [see also @petrides1995impairments; @diamond1997prefrontal]. Three identical cups were placed equidistantly on a sliding table directly in front of the ape (Supplementary Figure \@ref(fig:setup)E). The experimenter baited all three cups in full view of the ape. Next, the experimenter pushed the sliding table forwards for the ape to choose one of the cups by pointing. After the choice, the table was pulled back and the ape received the food. After a 3s pause, the table was pushed forward again for a second choice. This procedure was repeated for a third choice. If the ape chose a baited cup, they received the food, if not, not. We coded the number of times the ape chose and empty cup (i.e. chose a cup they already chose before). Please note that this outcome variable differed from the other tasks in two ways: first, possible values were 0, 1, and 2 (instead of just 0 and 1) and second, a lower score indicated better performance. Apes received twelve trials. No counterbalancing was needed. We assumed that apes use their working memory abilities to remember where they had already searched and which cups still contained food.
+
+## Data collection
+
+# Analysis and Results
+
+# Discussion
+
+# Conclusion
+
+\newpage
+
+# References
+
+::: {#refs custom-style="Bibliography"}
+:::
