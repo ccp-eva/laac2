@@ -1768,11 +1768,11 @@ plsc
 
 
 ```{r }
-plot_grid(lsm2, plsc2, plste2, ncol = 1, labels = c("A", "B", "C"), align = "v",axis = "l", rel_heights = c(1,1))
+#plot_grid(lsm2, plsc2, plste2, ncol = 1, labels = c("A", "B", "C"), align = "v",axis = "l", rel_heights = c(1,1))
 ```
 
 ```{r}
-ggsave("../visuals/ls_lst.png", height = 7, width = 12, scale = 1)
+#ggsave("../visuals/ls_lst.png", height = 7, width = 12, scale = 1)
 ```
 
 ### Attention-following
@@ -1902,7 +1902,7 @@ pcor_mod
 ```
 
 ```{r}
-ggsave("../visuals/task_level_cor.png", height = 6, width = 6, scale = 1)
+#ggsave("../visuals/task_level_cor.png", height = 6, width = 6, scale = 1)
 ```
 
 Supplementary Figure\@ref(fig:mtmplot) shows the correlations between trait estimates for the different tasks reported in the present study as well as those reported in @bohn2023great. For the tasks reported in @bohn2023great we used the data from phase 2 because it was closer in time. Overall, most correlations were not significantly different from zero (i.e. the 95% CI did include zero). Because of this low average level of correlations, we decided not to explore models with higher-order factors and will only interpret the qualitative patterns. 
@@ -2921,10 +2921,10 @@ ppipreds
 ```
 
 ```{r}
-plot_grid(ppicomp, ppipreds, nrow = 1, labels = c("A", "B"), rel_widths = c(1,1))
+#plot_grid(ppicomp, ppipreds, nrow = 1, labels = c("A", "B"), rel_widths = c(1,1))
 ```
 ```{r}
-ggsave("../visuals/pred_sum.png", height = 6, width = 12, scale = 1, bg = "white")
+#ggsave("../visuals/pred_sum.png", height = 6, width = 12, scale = 1, bg = "white")
 ```
 
 Supplementary Figure \@ref(fig:ppisum) summarizes the selected predictors across tasks. Supplementary Figure \@ref(fig:ppipreds) shows the projected posterior model estimates for the predictors that were selected as relevant. 
