@@ -262,8 +262,17 @@ The task was modeled after Eckert, Call, Hermes, Herrmann, and Rakoczy (2018). D
 
 The task was modeled after Völter, Mundry, Call, and Seed (2019; Diamond, Prevor, Callender, and Druin, 1997; see also Petrides, 1995). Three identical cups were placed equidistantly on a sliding table directly in front of the ape (Supplementary Figure \ref{fig:setup}E). The experimenter baited all three cups in full view of the ape. Next, the experimenter pushed the sliding table forwards for the ape to choose one of the cups by pointing. After the choice, the table was pulled back and the ape received the food. After a 3s pause, the table was pushed forward again for a second choice. This procedure was repeated for a third choice. If the ape chose a baited cup, they received the food, if not, not. We coded the number of times the ape chose and empty cup (i.e.~chose a cup they already chose before). Please note that this outcome variable differed from the other tasks in two ways: first, possible values were 0, 1, and 2 (instead of just 0 and 1) and second, a lower score indicated better performance. Apes received twelve trials. No counterbalancing was needed. We assumed that apes use their working memory abilities to remember where they had already searched and which cups still contained food.
 
+\hypertarget{predictor-variables}{%
+\subsubsection{Predictor variables}\label{predictor-variables}}
+
+In addition to the data from the cognitive tasks, we collected data for a range of predictor variables to predict individual differences in performance in the cognitive tasks. Predictors could either vary with the individual (stable individual characteristics: group, age sex, rearing history, and time spent in research), vary with individual and time point (variable individual characteristics: rank, sickness, and sociality), vary with group membership (group life: time spent outdoors, disturbances, and life events), or vary with the testing arrangements and thus with individual, time point and session (testing arrangements: presence of an observer, participation in other studies on the same day or since the last time point). Predictors were collected from the zoo handbook with demographic information about the apes, via a diary that the animal caretakers filled out on a daily basis, or via proximity scans of the whole group. We provide a detailed description of these variables in the supplementary material.
+
 \hypertarget{data-collection}{%
 \subsection{Data collection}\label{data-collection}}
+
+Data collection started on April 28th, 2022, lasted until October 7th, 2023 and included 10 time points. One time point meant running all tasks with all participants. Within each time point, the tasks were organized in three sessions (see Fig. \ref{fig:setup}). Session 1 included the population-to-sample and logical-reasoning tasks, session 2 the communicative-cues and ignore-visible-food tasks and session 3 the self-ordered-search and attention-following tasks.
+
+The interval between two time points was planned to be eight weeks. However, it was not always possible to follow this schedule so that some intervals were longer or shorter (see supplementary material for details). The order of tasks was the same for all subjects. So was the counterbalancing within each task. This exact procedure was repeated at each time point so that the results would be comparable across participants and time points.
 
 \hypertarget{analysis-results-and-discussion}{%
 \section{Analysis, results and discussion}\label{analysis-results-and-discussion}}
@@ -271,6 +280,10 @@ The task was modeled after Völter, Mundry, Call, and Seed (2019; Diamond, Prevo
 \begin{figure}
 \includegraphics[width=1\linewidth]{../visuals/perf} \caption{Results from the six cognitive tasks across time points. Black crosses show mean performance at each time point across species (with 95\% CI). The sample size varied between time points and can be found in Supplementary Figure 1. Colored dots show mean performance by species. Dashed line shows chance level performance.}\label{fig:perfplot}
 \end{figure}
+
+To get an overview of the results, we first visualized the data (Fig. \ref{fig:perfplot}). Performance was consistently above chance in the communicative-cues, ignore-visible-food and population-to-sample tasks. For attention-following, this was the case only from time point 7 onward and for logical-reasoning, performance was, if anything, below chance. For the self-ordered-search task, performance was below chance but here lower values reflect better performance (i.e.~systematic avoidance of the visible food item). For attention-following, ignore-visible-food, communicative-cues and self-ordered-search there was a steady improvement in performance over time.
+
+In the following, we link performance in the tasks across time points to latent variables representing cognitive abilities. We first ask how stable these abilities are over time and how reliably they are measured. Next, we study the correlations between different abilities to explore the internal structure of great ape cognition. Finally, we link performance in the tasks to external predictors to shed light on the sources of individual differences in abilities. Each section uses different statistical techniques which we describe in the respective section.
 
 \hypertarget{stability-and-reliability}{%
 \subsection{Stability and reliability}\label{stability-and-reliability}}
@@ -284,10 +297,16 @@ The task was modeled after Völter, Mundry, Call, and Seed (2019; Diamond, Prevo
 \caption{A) Latent mean estimates for each time point by task based on latent state model. Means at time point 1 are set to zero. Shape denotes whether the 95\% CrI included zero (dashed line). The sample size varied between time points and can be found in Supplementary Fig. 1.  B) Correlations between subject-level latent state estimats for the different time points by task. C) Mean estimates from latent state-trait models with fixed and varyin means (color codeed) with 95\% CrI. Consistency refers to the proportion of (measurement-error-free) variance in performance explained by stable trait differences. Reliability refers to the proportion of true score variance to variance in raw scores.}\label{fig:figsem}
 \end{figure}
 
+\ldots{} describe models.
+
+The six tasks differed substantially in what they revealed about group- and individual-level variation. What stands out is the widespread change in performance over time. For all tasks except population-to-sample and logical-reasoning we observed an improvement in performance over time. This group-level change, however, has different individual-level interpretations for the different tasks. For communicative-cues, ignore-visible-food and self-ordered-search, individual differences remained relatively stable despite the group-level change suggesting stable individual differences combined with a systematic learning effect across individuals. In contrast, for attention-following, there was little stability in individual differences at earlier time points and only towards the end emerged a more stable ordering of individuals. In combination with the low reliability at earlier time points, this suggests that at least some individuals changed their response strategy in the course of the study. The combination of low reliability, chance-level performance and low correlation of latent states for logical-reasoning suggests that this task is not suited to probe individual differences in logical reasoning abilities in great apes. It is also noteworthy that the reliability estimates are on average lower compared to a previous study testing the same individuals on different tasks (Bohn et al., 2023). One explanation might be the increase in performance over time. At the beginning of the study, more individuals might have chosen randomly instead of using the available information provided in the task setup and the demonstrations. By definition, random variation is not reliable. With time, more and more individuals started using the available information so that inter-individual differences in how good they are in using it could be detected.
+
 \hypertarget{structure}{%
 \subsection{Structure}\label{structure}}
 
-Figure\ref{fig:figcor} shows the correlations between trait estimates for the different tasks reported in the present study as well as those reported in Bohn et al. (2023). For the tasks reported in Bohn et al. (2023) we used the data from phase 2 because it was closer in time. Overall, most correlations were not significantly different from zero (i.e.~the 95\% CI did include zero). Because of this low average level of correlations, we decided not to explore models with higher-order factors and will only interpret the qualitative patterns.
+To explore the structure of great ape cognition we correlated latent trait estimates for each task. In contrast to raw performance scores, these estimates take into account the reliability of measurement and are considered to be measurement-error free. Bohn et al. (2023) tested the same individuals and we therefore also include the data from tasks reported there (data from phase 2). Even though the data in the two studies was collected at different time points, we think it is justifiable to analyse them jointly because the trait estimates represent stable, time-invariant individual differences in cognitive abilities. The estimates were computed \ldots{}
+
+Figure\ref{fig:figcor} shows the correlations between trait estimates for the different tasks. Overall, most correlations were not significantly different from zero (i.e.~the 95\% CI did include zero). Because of this low average level of correlations, we decided not to explore models with higher-order factors and will only interpret the qualitative patterns.
 
 \begin{figure}
 
@@ -310,10 +329,16 @@ Finally, for the three inferential reasoning measures we found a correlation bet
 
 Next we turn to the correlations across domains. Perhaps the most surprising finding is the correlation between causal-inference and communicative-cues. On a closer look, the origin might be task impurity in that there are two ways to solve the causal-inference task: first, as hypothesized, by using the rattling sound to infer the location of the food. Second, by interpreting the experimenter's shaking of the cup as a communicative cue, which is very similar to the communicative-cues task. Thus, we suspect that at a least some individuals solved the task via the second route.
 
-Finally, there was a cluster of significant correlations between delay-of-gratification, self-ordered-search, inference-by-exclusion, causal-inference, population-to-sample and quantity discrimination. Of the 15 possible correlations, only four were non-significant. One commonality between these tasks that might -- in part -- explain this pattern is that they all benefit from sustained attention to the task. Sustained attention facilitates the processing of the experimenter's demonstrations (population-to-sample, inference-by-exclusion, causal-inference, delay-of-gratification), ones one actions on the setup (self-ordered-search) or visually complex stimuli (quantity discrimination). Tentative support for this idea comes from the analysis of relevant predictors (see Bohn et al., 2023 and below) in which \texttt{time\ spent\ in\ research} was selected as a relevant predictor of performance for all of these tasks except causal-inference. This predictor reflects individual's experience with experimental studies, which often involve sustained attention to distributions of food items, actions of conspecifics and/or demonstrations by experimenters.
+Finally, there was a cluster of significant correlations between delay-of-gratification, self-ordered-search, inference-by-exclusion, causal-inference, population-to-sample and quantity discrimination. Of the 15 possible correlations, only four were non-significant. One commonality between these tasks that might -- in part -- explain this pattern is that they all benefit from sustained attention to the task. Sustained attention facilitates the processing of the experimenter's demonstrations (population-to-sample, inference-by-exclusion, causal-inference, delay-of-gratification), ones one actions on the setup (self-ordered-search) or visually complex stimuli (quantity discrimination). Tentative support for this idea comes from the analysis of relevant predictors (see Bohn et al., 2023 and below) in which \texttt{time\ spent\ in\ research} was selected as a relevant predictor of performance for all of these tasks except causal-inference. This predictor reflects individual's experience with experimental studies, which often involve sustained attention to distributions of food items, actions of conspecifics and/or demonstrations by experimenters. Next, we turn to the sources of the individual differences analysed here.
 
 \hypertarget{predictability}{%
 \subsection{Predictability}\label{predictability}}
+
+In this section, we analysed which external variables accounted for for inter- and intra-individual differences in task performance. That is, we asked which of the predictor variables described above predicted performance in the different tasks. Given the large number of predictor variables (14), this question translates to a variable selection problem: selecting a subset of variables from a larger pool. We used the projection predictive inference (Piironen, Paasiniemi, \& Vehtari, 2020) approach because it is a state-of-the-art procedure that provides an excellent trade-off between model complexity and accuracy (Pavone, Piironen, Bürkner, \& Vehtari, 2020; Piironen \& Vehtari, 2017). The projection prediction approach is a two-step process: The first step consists of building the best predictive model possible, called the reference model. In our case, the reference model is a Bayesian multilevel regression model -- fit via \texttt{brms} (Bürkner, 2017) -- including all available predictors (Catalina, Bürkner, \& Vehtari, 2020). In the second step, the goal is to replace the posterior distribution of the reference model with a simpler distribution containing fewer predictors compared to the reference model. The importance of a predictor is assessed by inspecting the mean log-predictive density (\texttt{elpd}) and root-mean-squared error (\texttt{rmse}) of models containing the predictor vs.~not.
+
+The output of the procedure is a ranking of the different predictors. That is, for each task, we get a ranking of how important a predictor is for constructing the simpler replacement distribution. In addition, we can make a qualitatively assessment of whether or not a predictor is relevant or not. In addition to the global assessment, we also inspected the projected posterior distribution of the predictors classified as relevant to see how they influenced performance. In the supplementary material we provide a detailed description of the procedure including how the different variables were handled and how the importance of each predictor was assessed.
+
+In addition to the external predictors, the models also included a random intercept term for subject (\texttt{(1\ \textbar{}\ subject)} in \texttt{brms} notation). This predictor was handled in a special way in that it was always considered last because it would otherwise have soaked up most of the variance before the other predictors would have had a chance to explain any of it.
 
 \begin{figure}
 
@@ -323,6 +348,16 @@ Finally, there was a cluster of significant correlations between delay-of-gratif
 
 \caption{A) Predictor ranking and selection based on PPI models. Crosses mark predictors that were selected to be relevant based on the PPI models. Color shows the broader category each predictor belongs to. The x-axis is sorted by the average rank across tasks. B) Posterior model estimates for the selected predictors for each task based on data. Points show means with 95\% Credible Interval. Color denotes task. For categorical predictors, the estimate gives the difference compared to the reference level (Gorilla for group).}\label{fig:figpred}
 \end{figure}
+
+Fig. \ref{fig:figpred}A summarizes the selected predictors across tasks. For all tasks, the random intercept term improved model fit the most (not shown in Fig. \ref{fig:figpred}A). In line with results reported by Bohn et al. (2023), this suggests that idiosyncratic developmental processes or genetic pre-dispositions, which operate on time-scales longer than what we captured in our study, accounted for a substantial portion of the variance in cognitive abilities between individuals.
+
+However, for two tasks, other predictors had an comparable explanatory power -- something that was not observe in Bohn et al. (2023). For population-to-sample, \texttt{time\ spent\ in\ research} improved the model fit even more than adding the random intercept at the end did. This could be interpreted that performance in this task strongly depends on having learned to pay attention to stimuli and the human experimenter. For ignore-visible-food, \texttt{time\ point} had an influence exceeding that of the random intercept term. We think this result reflects the strong within-task learning effect across subjects. Because performance increased substantially with time, most of the variation captured by \texttt{time\ point} exceeded the variation between individuals.
+
+For the remaining predictors, the most highly-ranked and frequently selected ones came from the group of stable individual characteristics. The big exception being \texttt{time\ point}, which was ranked second across tasks. This pattern aligns with the SEM results, in which we saw that most of the variance in performance could be traced back to stable trait differences between individuals. The remaining occasion specific variation was largely due to improvement over time, most likely reflecting task-specific learning processes. The remaining time-varying predictors did not account for much variation.
+
+The predictor selected most often was \texttt{group}. It was the only predictor that was selected as relevant for all tasks. However, differences between groups were variable in that the ranking of the groups changed from task to task (Fig. \ref{fig:figpred}B). For example, Gorillas performed best in ignore-visible-food and self-ordered-search, the Chimpanzee group B performed best in communicative-cues and population-to-sample and the Bonobos performed best in attention-following. This speaks against clear species or group differences in general cognitive performance. Again, the most likely explanation for group differences is an interaction between species specific dispositions and individual- / task-level developmental processes.
+
+The predictors that were selected more than once influenced performance in variable ways (Fig. \ref{fig:figpred}B). As mentioned above, \texttt{time\ point} always had a positive effect because performance increased with time. Whenever \texttt{rearing} was selected to be relevant, mother-reared individuals outperformed others. \texttt{Time\ spent\ in\ research} had a positive effect, suggesting that more experience with research leads to better performance, except for attention-following. The effect of \texttt{sex} was variable in that females outperformed males in population-to-sample but males outperformed females in self-ordered-search and ignore-visible-food.
 
 \hypertarget{general-discussion}{%
 \section{General Discussion}\label{general-discussion}}
@@ -343,6 +378,12 @@ Beran, M. J. (2015). The comparative science of {``self-control''}: What are we 
 \leavevmode\vadjust pre{\hypertarget{ref-bohn2023great}{}}%
 Bohn, M., Eckert, J., Hanus, D., Lugauer, B., Holtmann, J., \& Haun, D. B. (2023). Great ape cognition is structured by stable cognitive abilities and predicted by developmental conditions. \emph{Nature Ecology \& Evolution}, \emph{7}(6), 927--938.
 
+\leavevmode\vadjust pre{\hypertarget{ref-R-brms_a}{}}%
+Bürkner, P.-C. (2017). {brms}: An {R} package for {Bayesian} multilevel models using {Stan}. \emph{Journal of Statistical Software}, \emph{80}(1), 1--28.
+
+\leavevmode\vadjust pre{\hypertarget{ref-catalina2020projection}{}}%
+Catalina, A., Bürkner, P.-C., \& Vehtari, A. (2020). Projection predictive inference for generalized linear and additive multilevel models. \emph{arXiv Preprint arXiv:2010.06994}.
+
 \leavevmode\vadjust pre{\hypertarget{ref-diamond1997prefrontal}{}}%
 Diamond, A., Prevor, M. B., Callender, G., \& Druin, D. P. (1997). Prefrontal cortex cognitive deficits in children treated early and continuously for PKU. \emph{Monographs of the Society for Research in Child Development}, i--206.
 
@@ -358,8 +399,17 @@ Herrmann, E., Hernández-Lloreda, M. V., Call, J., Hare, B., \& Tomasello, M. (2
 \leavevmode\vadjust pre{\hypertarget{ref-kaminski2004body}{}}%
 Kaminski, J., Call, J., \& Tomasello, M. (2004). Body orientation and face orientation: Two factors controlling apes' begging behavior from humans. \emph{Animal Cognition}, \emph{7}, 216--223.
 
+\leavevmode\vadjust pre{\hypertarget{ref-pavone2020using}{}}%
+Pavone, F., Piironen, J., Bürkner, P.-C., \& Vehtari, A. (2020). \emph{Using reference models in variable selection}. Retrieved from \url{https://arxiv.org/abs/2004.13118}
+
 \leavevmode\vadjust pre{\hypertarget{ref-petrides1995impairments}{}}%
 Petrides, M. (1995). Impairments on nonspatial self-ordered and externally ordered working memory tasks after lesions of the mid-dorsal part of the lateral frontal cortex in the monkey. \emph{Journal of Neuroscience}, \emph{15}(1), 359--375.
+
+\leavevmode\vadjust pre{\hypertarget{ref-piironen2018projective}{}}%
+Piironen, J., Paasiniemi, M., \& Vehtari, A. (2020). {Projective inference in high-dimensional problems: Prediction and feature selection}. \emph{Electronic Journal of Statistics}, \emph{14}(1), 2155--2197. \url{https://doi.org/10.1214/20-EJS1711}
+
+\leavevmode\vadjust pre{\hypertarget{ref-piironen2017comparison}{}}%
+Piironen, J., \& Vehtari, A. (2017). Comparison of bayesian predictive methods for model selection. \emph{Statistics and Computing}, \emph{27}, 711--735. \url{https://doi.org/10.1007/s11222-016-9649-y}
 
 \leavevmode\vadjust pre{\hypertarget{ref-schmid2017great}{}}%
 Schmid, B., Karg, K., Perner, J., \& Tomasello, M. (2017). Great apes are sensitive to prior reliability of an informant in a gaze following task. \emph{PLoS One}, \emph{12}(11), e0187451.
