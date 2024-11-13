@@ -1,5 +1,5 @@
 ---
-title             : "Individual differences in great ape cognition across time and domains: stability, structure, and origins"
+title             : "Individual differences in great ape cognition across time and domains: stability, structure, and predictability"
 shorttitle        : "Individual differences in great ape cognition"
 
 author: 
@@ -68,9 +68,9 @@ abstract: |
   
 keywords          : "keywords"
 
-bibliography      : "r-references.bib"
+bibliography      : "library.bib"
 
-floatsintext      : no
+floatsintext      : yes
 linenumbers       : yes
 draft             : no
 mask              : no
@@ -83,7 +83,7 @@ classoption       : "man"
 output            : papaja::apa6_pdf
 ---
 
-```{r setup, include = FALSE}
+```{r , include = FALSE}
 library("papaja")
 r_refs("r-references.bib")
 library(tidyverse)
@@ -91,6 +91,11 @@ library(tidyverse)
 
 # Introduction
 
+
+
+@bohn2023great studied
+
+The current study extended previous work in two important aspects. First, we study a broader range of cognitive domains including social cognition, reasoning about quantities, executive functions and inferential reasoning. This allows us to assess whether the results obtained by @bohn2023great replicate within domains and generalize to others. Second, we explored the structure of great ape cognition in more depth: we pooled the data collected here with the data from @bohn2023great to study the correlations between cognitive traits within and across domains.   
 
 # Methods
 
@@ -190,9 +195,59 @@ The task was modeled after @volter2019chimpanzees [see also @petrides1995impairm
 
 ## Data collection
 
-# Analysis and Results
+# Analysis, results and discussion
 
-# Discussion
+```{r perfplot, fig.width = 10, fig.height = 6,fig.cap = "Results from the six cognitive tasks across time points. Black crosses show mean performance at each time point across species (with 95\\% CI). The sample size varied between time points and can be found in Supplementary Figure 1. Colored dots show mean performance by species. Dashed line shows chance level performance.", out.width="100%"}
+
+knitr::include_graphics("../visuals/perf.png") 
+```
+
+
+## Stability and reliability 
+
+```{r figsem, include = T, fig.cap = "A) Latent mean estimates for each time point by task based on latent state model. Means at time point 1 are set to zero. Shape denotes whether the 95\\% CrI included zero (dashed line). The sample size varied between time points and can be found in Supplementary Fig. 1.  B) Correlations between subject-level latent state estimats for the different time points by task. C) Mean estimates from latent state-trait models with fixed and varyin means (color codeed) with 95\\% CrI. Consistency refers to the proportion of (measurement-error-free) variance in performance explained by stable trait differences. Reliability refers to the proportion of true score variance to variance in raw scores.", fig.align = "center", out.width="100%"}
+
+knitr::include_graphics("../visuals/ls_lst.png") 
+
+```
+
+
+## Structure
+
+Figure\@ref(fig:figcor) shows the correlations between trait estimates for the different tasks reported in the present study as well as those reported in @bohn2023great. For the tasks reported in @bohn2023great we used the data from phase 2 because it was closer in time. Overall, most correlations were not significantly different from zero (i.e. the 95% CI did include zero). Because of this low average level of correlations, we decided not to explore models with higher-order factors and will only interpret the qualitative patterns. 
+
+```{r figcor, include = T, fig.cap = "Correlations between ... trait estimates. Bold correlations have 95\\% CrI nont overlapping with zero.", fig.align = "center", out.width="70%"}
+
+knitr::include_graphics("../visuals/task_level_cor.png") 
+
+```
+
+
+Conceptually, the tasks can be clustered in the following broader domains: *social cognition* (attention-following, gaze-following, communicative-cues), *reasoning about quantities* (quantity-discrimination, population-to-sample), *executive functions* (delay-of-gratification, self-ordered-search, ignore-visible-food) and *inferential reasoning* (logical-reasoning, causal-inference, inference-by-exclusion). As a first step, we will evaluate whether we find evidence for such a clustering in the data.
+
+There was no significant correlation between any of the social cognition tasks. Furthermore, attention-following and gaze-following did not correlate significantly with any of the other tasks and communicative-cues correlated only with causal-inference -- a result we will discuss below. Thus, and in line with previous work [@herrmann2010structure], we found no evidence for shared cognitive processes in tasks measuring different aspects of social cognition.
+
+The two tasks measuring reasoning about quantities did correlate significantly. Both tasks require discriminating between different quantities, directly in the case of quantity-discrimination and as part of the decision making process in the case of population-to-sample. Deciding between the samples from the two populations requires discriminating between the relative quantities within each bucket from which the samples were drawn.
+
+Within the executive functions measures, self-ordered-search and inhibit-visible-food were significantly correlated but none of the two correlated with delay-of-gratification. The significant correlation can be explained by the need to inhibit a premature response (selecting visible food or a cup that was previously rewarded) in both tasks. It has been argued that delay-of-gratification requires self control (tolerating a longer waiting time to gain a more valuable reward) over and above behavioral inhibition [@beran2015comparative]. From this point of view, individual differences in the delay-of-gratification task might be due to differences in self control and less due to differences in inhibition.    
+
+Finally, for the three inferential reasoning measures we found a correlation between inference-by-exclusion and causal-inference. Logical-reasoning did not correlate with either (neither did it with any other task). This is not surprising given the results reported above: the observed variation in the logical-reasoning task was largely noise and did not reflect systematic individual differences. The correlation between causal-inference and inference-by-exclusion is most likely due to the fact that both tasks involve making inferences about the location of food based on reasoning about its physical properties. 
+
+Next we turn to the correlations across domains. Perhaps the most surprising finding is the correlation between causal-inference and communicative-cues. On a closer look, the origin might be task impurity in that there are two ways to solve the causal-inference task: first, as hypothesized, by using the rattling sound to infer the location of the food. Second, by interpreting the experimenter's shaking of the cup as a communicative cue, which is very similar to the communicative-cues task. Thus, we suspect that at a least some individuals solved the task via the second route. 
+
+Finally, there was a cluster of significant correlations between delay-of-gratification, self-ordered-search, inference-by-exclusion, causal-inference, population-to-sample and quantity discrimination. Of the 15 possible correlations, only four were non-significant. One commonality between these tasks that might -- in part -- explain this pattern is that they all benefit from sustained attention to the task. Sustained attention facilitates the processing of the experimenter's demonstrations (population-to-sample, inference-by-exclusion, causal-inference, delay-of-gratification), ones one actions on the setup (self-ordered-search) or visually complex stimuli (quantity discrimination). Tentative support for this idea comes from the analysis of relevant predictors [see @bohn2023great and below] in which `time spent in research` was selected as a relevant predictor of performance for all of these tasks except causal-inference. This predictor reflects individual's experience with experimental studies, which often involve sustained attention to distributions of food items, actions of conspecifics and/or demonstrations by experimenters. 
+
+
+## Predictability
+
+```{r figpred, include = T, fig.cap = "A) Predictor ranking and selection based on PPI models. Crosses mark predictors that were selected to be relevant based on the PPI models. Color shows the broader category each predictor belongs to. The x-axis is sorted by the average rank across tasks. B) Posterior model estimates for the selected predictors for each task based on data. Points show means with 95\\% Credible Interval. Color denotes task. For categorical predictors, the estimate gives the difference compared to the reference level (Gorilla for group).", fig.align = "center", out.width="100%"}
+
+knitr::include_graphics("../visuals/pred_sum.png") 
+```
+
+# General Discussion
+
+
 
 # Conclusion
 

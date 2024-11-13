@@ -111,7 +111,7 @@ data_trial <- read.csv("../data/laac2_data_trial.csv")%>%
 
 # Overview
 
-This document supplements the paper "The structure and predictability of individual differences in great ape cognition across domains". Some text passages and figures are the same in the supplementary material and the main paper. This redundancy is intended and ensures that the supplementary material is self-contained and readable. 
+This document supplements the paper "Individual differences in great ape cognition across time and domains: stability, structure, and predictability". Some text passages and figures are the same in the supplementary material and the main paper. This redundancy is intended and ensures that the supplementary material is self-contained and readable. 
 
 This document is structured as follows: we first describe the [sample](#participants). Next we describe the general [setup](#setup) and the experimental [tasks](#tasks). In the section [data collection](#data-collection), we lay out the time line of data collection. Next, we give an overview of the [predictor variables](#predictors) we recorded in addition to the experimental data.
 
@@ -1051,6 +1051,10 @@ perfplot
 ```
 
 ```{r}
+#ggsave("../visuals/perf.png", height = 5, width = 12, scale = 1, bg = "white")
+```
+
+```{r}
 cor_data <- data_task%>%
   select(subject, task, time_point, performance)%>%
   pivot_wider(values_from = "performance", names_from = "time_point")%>%
@@ -1440,10 +1444,29 @@ lsm <- ggplot(plse, aes(x = time_point, y = est))+
   theme_few()+
   theme(legend.direction = "vertical", legend.position = c(0.075, 0.9), legend.box = "horizontal", legend.background = element_blank(), strip.background = element_blank(),
   strip.text.y = element_blank(), axis.title.x = element_blank(), axis.ticks.x = element_blank(), axis.text.x = element_blank(),
-      axis.text = element_text(size = 8),       # Smaller axis text
+    axis.text = element_text(size = 8),       # Smaller axis text
     axis.title = element_text(size = 10),     # Smaller axis titles
     legend.text = element_text(size = 6),     # Smaller legend text
     strip.text = element_text(size = 8)      # Smaller plot title
+    )
+
+lsm2 <- ggplot(plse, aes(x = time_point, y = est))+
+  geom_hline(aes(yintercept = ref), lty = 3, alpha = .75)+
+  labs(x = "Time point",y = "Latent state mean")+
+  geom_line(alpha = .75)+
+  #geom_line(data = lsep%>%filter(time_point > 14), aes(group = task, x = time_point),position = position_dodge(width = 0.2), alpha = .75)+
+  geom_pointrange(aes(ymin = lower_2.5ci, ymax = upper_2.5ci, pch = sig), alpha = .75, fatten = 3)+
+  facet_grid(~task)+
+  scale_shape_manual(values = c(16,4), name = "", labels = c("includes 0", "different from 0"))+
+  #geom_vline(xintercept = 14.5, size = 1)+
+  scale_x_continuous(breaks = c(1,10), labels = c(1,10))+
+  theme_few()+
+  theme(legend.direction = "vertical", legend.position = c(0.075, 0.9), legend.box = "horizontal", legend.background = element_blank(), strip.background = element_blank(),
+  strip.text.y = element_blank(), axis.title.x = element_blank(),# axis.ticks.x = element_blank(), axis.text.x = element_blank(),
+    #axis.text = element_text(size = 8),       # Smaller axis text
+    #axis.title = element_text(size = 10),     # Smaller axis titles
+    legend.text = element_text(size = 8),     # Smaller legend text
+    #strip.text = element_text(size = 8)      # Smaller plot title
     )
 ```
 
@@ -1467,7 +1490,7 @@ lsrel <- ggplot(plsr, aes(x = time_point, y = est))+
 ```
 
 ```{r lseplot, fig.height = 4, fig.width=8, fig.cap = "Latent means and reliability estimates with 95\\% CI for each time point based on LSM. The sample size varied between time points and can be found in Supplementary Figure 1. Means at time point 1 are set to 0.", out.width="100%"}
-plot_grid(lsm, lsrel, nrow = 2, labels = c("A", "B"), align = "v", rel_heights = c(1,1))
+plot_grid(lsm, lsrel, nrow = 2, labels = c("A", "B"), align = "v",axis = "l", rel_heights = c(1,1))
 ```
 
 ```{r}
@@ -1633,13 +1656,44 @@ lstv_con_rel%>%mutate(type = "varying means")
   labs(x = "", y = "LST model estimate")+
   scale_x_discrete(labels = c("Consistency", "Reliability"), guide = guide_axis(n.dodge = 2))+
   scale_color_colorblind(name = "")+
-  theme(legend.direction = "vertical", legend.position = c(0.75, 0.25), legend.box = "horizontal", legend.background = element_blank(), strip.background = element_blank(),
+  theme(legend.direction = "vertical", legend.position = c(0.9, 0.25), legend.box = "horizontal", legend.background = element_blank(), strip.background = element_blank(),
   strip.text.y = element_blank(), axis.title.x = element_blank(), 
     axis.text = element_text(size = 8),       # Smaller axis text
     axis.title = element_text(size = 10),     # Smaller axis titles
     legend.text = element_text(size = 8),
     legend.title = element_text(size = 8),# Smaller legend text
-    strip.text = element_text(size = 8)      # Smaller plot title
+    strip.text = element_text(size = 8)
+    )
+
+
+plste2 <- bind_rows(
+lstf_con_rel%>%mutate(type = "fixed means"),
+lstv_con_rel%>%mutate(type = "varying means")
+)%>%
+  mutate(task = recode(task,
+       "pop-to-sample" = "Population-to-sample",
+       "communication" = "Communicative-cues",
+       "reasoning" = "Logical-reasoning",
+       "visible-food" = "Ignore-visible-food",
+       "inhibit-searched" = "Self-ordered-search",
+       "attention" = "Attention-following"
+  ))%>%
+  ggplot(aes(x = param, y = value, col = type))+
+  geom_pointrange(aes(ymin= lower_2.5ci, ymax = upper_2.5ci), position = position_dodge(width = 0.9))+
+  theme_few()+
+  ylim(0,1)+
+  facet_grid(~task)+
+  labs(x = "", y = "LST model estimate")+
+  scale_x_discrete(labels = c("Consistency", "Reliability"))+#, guide = guide_axis(n.dodge = 2))+
+  scale_color_colorblind(name = "")+
+  theme(legend.direction = "vertical", legend.position = c(0.9, 0.25), legend.box = "horizontal", legend.background = element_blank(), strip.background = element_blank(),
+  strip.text.y = element_blank(), axis.title.x = element_blank(), 
+    #axis.text = element_text(size = 8),       # Smaller axis text
+    #axis.title = element_text(size = 10),     # Smaller axis titles
+    legend.text = element_text(size = 8),
+    #legend.title = element_text(size = 8),# Smaller legend text
+    #strip.text = element_text(size = 8),
+   strip.text = element_blank()# Smaller plot title
     )
 ```
 
@@ -1685,10 +1739,40 @@ plsc <- cor%>%
   facet_wrap(~task, ncol = 3)+
   theme_few()+
   theme(legend.position = c(0.9,0.85), legend.direction = "vertical", legend.title = element_blank(), legend.background = element_blank())
+
+
+plsc2 <- cor%>%
+  ggplot(aes(y = paramHeader, x = param, fill = est))+
+    geom_tile(color = "white")+
+  labs(x = "", y = "")+
+  scale_fill_gradientn(
+    colors = c("darkgrey","darkgrey", "#CC6677", "#FFE066", "#117733"),  # Define four colors
+    values = scales::rescale(c(-0.1,0, 0.01, 0.5, 1)),  # Define the position of the points along the scale
+    limits = c(-0.1, 1),  # Ensure values match your data range
+    space = "Lab", 
+    name = "Correlation",
+    breaks = c(0, 0.5, 1)
+  ) +
+  #geom_text(aes(label = round(est, 2)), size = 2)+
+  scale_y_discrete(breaks = c(2,10))+
+  scale_x_discrete(breaks = c(1,9))+
+  facet_wrap(~task, nrow = 1)+
+  theme_few()+
+  theme(legend.position = c(0.975,0.25), legend.direction = "vertical", legend.title = element_blank(), legend.background = element_blank(), strip.text = element_blank(), legend.text = element_text(size = 8), legend.key.size = unit(0.4, "cm"))
+
 ```
 
 ```{r lsplot, fig.height=4, fig.cap = "Correlations between latent state variables based on LSM for the different tasks.", out.width="100%"}
 plsc
+```
+
+
+```{r }
+plot_grid(lsm2, plsc2, plste2, ncol = 1, labels = c("A", "B", "C"), align = "v",axis = "l", rel_heights = c(1,1))
+```
+
+```{r}
+ggsave("../visuals/ls_lst.png", height = 7, width = 12, scale = 1)
 ```
 
 ### Attention-following
@@ -1787,7 +1871,7 @@ cor_mod <- cor_mod_raw$parameters$stdyx.standardized%>%filter(grepl("WITH",param
     COMM = "Communicative-cues",
     SEARCH = "Self-ordered-search",
     POP = "Population-to-sample",
-    QUANT = "Quantity discrimination",
+    QUANT = "Quantity-discrimination",
     REASON = "Logical-reasoning",
     FOOD = "Ignore-visible-food"
   ))%>%
@@ -1818,7 +1902,7 @@ pcor_mod
 ```
 
 ```{r}
-#ggsave("../visuals/task_level_cor.png", height = 6, width = 6, scale = 1)
+ggsave("../visuals/task_level_cor.png", height = 6, width = 6, scale = 1)
 ```
 
 Supplementary Figure\@ref(fig:mtmplot) shows the correlations between trait estimates for the different tasks reported in the present study as well as those reported in @bohn2023great. For the tasks reported in @bohn2023great we used the data from phase 2 because it was closer in time. Overall, most correlations were not significantly different from zero (i.e. the 95% CI did include zero). Because of this low average level of correlations, we decided not to explore models with higher-order factors and will only interpret the qualitative patterns. 
@@ -2755,12 +2839,16 @@ ro <- bind_rows(
   ungroup()%>%
   droplevels()%>%
   mutate(type = ifelse(
-    ranking_fulldata == "Time spent in research" | ranking_fulldata == "Rearing history" | ranking_fulldata == "Group" | ranking_fulldata == "Sex"| ranking_fulldata == "Age", "Stable characteristic", ifelse(
-      ranking_fulldata == "Rank" | ranking_fulldata == "Sickness severity" | ranking_fulldata == "Sociality" ,"Variable characteristic", ifelse(
-        ranking_fulldata == "Time spent outdoors" | ranking_fulldata == "Disturbance" | ranking_fulldata == "Life event", "Group life", "Testing arrangement"
+    ranking_fulldata == "Time spent in research" | ranking_fulldata == "Rearing history" | ranking_fulldata == "Group" | ranking_fulldata == "Sex"| ranking_fulldata == "Age", "Stable charac.", ifelse(
+      ranking_fulldata == "Rank" | ranking_fulldata == "Sickness severity" | ranking_fulldata == "Sociality" ,"Variable charac.", ifelse(
+        ranking_fulldata == "Time spent outdoors" | ranking_fulldata == "Disturbance" | ranking_fulldata == "Life event", "Group life", "Testing arr."
       )
     )
-  ))
+  ))%>%
+  mutate(ranking_fulldata = recode(ranking_fulldata, 
+                                   "Study participation (time point)" = "Study part. (time point)",
+                                   "Study participation (day)" = "Study part. (day)",
+                                   "Time spent in research" = "Time in research"))
 
 
 ppicomp <- ggplot(ro,aes(x = fct_reorder(ranking_fulldata,sum), y = size, col = type ))+
@@ -2830,6 +2918,13 @@ ppipreds <- ggplot(proj_samples_sum, aes(x = mean, y = pred, col = task))+
 
 ```{r ppipreds, fig.height=6, fig.width=10, fig.cap = "Posterior model estimates for the selected predictors for each task based on data. Points show means with 95\\% Credible Interval. Color denotes task. For categorical predictors, the estimate gives the difference compared to the reference level (Gorilla for group).", out.width="100%"}
 ppipreds
+```
+
+```{r}
+plot_grid(ppicomp, ppipreds, nrow = 1, labels = c("A", "B"), rel_widths = c(1,1))
+```
+```{r}
+ggsave("../visuals/pred_sum.png", height = 6, width = 12, scale = 1, bg = "white")
 ```
 
 Supplementary Figure \@ref(fig:ppisum) summarizes the selected predictors across tasks. Supplementary Figure \@ref(fig:ppipreds) shows the projected posterior model estimates for the predictors that were selected as relevant. 
