@@ -1632,6 +1632,8 @@ lst_overview <- bind_rows(
 lstf_con_rel%>%mutate(type = "fixed means"),
 lstv_con_rel%>%mutate(type = "varying means")
 )
+
+#saveRDS(lst_overview, "../saves/lst_overview.rds")
 ```
 
 
