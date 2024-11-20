@@ -92,7 +92,19 @@ library(tidyverse)
 
 # Introduction
 
+Variation is the fodder of evolution. Individual differences in cognitive abilities are key for understanding what evolves [@volter2018comparative]. They inform us which aspects of cognition are invariant and which are more maleable. They also inform us about the broader structure of the cognitive architecture when studying relations between individual differences in different aspects of cognition. Finally, they hold the key to understanding which socio-ecological factors shape cognition during ontogeny and phylogeny. 
 
+
+@matzel2017individual @boogert2018measuring
+
+
+reliability: @griffin2015cognition
+
+@shaw2017cognitive
+
+Studying individual differnces is hard. 
+
+@volter2022structure
 
 @bohn2023great studied
 
@@ -294,6 +306,10 @@ The predictors that were selected more than once influenced performance in varia
 
 # General Discussion
 
+
+no evidence for something like g contra eg [@banerjee2009general]
+
+on an individual level, in long-lived species like primates sociality etc play littel roles. if anythin rearing history. 
 
 
 # Conclusion
