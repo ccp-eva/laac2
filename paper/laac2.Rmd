@@ -81,7 +81,7 @@ tablelist         : no
 footnotelist      : no
 
 classoption       : "man"
-output            : papaja::apa6_pdf
+output            : papaja::apa6_docx
 ---
 
 ```{r , include = FALSE}
@@ -92,19 +92,25 @@ library(tidyverse)
 
 # Introduction
 
-Variation is the fodder of evolution. Individual differences in cognitive abilities are key for understanding what evolves [@volter2018comparative]. They inform us which aspects of cognition are invariant and which are more maleable. They also inform us about the broader structure of the cognitive architecture when studying relations between individual differences in different aspects of cognition. Finally, they hold the key to understanding which socio-ecological factors shape cognition during ontogeny and phylogeny. 
+Variation is the fodder of evolution. Individual differences in cognitive abilities are key for understanding what evolves [@volter2018comparative; @shaw2017cognitive]. They inform us which aspects of cognition are invariant and which are more malleable. They also inform us about the broader structure of the cognitive architecture when studying relations between individual differences in different aspects of cognition. Finally, they hold the key to understanding which socio-ecological factors shape cognition during ontogeny and phylogeny. 
+
+invariant vs. maleable: substantial individual differences in most domains in captivity and the wild [@herrmann2010structure; @watson2018chimpanzees; @bohn2023great; ]. suggests substantial plasticity of the mind that responds to . Thus individual differences tell us something about the structure [@volter2022structure]. 
+
+few studies on the broader structure of individual differences in great apes, most of which have ben focused on finding something like general intelligence [deaner2006some; @burkart2017evolution; @reader2011evolution]. Using the primate cognition test battery [@herrmann2007humans], @herrmann2010structure found no support of a g factor and instead evidence for a bifactorial strucutre with one factor dor space and the other for the remianing social physical tasks  [see also @fichtel2020lemur and schmitt2012old for work with other primate taxa]. Using the same method  but studying different subjects, @hopkins2014chimpanzee postualted g (but did not comapre it to alternative models) which was found to be realted to measures of self-control @beran2018self. @kaufman2019structure combined datasets collected with the PCT and tested different models of human intelligence. beyond general intelligence, @volter2022inhibitory tested different models of strucutre of executive functions using a multi-trait multi-method approach and found ... 
+
+The existence of individual differnces asks the questions of what factors influence their emergence. Most theorizing about drivers about cognitive complexity are on a species level @dunbar2017there; @rosati2017foraging. Empricial studies are often small scale comparisons between e.g. more or less tolerant species from the same genus @rosati2017tolerant @joly2017comparing or species showing different social dynamics @amici2008fission. big picture studies using aggregated data: @deaner2006some @piantadosi2016extraordinary . Comparability of the data for different species is problematic because they were often collected using very different methods [@schubiger2020validity]. Notable exception is @primates2021evolution, used a comparable method to test hypothesis on a species-level. the results were sobering. No individual external predictor explained variation betzween species over and above phylogeentic relatedness. 
+
+much less on an individual level: 
+
+effects of enculturation - see @berio2023great for a recent summary; @watson2018chimpanzees hand reared individuals are more likely to use social information; @bard2014emotional human reared chimps are better at social cognition - but groups differ in many respects. 
 
 
-@matzel2017individual @boogert2018measuring
+@hopper2014influence personality traits influence problem solving; @brosnan2015personality personality correlated with responses to inequity   (see also @carter2014personality for monkeys)
 
 
-reliability: @griffin2015cognition
+meausurement: 
+research using individual differences to find out about the strucutre and factoes influencing cognition face the challenge of individual-level measurement. this is hard.  @matzel2017individual @boogert2018measuring reliability: @griffin2015cognition . mostly not assessed - for example @kaufman2019structure report poor stability of measurement, but the interval was 2 years. 
 
-@shaw2017cognitive
-
-Studying individual differnces is hard. 
-
-@volter2022structure
 
 @bohn2023great studied
 
@@ -307,7 +313,7 @@ The predictors that were selected more than once influenced performance in varia
 # General Discussion
 
 
-no evidence for something like g contra eg [@banerjee2009general]
+no evidence for something like g contra eg [@banerjee2009general] kaufman2019structure. they did not take into account the measurement properties of the different tasks but used sum scores
 
 on an individual level, in long-lived species like primates sociality etc play littel roles. if anythin rearing history. 
 
