@@ -1,7 +1,8 @@
 ---
 output:
-  pdf_document:
+  bookdown::pdf_document2:
     toc: yes
+    number_sections: no
   bookdown::html_document2:
     toc: yes
     toc_float: yes
@@ -11,9 +12,8 @@ output:
   html_document:
     toc: yes
     df_print: paged
-  bookdown::pdf_document2:
+  pdf_document:
     toc: yes
-    number_sections: no
 bibliography: ../paper/library.bib
 csl: apa6.csl
 header-includes: \usepackage{caption} \renewcommand{\figurename}{Supplementary Figure} \renewcommand{\tablename}{Supplementary Table}
