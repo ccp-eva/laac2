@@ -1,0 +1,105 @@
+---
+title: "LAAC2 Reliability"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(writexl)
+library(readxl)
+library(psych)
+```
+
+# Round 1
+
+## Prepare files
+```{r}
+# read in data files
+data_task <- read.csv("../data/laac2_data_task.csv") 
+data_trial <- read.csv("../data/laac2_data_trial.csv") 
+```
+
+```{r}
+#tp <- sample(c(1:10), 2) #[1] 4 8 
+
+tp <- c(4,8)
+
+# data_trial%>%
+#   filter(time_point %in% tp)%>%
+#   select(group, time_point, date, subject, task, trial,  pick)%>%
+#   mutate(code_reli = NA)%>%
+#   write_xlsx("../../../MPI-Cloud/LAAC/laac2_reli/reli_2nd_coder.xlsx")
+
+error_vid <- read_xlsx("../data/Liste-fehlende-Videos.xlsx", col_names = c("group", "time_point", "date", "subject", "task"))%>%
+  mutate(time_point = time_point-1,
+         sec = "T")%>%
+  select(-date)
+
+error_vid2 <- read_xlsx("../data/Fehlende-trials.xlsx", col_names = c("group", "time_point", "date", "subject", "task"))%>%
+  mutate(time_point = time_point-1,
+         sec = "T")%>%
+  select(-date)
+
+data_trial%>%
+  left_join(error_vid)%>%
+  filter(sec == "T")%>%
+  select(group, time_point, date, subject, task, trial)%>%
+  mutate(code_reli = NA)%>%
+  write_xlsx("../../../MPI-Cloud/LAAC/laac2_reli/reli_2nd_coder_pt2.xlsx")
+
+data_trial%>%
+  left_join(error_vid2)%>%
+  filter(sec == "T")%>%
+  select(group, time_point, date, subject, task, trial)%>%
+  mutate(code_reli = NA)%>%
+  write_xlsx("../../../MPI-Cloud/LAAC/laac2_reli/reli_2nd_coder_pt3.xlsx")
+  
+
+```
+
+## Combine files
+
+```{r}
+reli <- data_trial%>%
+  #filter(time_point %in% tp)%>%
+  select(group, time_point, date, subject, task, trial,  pick, code)%>%
+  left_join(
+    bind_rows(read_xlsx("../../../MPI-Cloud/LAAC/laac2_reli/reli_2nd_coder.xlsx"),
+              read_xlsx("../../../MPI-Cloud/LAAC/laac2_reli/reli_2nd_coder_pt2.xlsx"),
+              read_xlsx("../../../MPI-Cloud/LAAC/laac2_reli/reli_2nd_coder_pt3.xlsx")
+              )
+    )%>%
+  filter(!is.na(code_reli))%>%
+  mutate(match_code = ifelse(code == code_reli, 1, 0))
+
+```
+
+
+```{r}
+reli_summary <- tibble()
+
+for (t in unique(data_trial$task)) {
+  
+  rel_dat <- reli%>%
+    filter(task == t, !is.na(match_code))
+  
+  match = rel_dat%>%summarise(match = mean(match_code, na.rm = T))
+  
+  kap = cohen.kappa(cbind(rel_dat$code, rel_dat$code_reli))
+  
+  row = tibble(
+    task = t,
+    match = match$match,
+    kappa = kap$kappa, 
+    w_kappa = kap$weighted.kappa
+    
+  )
+  
+  reli_summary <- bind_rows(reli_summary, row)
+  
+}
+
+saveRDS(reli_summary, "../saves/reli_summary.rds")
+
+
+```

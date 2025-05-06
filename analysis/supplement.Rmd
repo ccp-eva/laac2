@@ -232,6 +232,15 @@ The task was modeled after @volter2019chimpanzees [see also @petrides1995impairm
 
 We assume that apes use their working memory abilities to remember where they had already searched and which cups still contained food.
 
+### Reliability coding 
+
+```{r}
+reli_summary <- readRDS("../saves/reli_summary.rds")
+```
+
+
+A second coder unfamiliar to the purpose of the study coded 20% of all time points (2 out of 10) for all tasks. Reliability was ...
+
 ## Data collection {#data-collection}
 
 One time point meant running all tasks with all participants. Within each time point, the tasks were organized in three sessions (see Supplementary Figure \@ref(fig:setup)). Session 1 included the population-to-sample and logical-reasoning tasks, session 2 the communicative-cues and ignore-visible-food tasks and session 3 the self-ordered-search and attention-following tasks.
@@ -1546,135 +1555,88 @@ plot_grid(lsm, lsrel, nrow = 2, labels = c("A", "B"), align = "v",axis = "l", re
 
 ```{r}
 lstf_con_rel <- bind_rows(
-  bind_rows(
   lstcf$parameters$unstandardized%>%
-  filter(paramHeader == "Variances", 
-         param %in% c("T", "S1"))%>%
-  select(param, est)%>%
-  pivot_wider(names_from = param, values_from = est)%>%
-  mutate(consistency = `T`/(S1 + `T`))%>%select(consistency)%>%mutate(task = "communication"),
+  filter(grepl("New.Additional.Para",paramHeader))%>%
+  select(param, est, lower_2.5ci, upper_2.5ci)%>%
+  mutate(task = "communication"),
   
   
   lstvf$parameters$unstandardized%>%
-  filter(paramHeader == "Variances", 
-         param %in% c("T", "S1"))%>%
-  select(param, est)%>%
-  pivot_wider(names_from = param, values_from = est)%>%
-  mutate(consistency = `T`/(S1 + `T`))%>%select(consistency)%>%mutate(task = "visible-food"),
+  filter(grepl("New.Additional.Para",paramHeader))%>%
+  select(param, est, lower_2.5ci, upper_2.5ci)%>%
+  mutate(task = "visible-food"),
   
   lstrf$parameters$unstandardized%>%
-  filter(paramHeader == "Variances", 
-         param %in% c("T", "S1"))%>%
-  select(param, est)%>%
-  pivot_wider(names_from = param, values_from = est)%>%
-  mutate(consistency = `T`/(S1 + `T`))%>%select(consistency)%>%mutate(task = "reasoning"),
+  filter(grepl("New.Additional.Para",paramHeader))%>%
+  select(param, est, lower_2.5ci, upper_2.5ci)%>%
+    mutate(task = "reasoning"),
   
   
   lstpf$parameters$unstandardized%>%
-  filter(paramHeader == "Variances", 
-         param %in% c("T", "S1"))%>%
-  select(param, est)%>%
-  pivot_wider(names_from = param, values_from = est)%>%
-  mutate(consistency = `T`/(S1 + `T`))%>%select(consistency)%>%mutate(task = "pop-to-sample"),
+  filter(grepl("New.Additional.Para",paramHeader))%>%
+  select(param, est, lower_2.5ci, upper_2.5ci)%>%
+    mutate(task = "pop-to-sample"),
   
   
   lstif$parameters$unstandardized%>%
-  filter(paramHeader == "Variances", 
-         param %in% c("T", "S1"))%>%
-  select(param, est)%>%
-  pivot_wider(names_from = param, values_from = est)%>%
-  mutate(consistency = `T`/(S1 + `T`))%>%select(consistency)%>%mutate(task = "inhibit-searched"),
+  filter(grepl("New.Additional.Para",paramHeader))%>%
+  select(param, est, lower_2.5ci, upper_2.5ci)%>%
+    mutate(task = "inhibit-searched"),
   
   lstaf$parameters$unstandardized%>%
-  filter(paramHeader == "Variances", 
-         param %in% c("T", "S1"))%>%
-  select(param, est)%>%
-  pivot_wider(names_from = param, values_from = est)%>%
-  mutate(consistency = `T`/(S1 + `T`))%>%select(consistency)%>%mutate(task = "attention"),
+  filter(grepl("New.Additional.Para",paramHeader))%>%
+  select(param, est, lower_2.5ci, upper_2.5ci)%>%
+    mutate(task = "attention"),
 )%>%
-  mutate(param = "consistency")%>%
-  dplyr::rename(value = consistency),
-
-bind_rows(
-  lstcf$parameters$r2%>%filter(param == "P11")%>%mutate(task = "communication"),
-  lstvf$parameters$r2%>%filter(param == "P11")%>%mutate(task = "visible-food"),
-  lstrf$parameters$r2%>%filter(param == "P11")%>%mutate(task = "reasoning"),
-  lstpf$parameters$r2%>%filter(param == "P11")%>%mutate(task = "pop-to-sample"),
-  lstif$parameters$r2%>%filter(param == "P11")%>%mutate(task = "inhibit-searched"),
-  lstaf$parameters$r2%>%filter(param == "P11")%>%mutate(task = "attention"),
-)%>%
-  mutate(param = "reliability")%>%
-  dplyr::rename(value = est)%>%
-  select(task, value, param,lower_2.5ci, upper_2.5ci)
-)
-
+  mutate(param = recode(param, 
+                        "CON" = "consistency",
+                        "REL" = "reliability",
+                        "OCC" = "occasion-specificity"))%>%
+  dplyr::rename(value = est)
 ```
 
 *[Jana: The way we compute consistency does not give a confidence interval for the LST model with fixed or varying means. Any chance we can get this? In the last paper we had this at least for the model with the fixed means]*
 
 ```{r}
 lstv_con_rel <- bind_rows(
-  bind_rows(
   lstcv$parameters$unstandardized%>%
-  filter(paramHeader == "Variances", 
-         param %in% c("T", "S1"))%>%
-  select(param, est)%>%
-  pivot_wider(names_from = param, values_from = est)%>%
-  mutate(consistency = `T`/(S1 + `T`))%>%select(consistency)%>%mutate(task = "communication"),
+  filter(grepl("New.Additional.Para",paramHeader))%>%
+  select(param, est, lower_2.5ci, upper_2.5ci)%>%
+  mutate(task = "communication"),
   
   
   lstvv$parameters$unstandardized%>%
-  filter(paramHeader == "Variances", 
-         param %in% c("T", "S1"))%>%
-  select(param, est)%>%
-  pivot_wider(names_from = param, values_from = est)%>%
-  mutate(consistency = `T`/(S1 + `T`))%>%select(consistency)%>%mutate(task = "visible-food"),
+  filter(grepl("New.Additional.Para",paramHeader))%>%
+  select(param, est, lower_2.5ci, upper_2.5ci)%>%
+  mutate(task = "visible-food"),
   
   lstrv$parameters$unstandardized%>%
-  filter(paramHeader == "Variances", 
-         param %in% c("T", "S1"))%>%
-  select(param, est)%>%
-  pivot_wider(names_from = param, values_from = est)%>%
-  mutate(consistency = `T`/(S1 + `T`))%>%select(consistency)%>%mutate(task = "reasoning"),
+  filter(grepl("New.Additional.Para",paramHeader))%>%
+  select(param, est, lower_2.5ci, upper_2.5ci)%>%
+    mutate(task = "reasoning"),
   
   
   lstpv$parameters$unstandardized%>%
-  filter(paramHeader == "Variances", 
-         param %in% c("T", "S1"))%>%
-  select(param, est)%>%
-  pivot_wider(names_from = param, values_from = est)%>%
-  mutate(consistency = `T`/(S1 + `T`))%>%select(consistency)%>%mutate(task = "pop-to-sample"),
+  filter(grepl("New.Additional.Para",paramHeader))%>%
+  select(param, est, lower_2.5ci, upper_2.5ci)%>%
+    mutate(task = "pop-to-sample"),
   
   
   lstiv$parameters$unstandardized%>%
-  filter(paramHeader == "Variances", 
-         param %in% c("T", "S1"))%>%
-  select(param, est)%>%
-  pivot_wider(names_from = param, values_from = est)%>%
-  mutate(consistency = `T`/(S1 + `T`))%>%select(consistency)%>%mutate(task = "inhibit-searched"),
+  filter(grepl("New.Additional.Para",paramHeader))%>%
+  select(param, est, lower_2.5ci, upper_2.5ci)%>%
+    mutate(task = "inhibit-searched"),
   
   lstav$parameters$unstandardized%>%
-  filter(paramHeader == "Variances", 
-         param %in% c("T", "S1"))%>%
-  select(param, est)%>%
-  pivot_wider(names_from = param, values_from = est)%>%
-  mutate(consistency = `T`/(S1 + `T`))%>%select(consistency)%>%mutate(task = "attention"),
+  filter(grepl("New.Additional.Para",paramHeader))%>%
+  select(param, est, lower_2.5ci, upper_2.5ci)%>%
+    mutate(task = "attention"),
 )%>%
-  mutate(param = "consistency")%>%
-  dplyr::rename(value = consistency),
-
-bind_rows(
-  lstcv$parameters$r2%>%filter(param == "P11")%>%mutate(task = "communication"),
-  lstvv$parameters$r2%>%filter(param == "P11")%>%mutate(task = "visible-food"),
-  lstrv$parameters$r2%>%filter(param == "P11")%>%mutate(task = "reasoning"),
-  lstpv$parameters$r2%>%filter(param == "P11")%>%mutate(task = "pop-to-sample"),
-  lstiv$parameters$r2%>%filter(param == "P11")%>%mutate(task = "inhibit-searched"),
-  lstav$parameters$r2%>%filter(param == "P11")%>%mutate(task = "attention"),
-)%>%
-  mutate(param = "reliability")%>%
-  dplyr::rename(value = est)%>%
-  select(task, value, param,lower_2.5ci, upper_2.5ci)
-)
+  mutate(param = recode(param, 
+                        "CON" = "consistency",
+                        "REL" = "reliability",
+                        "OCC" = "occasion-specificity"))%>%
+  dplyr::rename(value = est)
 ```
 
 
@@ -1701,6 +1663,7 @@ lstv_con_rel%>%mutate(type = "varying means")
        "inhibit-searched" = "Self-ordered-search",
        "attention" = "Attention-following"
   ))%>%
+  filter(param != "occasion-specificity")%>%
   ggplot(aes(x = param, y = value, col = type))+
   geom_pointrange(aes(ymin= lower_2.5ci, ymax = upper_2.5ci), position = position_dodge(width = 0.9))+
   theme_few()+
@@ -1709,7 +1672,7 @@ lstv_con_rel%>%mutate(type = "varying means")
   labs(x = "", y = "LST model estimate")+
   scale_x_discrete(labels = c("Consistency", "Reliability"), guide = guide_axis(n.dodge = 2))+
   scale_color_colorblind(name = "")+
-  theme(legend.direction = "vertical", legend.position = c(0.9, 0.25), legend.box = "horizontal", legend.background = element_blank(), strip.background = element_blank(),
+  theme(legend.direction = "vertical", legend.position = c(0.92, 0.25), legend.box = "horizontal", legend.background = element_blank(), strip.background = element_blank(),
   strip.text.y = element_blank(), axis.title.x = element_blank(), 
     axis.text = element_text(size = 8),       # Smaller axis text
     axis.title = element_text(size = 10),     # Smaller axis titles
@@ -1731,6 +1694,7 @@ lstv_con_rel%>%mutate(type = "varying means")
        "inhibit-searched" = "Self-ordered-search",
        "attention" = "Attention-following"
   ))%>%
+  filter(param != "occasion-specificity")%>%
   ggplot(aes(x = param, y = value, col = type))+
   geom_pointrange(aes(ymin= lower_2.5ci, ymax = upper_2.5ci), position = position_dodge(width = 0.9))+
   theme_few()+
@@ -1754,9 +1718,6 @@ lstv_con_rel%>%mutate(type = "varying means")
 plste
 ```
 
-```{r}
-#ggsave("../visuals/comp_fix_vary_means.png", height = 3, width = 5, scale = 1.5)
-```
 
 ```{r}
 cor <- bind_rows(
@@ -1834,7 +1795,7 @@ To fit the models, the response categories of 0 or 1 solved trials had to be col
 
 Supplementary Figure \@ref(fig:lseplot) visualizes the latent state means and reliability estimates from the LS model. Reliability was low for earlier time points and increased towards the end of the study. Latent means also slightly increased throughout the study and were significantly different from zero (i.e. time point 1) at time point 9 and 10. Supplementary Figure \@ref(fig:lsplot) gives the correlations between the latent states for the different time points. Correlations between latent states were moderate to low for time points below 7 and substantially higher from then on. Taken together, this pattern suggests substantial re-organization of individual differences that stabilized towards the end of the study. 
 
-In the LST model with fixed means, the consistency coefficient was estimated to be `r round(lst_overview%>%filter(task == "attention", param == "consistency", type == "fixed means")%>%pull(value),2)` which was very similar to the model with variable means (`r round(lst_overview%>%filter(task == "attention", param == "consistency", type == "varying means")%>%pull(value),2)`). This means that more than 90% of true inter-individual differences are attributable to stable (trait) differences between individuals [@Jana: das beißt sich mit dem LS model - hast Du eine Idee warum das so ist?]. Reliability (across time points) was estimated to be low (fixed means: `r round(lst_overview%>%filter(task == "attention", param == "reliability", type == "fixed means")%>%pull(value),2)`; variable means: fixed means: `r round(lst_overview%>%filter(task == "attention", param == "reliability", type == "varying means")%>%pull(value),2)`) (see Supplementary Figure \@ref(fig:lsteplot)). However, when only considering the data from time point 7 and later, reliability was substantially higher (`r round(lstav_short$parameters$r2%>%filter(param == "P17")%>%pull(est),2)`)
+In the LST model with fixed means, the consistency coefficient was estimated to be `r round(lst_overview%>%filter(task == "attention", param == "consistency", type == "fixed means")%>%pull(value),2)` which was very similar to the model with variable means (`r round(lst_overview%>%filter(task == "attention", param == "consistency", type == "varying means")%>%pull(value),2)`). This means that more than 90% of true inter-individual differences are attributable to stable (trait) differences between individuals [@Jana: das beißt sich mit dem LS model - hast Du eine Idee warum das so ist?]. Reliability (across time points) was estimated to be low (fixed means: `r round(lst_overview%>%filter(task == "attention", param == "reliability", type == "fixed means")%>%pull(value),2)`; variable means: fixed means: `r round(lst_overview%>%filter(task == "attention", param == "reliability", type == "varying means")%>%pull(value),2)`) (see Supplementary Figure \@ref(fig:lsteplot)). However, when only considering the data from time point 7 and later, reliability was substantially higher (`r round(lstav_short$parameters$unstandardized%>%filter(grepl("New.Additional.Para",paramHeader))%>%filter(param == "REL")%>%pull(est),2)`)
 
 Taken together, there was considerable variation both in group- and individual-level performance -- particularly in the earlier time points. Towards the end of the study, group-level performance stabilized on a level above chance (see Supplementary Figure \@ref(fig:perfplot)) and individual-differences also became more stable. Presumably, some individuals changed the way they approached the task half-way through the study -- seeing it initially as a competitive and only later as a cooperative task -- so that systematic individual differences only emerged at later time points. 
 
@@ -1903,38 +1864,41 @@ cor_mod <- cor_mod_raw$parameters$stdyx.standardized%>%filter(grepl("WITH",param
   filter(paramHeader != "INF1", 
          param!= "INF1")%>%
   mutate(paramHeader = recode(paramHeader,
-    ATTENT = "Attention-following",
-    GAZE = "Gaze-following",
+    ATTENT = "ZAttention-following",
+    GAZE = "ZGaze-following",
     CAUSE = "Causal-inference",
     INF2 = "Inference-by-exclusion",
     DELAY = "Delay-of-gratification",
-    COMM = "Communicative-cues",
+    COMM = "ZCommunicative-cues",
     SEARCH = "Self-ordered-search",
     POP = "Population-to-sample",
     QUANT = "Quantity-discrimination",
-    REASON = "Logical-reasoning",
+    REASON = "XLogical-reasoning",
     FOOD = "Ignore-visible-food"
   ),
   param = recode(param,
-    ATTENT = "Attention-following",
-    GAZE = "Gaze-following",
+    ATTENT = "ZAttention-following",
+    GAZE = "ZGaze-following",
     CAUSE = "Causal-inference",
     INF2 = "Inference-by-exclusion",
     DELAY = "Delay-of-gratification",
-    COMM = "Communicative-cues",
+    COMM = "ZCommunicative-cues",
     SEARCH = "Self-ordered-search",
     POP = "Population-to-sample",
     QUANT = "Quantity-discrimination",
-    REASON = "Logical-reasoning",
+    REASON = "XLogical-reasoning",
     FOOD = "Ignore-visible-food"
   ))%>%
   rowwise()%>%
   mutate(id = paste(sort(c(paramHeader, param)), collapse = "_"))%>%
   separate(id, into = c("task", "task_1"), sep = "_")%>%
   arrange(task, task_1)%>%
-  mutate(sig = ifelse(pval < 0.05, "bold", "plain"))
+  mutate(sig = ifelse(pval < 0.05, "bold", "plain"))%>%
+  mutate(est = ifelse(task_1 == "Self-ordered-search", est *-1, est))%>%
+  mutate(order = as.numeric(factor(task)),
+         order_1 = as.numeric(factor(task_1)))
 
-pcor_mod <- ggplot(cor_mod, aes(y = task, x = task_1, fill = est))+
+pcor_mod_a <- ggplot(cor_mod, aes(y = factor(order), x = factor(order_1), fill = est))+
   geom_tile(color = "white")+
   labs(x = "", y = "")+
   scale_fill_gradient2(low = "#CC6677", high = "#117733", mid = "white", 
@@ -1942,7 +1906,61 @@ pcor_mod <- ggplot(cor_mod, aes(y = task, x = task_1, fill = est))+
   name="Correlation")+
   #ggtitle("Model based correlations")+
   geom_text(aes(label = round(est, 2), fontface = sig), size = 3)+
-  scale_x_discrete(guide = guide_axis(angle = 90))+
+  scale_y_discrete(breaks = c(1:10), labels = c(str_remove(str_remove(sort(unique(cor_mod$task)), "Z"),"X")))+
+  scale_x_discrete(guide = guide_axis(angle = 90), labels = c(str_remove(str_remove(sort(unique(cor_mod$task_1)), "Z"),"X")))+
+  #scale_y_discrete(limits=rev, breaks = c(1:10))+
+  #scale_x_discrete(breaks = c(1:9))+
+  theme_few()+
+  theme(legend.position =  c(0.15, 0.8), legend.direction = "vertical", legend.title = element_blank(), legend.background = element_blank())
+
+pcor_mod_s <- cor_mod%>%
+  filter(task %in% c("ZAttention-following", "ZGaze-following", "ZCommunicative-cues"))%>%
+  ggplot(., aes(y = factor(order), x = factor(order_1), fill = est))+
+  geom_tile(color = "white")+
+  labs(x = "", y = "")+
+  scale_fill_gradient2(low = "#CC6677", high = "#117733", mid = "white", 
+  midpoint = 0, limit = c(-1,1), space = "Lab", 
+  name="Correlation", guide = "none")+
+  #ggtitle("Model based correlations")+
+  geom_text(aes(label = round(est, 2), fontface = sig), size = 3)+
+  scale_y_discrete(labels = c("Att.\nfoll.","Com.\ncue."))+
+  scale_x_discrete(labels = c("Com.\ncue.", "Gaze\nfoll."))+
+  #scale_y_discrete(limits=rev, breaks = c(1:10))+
+  #scale_x_discrete(breaks = c(1:9))+
+  theme_few()+
+  theme(legend.position =  c(0.15, 0.8), legend.direction = "vertical", legend.title = element_blank(), legend.background = element_blank())
+
+pcor_mod_n <- cor_mod%>%
+  filter(task %in% c("Quantity-discrimination", "Population-to-sample", "XLogical-reasoning"),
+         task_1 %in% c("Quantity-discrimination", "Population-to-sample", "XLogical-reasoning"))%>%
+  ggplot(., aes(y = task, x = task_1, fill = est))+
+  geom_tile(color = "white")+
+  labs(x = "", y = "")+
+  scale_fill_gradient2(low = "#CC6677", high = "#117733", mid = "white", 
+  midpoint = 0, limit = c(-1,1), space = "Lab", 
+  name="Correlation", guide = "none")+
+  #ggtitle("Model based correlations")+
+  geom_text(aes(label = round(est, 2), fontface = sig), size = 3)+
+  scale_y_discrete(labels = c("Pop.\nsamp.","Quan.\ndisc."))+
+  scale_x_discrete(labels = c("Quan.\ndisc.","Log.\nreas."))+
+  #scale_y_discrete(limits=rev, breaks = c(1:10))+
+  #scale_x_discrete(breaks = c(1:9))+
+  theme_few()+
+  theme(legend.position =  c(0.15, 0.8), legend.direction = "vertical", legend.title = element_blank(), legend.background = element_blank())
+
+pcor_mod_e <- cor_mod%>%
+  filter(task %in% c("Self-ordered-search", "Ignore-visible-food", "Delay-of-gratification"),
+         task_1 %in% c("Self-ordered-search", "Ignore-visible-food", "Delay-of-gratification"))%>%
+  ggplot(., aes(y = task, x = task_1, fill = est))+
+  geom_tile(color = "white")+
+  labs(x = "", y = "")+
+  scale_fill_gradient2(low = "#CC6677", high = "#117733", mid = "white", 
+  midpoint = 0, limit = c(-1,1), space = "Lab", 
+  name="Correlation", guide = "none")+
+  #ggtitle("Model based correlations")+
+  geom_text(aes(label = round(est, 2), fontface = sig), size = 3)+
+  scale_y_discrete(labels = c("Del.\ngrat.", "Ign.\nvis."))+
+  scale_x_discrete(labels = c("Ign.\nvis.", "Self\nord."))+
   #scale_y_discrete(limits=rev, breaks = c(1:10))+
   #scale_x_discrete(breaks = c(1:9))+
   theme_few()+
@@ -1950,12 +1968,19 @@ pcor_mod <- ggplot(cor_mod, aes(y = task, x = task_1, fill = est))+
 
 ```
 
-```{r mtmplot, fig.height=8, fig.width=8, fig.cap = "Correlations between trait estimates. Bold correlations are different from zero as judged by the 95\\% CI.", out.width="100%"}
-pcor_mod
+```{r}
+opcor_mod <- plot_grid(pcor_mod_a, 
+          plot_grid(pcor_mod_s, pcor_mod_n,pcor_mod_e,NULL, ncol = 1, labels = c("B", "C", "D")),
+          ncol = 2, labels = c("A", ""),axis = "tb", rel_widths = c(3.5,1))
+```
+
+
+```{r mtmplot, fig.height=8, fig.width=10, fig.cap = "Correlations between trait estimates. Bold correlations are different from zero as judged by the 95\\% CI.", out.width="100%"}
+opcor_mod
 ```
 
 ```{r}
-#ggsave("../visuals/task_level_cor.png", height = 6, width = 6, scale = 1)
+#ggsave("../visuals/task_level_cor.png", height = 6, width = 8, scale = 1)
 ```
 
 Supplementary Figure\@ref(fig:mtmplot) shows the correlations between trait estimates for the different tasks reported in the present study as well as those reported in @bohn2023great. For the tasks reported in @bohn2023great we used the data from phase 2 because it was closer in time. Overall, most correlations were not significantly different from zero (i.e. the 95% CI did include zero). Because of this low average level of correlations, we decided not to explore models with higher-order factors and will only interpret the qualitative patterns. 
