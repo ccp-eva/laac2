@@ -90,7 +90,7 @@ data_task <- read.csv("../data/laac2_data_task.csv")%>%
   mutate(task = recode(task,
        "population" = "Population-to-sample",
        "communication" = "Communicative-cues",
-       "reasoning" = "Logical-reasoning",
+       "reasoning" = "Probabilistic-reasoning",
        "visible_food" = "Ignore-visible-food",
        "inhibit_searched" = "Self-ordered-search",
        "attention" = "Attention-following"
@@ -100,7 +100,7 @@ data_trial <- read.csv("../data/laac2_data_trial.csv")%>%
   mutate(task = recode(task,
        "population" = "Population-to-sample",
        "communication" = "Communicative-cues",
-       "reasoning" = "Logical-reasoning",
+       "reasoning" = "Probabilistic-reasoning",
        "visible_food" = "Ignore-visible-food",
        "inhibit_searched" = "Self-ordered-search",
        "attention" = "Attention-following"
@@ -113,9 +113,12 @@ This document supplements the paper "Individual differences in great ape cogniti
 
 This document is structured as follows: we first describe the [sample](#participants). Next we describe the general [setup](#setup) and the experimental [tasks](#tasks). In the section [data collection](#data-collection), we lay out the time line of data collection. Next, we give an overview of the [predictor variables](#predictors) we recorded in addition to the experimental data.
 
-We then move on to our [analytical framework](#analytical-framework). First we describe the [Structural Equation models](#structural-equation-modeling) that were used to investigate robustness, stability and reliability of cognitive performance. Next, we describe the [Projection Predictive Inference](#projection-predictive-inference) analysis which we used to test the importance of the predictor variables.
+We then move on to our [analytical framework](#analytical-framework). First we describe the [Structural Equation models](#structural-equation-modeling) that were used to investigate mean change, stability and reliability of cognitive performance. Next, we describe the [Projection Predictive Inference](#projection-predictive-inference) analysis which we used to test the importance of the predictor variables.
 
 In the [results](#results) we first report on the [robustness, stability and reliability](#stability-and-reliability) of each task. Next, we investigate [relations between](#relations-between-tasks) trait variables computed for the different tasks. Here we also include the tasks described in @bohn2023great. Finally, we report how the different [predictors](#predictability) related to performance in the different tasks.
+
+<!-- All data sets, model outputs and analysis code are available in the associated online [`repository`](https://github.com/ccp-eva/laac2/).  -->
+All data sets, model outputs and analysis code are available in the associated online [*masked for peer review*]. The repository also contains additional documentation of the experiemental procedures and example videos for the different tasks.
 
 # Methods 
 
@@ -184,7 +187,7 @@ ggplot(tpn, aes(x = date, y = n, col = group))+
 
 Apes were tested in familiar sleeping or observation rooms by a single experimenter. Whenever possible, they were tested individually. The basic setup comprised a sliding table positioned in front of a mesh or a clear plexiglas panel with three holes in it. The experimenter sat on a small stool and used an occluder to cover the sliding table (see Supplementary Figure \@ref(fig:setup)).
 
-```{r setup, include = T, fig.cap = "Setup used for the six tasks. A) population-to-sample, B) logical-reasoning, C) communicative-cues, D) ignore-visible-food, E) self-ordered-search and F) attention-following. Text at the bottom shows order of task presentation and trial numbers", out.width="100%"}
+```{r setup, include = T, fig.cap = "Setup used for the six tasks. A) population-to-sample, B) probabilistic-reasoning, C) communicative-cues, D) ignore-visible-food, E) self-ordered-search and F) attention-following. Text at the bottom shows order of task presentation and trial numbers", out.width="100%"}
 knitr::include_graphics("../visuals/setup.png") 
 ```
 
@@ -193,7 +196,9 @@ knitr::include_graphics("../visuals/setup.png")
 
 The tasks we selected are based on published procedures and are commonly used in the field of comparative psychology. The original publications often include control conditions to rule out alternative, cognitively less demanding ways to solve the tasks. We did not include such controls here and only ran the experimental conditions. For each task, we refer to the publication we used to model our procedure. We ask the reader to read these papers if they want to know more about control conditions and/or a detailed discussion of the nature of the underlying cognitive mechanisms.
 
-Example videos for each task can be found in the associated online repository in [`videos/`](https://github.com/ccp-eva/laac2/tree/master/videos).
+<!-- Example videos for each task can be found in the associated online repository in [`videos/`](https://github.com/ccp-eva/laac2/tree/master/videos). -->
+
+Example videos for each task can be found in the associated online repository in [*masked for peer revie*w]. 
 
 ### Attention-following
 
@@ -213,7 +218,7 @@ The task was modeled after @volter2022inhibitory. The task involved two opaque c
 
 We assume that apes need to inhibit selecting the visible food item and instead use their short-term memory to remember where the food was hidden. 
 
-### Logical-reasoning
+### Probabilistic-reasoning
 
 The task was modeled after @hanus2014maths. Three identical cups were presented side-by-side on a sliding table, with the cup in the middle sometimes positioned closer to the left cup and sometimes closer to the right. (Supplementary Figure \@ref(fig:setup)B). Two half-open boxes served as occluders to block the ape’s view when shuffling the cups. Each trial started by showing the ape that all three cups (one on one side of the table, two on the other) were empty. After placing the occluders over both sides of the table, the experimenter put one piece of food on top of each occluder. Next, the experimenter hid each piece of food under the cup(s) behind the occluders. In case of the occluder with the two cups, the food was randomly placed under one of the two cups while both cups were visited and even shuffled. Finally, both occluders were lifted and the table pushed forwards, allowing the ape to choose one of the three cups, from which they then received the content. We coded whether the ape chose the certain cup (i.e. the cup from the side of the table with only one cup). Apes received 12 trials. The side with one cup was counterbalanced, with the same constellation appearing not more than two times in a row on the same side.
 
@@ -239,11 +244,11 @@ reli_summary <- readRDS("../saves/reli_summary.rds")
 ```
 
 
-A second coder unfamiliar to the purpose of the study coded 20% of all time points (2 out of 10) for all tasks. Reliability was ...
+A second coder unfamiliar to the purpose of the study coded 20% of all time points (2 out of 10) for all tasks. Inter-rater reliability was excellent (lowest proportion of agreement = `r round(min(reli_summary$match),2)` for population-to-sample, lowest $\kappa$ = `r round(min(reli_summary$kappa),2)` for ignore-visible-food).
 
 ## Data collection {#data-collection}
 
-One time point meant running all tasks with all participants. Within each time point, the tasks were organized in three sessions (see Supplementary Figure \@ref(fig:setup)). Session 1 included the population-to-sample and logical-reasoning tasks, session 2 the communicative-cues and ignore-visible-food tasks and session 3 the self-ordered-search and attention-following tasks.
+One time point meant running all tasks with all participants. Within each time point, the tasks were organized in three sessions (see Supplementary Figure \@ref(fig:setup)). Session 1 included the population-to-sample and probabilistic-reasoning tasks, session 2 the communicative-cues and ignore-visible-food tasks and session 3 the self-ordered-search and attention-following tasks.
 
 The order of tasks was the same for all subjects. So was the positioning of food items within each task. The counterbalancing can be found in the coding sheets in the online repository in `documentation/`. This exact procedure was repeated at each time point so that the results would be comparable across participants and time points. The three sessions were usually spread out across three adjacent days. For the larger chimpanzee group, they were spread out across six days, but so that each individual completed the tasks within thre days (a.i. 50% of the group where tester in the first three days, the other half in the last three days).
 
@@ -595,7 +600,7 @@ ggplot(.,aes(y = mean, x = factor(time_point), col = subject)) +
   theme(panel.border = element_rect(colour = "black", fill=NA, size = .5))
 ```
 
-We conducted proximity scans for all groups in the early afternoon on every workday (Monday to Friday)[*Nico: check if this is roughly correct*]. For each individual, we recorded which individuals were within arms reach. Research assistants used a tablet to record their observations with the behavioral coding software ZooMonitor [@wark2019monitoring]. Given the variable intervals between time points and constraints due to the availability of personnel, we did not have the same number of scans for each time point and species. On average, there were `r round(mean(srm_model_data$n),2)` scans per subject and time point (range: `r range(srm_model_data$n)[1]` - `r range(srm_model_data$n)[2]`).
+We conducted proximity scans for all groups in the early afternoon on every workday (Monday to Friday). For each individual, we recorded which individuals were within arms reach. Research assistants used a tablet to record their observations with the behavioral coding software ZooMonitor [@wark2019monitoring]. Given the variable intervals between time points and constraints due to the availability of personnel, we did not have the same number of scans for each time point and species. On average, there were `r round(mean(srm_model_data$n),2)` scans per subject and time point (range: `r range(srm_model_data$n)[1]` - `r range(srm_model_data$n)[2]`).
 
 To derive individual specific estimates of sociality for each time point, we fit a variant of a Social Relations Model [@snijders1999social] to the proximity data. These models allow estimating an individual specific sociality index while accounting for the dyadic nature of social interaction. Social relations models usually deal with directed behaviors (e.g. individual *i* is grooming individual *j*). Because the behavior we observed was symmetric, we cannot differentiate between the actor and receiver. @Kajokaite2020 suggested to speak of a Multiple Membership Relations Model [see also @leckie2019multiple] in such a context, which simply estimates how likely an individual is to be observed in proximity to another individual.
 
@@ -786,11 +791,9 @@ Our second question was, which predictors explain variability in cognitive perfo
 
 In the present analyses we were interested in estimating the stability of performances in a given task across time as well as the association between performances across different tasks. To separate components of random fluctuation (measurement error) from systematic differences in performance across time, we used Structural equation models (SEM). SEMs can be used to model relations between latent variables (constructs) which are estimated based on several observed variables.
 
-*[Jana: following paragraph to be updated to include LST model with variable means]* We used latent state-trait models to separate traits (stable over time) from state residuals (time varying). In the present context, one can think of a trait as a stable psychological ability (e.g. ability to make causal inferences) and state residuals as time-specific deviations from these traits due to variable psychological conditions (e.g. variations in performance due to being attentive or inattentive). Variation in performance on a given time point can then be partitioned into variance due to the trait, variance due to the situation or individual-situation interactions, and measurement error. Because the latent variables are estimated on multiple indicators (here: test halves), they are assumed to be measurement-error free [@steyer1992states; @steyer2015theory; @geiser2020longitudinal]. Next we describe the model construction process in more detail.
+We used latent state-trait models to separate traits (stable over time) from state residual variables (time varying). In the present context, one can think of a trait as a stable psychological ability (e.g. ability to make causal inferences) and state residuals as time-specific deviations of the time-specific true score from these traits due to variable psychological conditions (e.g. variations in performance due to being attentive or inattentive). Variation in performance on a given time point can then be partitioned into variance due to the trait, variance due to the situation or individual-situation interactions, and measurement error. Because the latent variables are estimated on multiple indicators (here: test halves), they are assumed to be measurement-error free [@steyer1992states; @steyer2015theory; @geiser2020longitudinal]. Next we describe the model construction process in more detail.
 
-At each time point, we observed 12 identical trials per individual per task. We modeled sum scores of the repeated trials (instead of latent ability factors), given that each trial per task was an identical repetition of the same task.
-
-To separate reliable from unreliable variance components and obtain reliability estimates of the resulting sum score variables, we build two sum score variables per task per time point. That is, for each task, two parallel test halves were build, corresponding to performance sum scores of half of the trials of the same time point per task. Trials were alternately assigned to the first and the second test half. For all tasks except self-ordered-search this procedure resulted in two test halves with 7 possible values (0 to 6 correctly solved trials). For self-ordered-search, because one could search in the same location twice on each trial, test halves could maximally assume 13 possible values (0 to 12 errors). 
+At each time point, we observed 12 identical trials per individual per task. We modeled sum scores of the repeated trials, given that each trial per task was an identical repetition of the same task. To separate reliable from unreliable variance components and obtain reliability estimates of the resulting sum score variables, we build two sum score variables per task per time point. That is, for each task, two parallel test halves were build, corresponding to performance sum scores of half of the trials of the same time point per task. Trials were alternately assigned to the first and the second test half. For all tasks except self-ordered-search this procedure resulted in two test halves with 7 possible values (0 to 6 correctly solved trials). For self-ordered-search, because one could search in the same location twice on each trial, test halves could maximally assume 13 possible values (0 to 12 errors). 
 
 We interpreted reliability estimates in the following way: low < 0.5, moderate = 0.6, acceptable = .7, good = .8 and high = .9. Please note that these estimates are for test-halves and the reliability of the full test would be higher.
 
@@ -800,11 +803,9 @@ For model parsimony, to improve estimation accuracy, and in order to test for la
 
 ### Models and coefficients
 
-For each task, we constructed three different models which increased in complexity. We started with a latent state (LS) model, which estimates a latent state for each time point based on the two test halves. Robustness of task-level performance can be assessed by comparing latent state means across time points. Stability of individual differences can be assessed by correlating latent state variables across different time points.
+For each task, we constructed two models. We started with a latent state (LS) model, which estimates a latent state for each time point based on the two test halves. Mean change in task-level performance can be assessed by comparing latent state means across time points. Stability of individual differences can be assessed by correlating latent state variables across different time points.
 
-Second, we fit a latent state-trait (LST) model. In LST models, true inter-individual differences are decomposed into a latent trait variable and time-specific deviations of the true score from the latent trait (state residual variable). In the following LST models, we assumed stable latent trait variables across time (no trait change). The model allowed us to partition the true variance in performance into stable (trait) and variable (state residual) components. Assuming a stable latent trait variable, the LST model is more restrictive than the LS model with respect to the implied covariance matrix, as correlations between true scores are not freely estimated across time points but assumed to be the same for different time lags.
-
-*[Jana: quick explanation of this model]* Third, we fit LST models with varying means ... 
+Second, we fit a latent state-trait (LST) model. In LST models, true inter-individual differences are decomposed into a latent trait variable and time-specific deviations of the true score from the latent trait (state residual variable). Usually, LST models assume stable latent trait variables across time (no trait change). After inspecting the data, we relaxed this assumption to account for the mean change in performance over time. Thus, we fitted LST models with varying intercept parameters over time. These intercept parameters for the time-specific true scores correspond to the average performance levels. Note that there is one intercept per time point, while the threshold parameters are set equal across test halves and time points. Thereby, we allowed for mean change in performance across time, which does not follow a pre-specified functional form. This model allowed us to partition the true variance in performance into stable (trait) and variable (state residual) components.
 
 The following sections give a mathematical description of the different models and the parameters in them.
 
@@ -919,7 +920,7 @@ node[align=center,below,yshift= 0mm, pos=0.5]
 
 ```
 
-#### Latent state-trait (LST) models
+#### Latent state-trait (LST) models with varying means
 
 In LST models, the latent state variables $S_{it}$ are further decomposed into a latent trait variable $T_{it}$ and a latent state residual variable $\zeta_{it}$. The latent trait variables $T_{it}$ are time-specific dispositions, that is, trait scores capture the expected value of the latent state (i.e., true score) variable for an individual at time $t$ across all possible situations the individual might experience at time $t$ [@eid2017definition; @steyer2015theory]. The state residual variables $\zeta_{it}$ capture the deviation of a momentary state from the time-specific disposition $T_{it}$. In the following models, we assume that latent traits are stable across time. Additionally assuming common latent trait and state residual variables across the two test halves, results in the following measurement equation for parcel $i$ at time point $t$:
 
@@ -989,7 +990,18 @@ Here, $T$ is a stable (time-invariant) latent trait variable, capturing stable i
 
 ```
 
-As noted above, we assume strict factorial (measurement) invariance. Additionally, for reasons of parsimony, we assume that the variances of the state residual variances are invariant across time. As a consequence, the specified LST model corresponds to a multilevel model with a latent trait factor at the between-level (person-level) and a latent state residual factor at the within-level (time-specific) level.
+
+To allow for mean change across time within the LST model, we introduced an additional intercept parameter, with 
+
+```{=tex}
+\begin{equation}
+Y^*_{it}= \alpha_t + T + \zeta_t + \epsilon_{it}
+\end{equation}
+```
+
+where $\alpha_1=0$ and $\mathbf{E}(T)=\mathbf{E}(\zeta_t)=\mathbf{E}(\epsilon{it})=0$, and threshold parameters are set invariant across time and test halves.
+
+As noted above, we assume strict factorial (measurement) invariance. Additionally, for reasons of parsimony, we assume that the variances of the state residual variables are invariant across time. As a consequence, the specified LST model corresponds to a multilevel model with a latent trait factor at the between-level (person-level) and a latent state residual factor at the within-level (time-specific) level.
 
 The following variance components can be computed for the presented LST model.
 
@@ -1013,20 +1025,13 @@ OS(Y^*_{it})=1-Con(Y^*_{it}) = \frac{Var(\zeta_t)}{Var(T)+Var(\zeta_t)}
 ```
 As state residual variances $Var(\zeta_t)$ were set equal across time, $Con(Y^*_{it})$ and $OS(Y^*_{it})$ are constant across time (as well as across item parcels $i$).
 
-#### Latent state-trait (LST) models with varying means
-
-*[Jana: flesh out this model]*
-
-
 #### Correlations between tasks
 
-*[Jana: Description of how the values for correlations between tasks were computed]*
+Correlations between the the different tasks were estimated for the latent traits, that is, with respect to measurement-error free time-stable individual abilities. As the estimation of models combining several of the tasks runs into estimation problems due to item sparseness in the large number of categorical indicators (test halves times time points times tasks), we chose to estimate the correlations in a two-step procedure. To this end, we ran the LST models with varying means, as described above, per task and saved 50 plausible values for the latent trait variables per individual from the posterior distribution. Plausible values can be considered as imputed values for latent variables in the context of MCMC estimation [@asparouhov2010bayesian]. These plausible values were then merged for the different tasks and analyzed as multiple imputed datasets, that is, by using Rubin’s method [-@rubin1987multiple] for pooling the results from the imputations, obtaining a mean and a respective standard error for the correlation coefficient. All analyses were run in Mplus 8.10 [@muthen1998mplus] using the plausible value estimation and multiple imputation features.
 
 ### Estimation {#estimation}
 
-*[Jana: quick check if this is still accurate]*
-
-Models were estimated with MPlus version 8.4 [@muthen1998mplus], using Bayesian Markov-Chain Monte-Carlo sampling, with the Mplus default priors (see simulation studies in the [appendix](#appendix)). Using inverse gamma priors `IG(0.001, 0.001)` for LST models did not substantially change the parameter estimates (see simulation study). Therefore, only the results using the MPlus default priors are reported. We used two chains with a minimum of 10,000 iterations per chain, with a thinning of 10 (corresponds to a minimum of 100,000 drawn samples per chain of which every 10th is used for the construction of the posterior distribution). The first half of each chain is discarded as burn-in. Convergence was assumed and estimation stopped when the Potential Scale Reduction (PSR) factor was well below a threshold of 1.01 for the first time after the minimum number of iterations was reached. Model syntax can be accessed by locating the respective model in the folder `writing/supplement/saves/` in the GitHub repository and opening the `.out` file using a text editor.
+Models were estimated with MPlus version 8.10 [@muthen1998mplus], using Bayesian Markov-Chain Monte-Carlo sampling, with the Mplus default priors [see simulation studies in the supplementary material of @bohn2023great]. Using inverse gamma priors `IG(0.001, 0.001)` for LST models did not substantially change the parameter estimates (see simulation study). Therefore, only the results using the MPlus default priors are reported. We used two chains with a minimum of 20,000 iterations per chain, with a thinning of 10 (corresponds to a minimum of 200,000 drawn samples per chain of which every 10th is used for the construction of the posterior distribution). The first half of each chain is discarded as burn-in. Convergence was assumed and estimation stopped when the Potential Scale Reduction (PSR) factor was well below a threshold of 1.01 for the first time after the minimum number of iterations was reached. Model syntax can be accessed by locating the respective model in the folder `outputs/` in the GitHub repository and opening the `.out` file using a text editor.
 
 Model fit was evaluated by computing Posterior Predicted P-values (PPP). PPP is the probability that the newly generated data are more extreme than the observed data, as measured by a specific test statistic or discrepancy function, in this case the chi-square fit function (that is, the likelihood ratio test between the specified structural equation model and an unrestricted mean and variance covariance model), see @asparouhov2010bayesian. The PPP is computed via the following steps: For a given MCMC iteration, a new data set is generated based on the model and the parameters of that iteration. Then the likelihood ratio chi-square test is applied to the real data as well as the newly generated data set to compute a fit index. The indices for the data and the generated data are then compared in size. If the value for the data is smaller, it is scored as 1 and if not, as 0. Averaging across these scores for the different iterations yields the PPP. Thus, values around .5 suggest a good model fit (no systematic difference between real and generated data) and very high and very low values suggest a poor model fit and / or model misspecification. In addition, we report the 95% CI of the difference between predicted and observed chi-square values, which should be centered around 0 for a good model fit.
 
@@ -1059,8 +1064,6 @@ Continuous predictors were centered when needed. We transformed the `rank` varia
 Following step two, we performed projection prediction for each reference model separately, thus resulting in different rankings of the relevant predictors for each task. We used the R package `projpred` [@projpred202], which implements the aforementioned projection prediction technique. The predictor relevance ranking is measured by the LOO cross-validated mean log-predictive density and root-mean-squared error. To find the optimal submodel size, we inspected -- in line with the authors' recommendations -- summaries and the plotted trajectories of the calculated `elpd` and `rmse`.
 
 The order of relevance for the predictors and the random intercept (together called terms) is created by performing forward search. The term that decreases the KL divergence between the reference model's predictions and the projection's predictions the most goes into the ranking first. Forward search is then repeated $N$ times to get a more robust selection. We chose the final model by inspecting the predictive utility of each projection. To be precise, we chose the model with $p$ terms where $p$ depicts the number of terms at the cutoff between the term that increases the `elpd` and the term that does not increase the `elpd` by any significant amount. In order to get a useful predictor ranking, we manually delayed the random intercept term to the last position in the predictor selection process. The random intercept delay is needed because if the random intercept were not delayed, it would soak up almost all of the variance of the dependent variable before the predictors are allowed to explain some amount of the variance themselves. One could have used the function `suggest_size` as a heuristic decision rule to find the optimal submodel as an alternative to a graphical inspection. However, this is not yet possible due to the delay of the random intercept term.
-
-
 
 # Results
 
@@ -1150,11 +1153,11 @@ rel_plot
 ```
 
 
-## Robustness, Stability and Reliability {#stability-and-reliability}
+## Mean Performance, Stability and Reliability {#stability-and-reliability}
 
-To get an overview of the results, we first visualized the data. Supplementary Figure \@ref(fig:perfplot) shows performance at the different time points. From a task-level perspective, we can say that performance was consistently above chance in the communicative-cues, ignore-visible-food and population-to-sample tasks. For attention-following, this was the case only from time point 7 onward and for logical-reasoning, performance was, if anything, below chance. For the self-ordered-search task, performance was below chance but here lower values reflect better performance (i.e. systematic avoidance of the visible food item). For attention-following, ignore-visible-food, communicative-cues and self-ordered-search there was a steady improvement in performance over time.  
+To get an overview of the results, we first visualized the data. Supplementary Figure \@ref(fig:perfplot) shows performance at the different time points. From a task-level perspective, we can say that performance was consistently above chance in the communicative-cues, ignore-visible-food and population-to-sample tasks. For attention-following, this was the case only from time point 7 onward and for probabilistic-reasoning, performance was, if anything, below chance. For the self-ordered-search task, performance was below chance but here lower values reflect better performance (i.e. systematic avoidance of the visible food item). For attention-following, ignore-visible-food, communicative-cues and self-ordered-search there was a steady improvement in performance over time.  
 
-For a first glimpse on the stability of individual differences, we correlated performance at the different time points for each task (all possible combinations of time points). Supplementary Figure \@ref(fig:relplot) visualizes these re-test correlation coefficients against the temporal distance between time points. Correlations between time points were exclusively larger than zero for direct communicative-cues, population-to-sample and self-ordered-search. For attention-following, ignore-visible-food and logical-reasoning some correlations were negative. For all tasks, correlations between time points were lower for time points that were further apart [see also @uher2011individual]. However, these re-test correlations confound measurement precision (reliability) and stability of individual differences. That is, low correlations could reflect high measurement error or a lack of stability of individual differences. We tease these components apart in the SEM models reported below. 
+For a first glimpse on the stability of individual differences, we correlated performance at the different time points for each task (all possible combinations of time points). Supplementary Figure \@ref(fig:relplot) visualizes these re-test correlation coefficients against the temporal distance between time points. Correlations between time points were exclusively larger than zero for direct communicative-cues, population-to-sample and self-ordered-search. For attention-following, ignore-visible-food and probabilistic-reasoning some correlations were negative. For all tasks, correlations between time points were lower for time points that were further apart [see also @uher2011individual]. However, these re-test correlations confound measurement precision (reliability) and stability of individual differences. That is, low correlations could reflect high measurement error or a lack of stability of individual differences. We tease these components apart in the SEM models reported below. 
 
 Next, we report the SEM results for the different tasks and the relations between them. All models showed acceptable fit indices (see Supplementary Table \@ref(tab:semt)). The threshold parameters for each model are shown in Supplementary Table \@ref(tab:thresht).
 
@@ -1170,12 +1173,12 @@ lsv <- readModels("../outputs/laac2_LS_food.out")
 
 # latent state trait models fixed  means
 
-lstaf <- readModels("../outputs/laac2_LST_attent_equalSvar.out")
-lstcf <- readModels("../outputs/laac2_LST_comm_equal_Svar.out")
-lstpf <- readModels("../outputs/laac2_LST_population_equalSvar.out")
-lstrf <- readModels("../outputs/laac2_LST_reason_equalSvar.out")
-lstif <- readModels("../outputs/laac2_LST_search_2_equalSvar.out")
-lstvf <- readModels("../outputs/laac2_LST_food_equalSvar.out")
+# lstaf <- readModels("../outputs/laac2_LST_attent_equalSvar.out")
+# lstcf <- readModels("../outputs/laac2_LST_comm_equal_Svar.out")
+# lstpf <- readModels("../outputs/laac2_LST_population_equalSvar.out")
+# lstrf <- readModels("../outputs/laac2_LST_reason_equalSvar.out")
+# lstif <- readModels("../outputs/laac2_LST_search_2_equalSvar.out")
+# lstvf <- readModels("../outputs/laac2_LST_food_equalSvar.out")
 
 # latent state trait models varying means
 
@@ -1192,33 +1195,46 @@ lstvv <- readModels("../outputs/laac2_LST_food_equalSvar_means.out")
 ```{r}
 mot <- bind_rows(
   tibble(
-  Task = c("Attention-following", "", ""),
-  Model = c("LSM","LSTM", "LSTM-V"),
+  Task = c("Attention-following", "",
+           #"",
+           ""),
+  Model = c("LSM",
+            #"LSTM", 
+            "LSTM-V","LSTM-V (time point 7 onwards)"),
   PPP = c(lsa$summaries$PostPred_PValue,
-          lstaf$summaries$PostPred_PValue,
-          lstav$summaries$PostPred_PValue),
+          #lstaf$summaries$PostPred_PValue,
+          lstav$summaries$PostPred_PValue,
+          lstav_short$summaries$PostPred_PValue),
   `Chi 95% CI` = c(
     
     paste(
       lsa$summaries$ObsRepChiSqDiff_95CI_LB%>%round(2)%>%format(nsmall =2),
       lsa$summaries$ObsRepChiSqDiff_95CI_UB%>%round(2)%>%format(nsmall =2), sep = " ; "),
     
-    paste(
-      lstaf$summaries$ObsRepChiSqDiff_95CI_LB%>%round(2)%>%format(nsmall =2),
-      lstaf$summaries$ObsRepChiSqDiff_95CI_UB%>%round(2)%>%format(nsmall =2), sep = " ; "),
+    # paste(
+    #   lstaf$summaries$ObsRepChiSqDiff_95CI_LB%>%round(2)%>%format(nsmall =2),
+    #   lstaf$summaries$ObsRepChiSqDiff_95CI_UB%>%round(2)%>%format(nsmall =2), sep = " ; "),
     
     paste(
       lstav$summaries$ObsRepChiSqDiff_95CI_LB%>%round(2)%>%format(nsmall =2),
-      lstav$summaries$ObsRepChiSqDiff_95CI_UB%>%round(2)%>%format(nsmall =2), sep = " ; ")
+      lstav$summaries$ObsRepChiSqDiff_95CI_UB%>%round(2)%>%format(nsmall =2), sep = " ; "),
+    
+        paste(
+      lstav_short$summaries$ObsRepChiSqDiff_95CI_LB%>%round(2)%>%format(nsmall =2),
+      lstav_short$summaries$ObsRepChiSqDiff_95CI_UB%>%round(2)%>%format(nsmall =2), sep = " ; ")
     
     )),
   
   
   tibble(
-  Task = c("Communicative-cues", "", ""),
-  Model = c("LSM","LSTM", "LSTM-V"),
+  Task = c("Communicative-cues",
+           #"",
+           ""),
+  Model = c("LSM",
+            #"LSTM", 
+            "LSTM-V"),
   PPP = c(lsc$summaries$PostPred_PValue,
-          lstcf$summaries$PostPred_PValue,
+          #lstcf$summaries$PostPred_PValue,
           lstcv$summaries$PostPred_PValue),
   `Chi 95% CI` = c(
     
@@ -1226,9 +1242,9 @@ mot <- bind_rows(
       lsc$summaries$ObsRepChiSqDiff_95CI_LB%>%round(2)%>%format(nsmall =2),
       lsc$summaries$ObsRepChiSqDiff_95CI_UB%>%round(2)%>%format(nsmall =2), sep = " ; "),
     
-    paste(
-      lstcf$summaries$ObsRepChiSqDiff_95CI_LB%>%round(2)%>%format(nsmall =2),
-      lstcf$summaries$ObsRepChiSqDiff_95CI_UB%>%round(2)%>%format(nsmall =2), sep = " ; "),
+    # paste(
+    #   lstcf$summaries$ObsRepChiSqDiff_95CI_LB%>%round(2)%>%format(nsmall =2),
+    #   lstcf$summaries$ObsRepChiSqDiff_95CI_UB%>%round(2)%>%format(nsmall =2), sep = " ; "),
     
     paste(
       lstcv$summaries$ObsRepChiSqDiff_95CI_LB%>%round(2)%>%format(nsmall =2),
@@ -1238,10 +1254,14 @@ mot <- bind_rows(
   
   
   tibble(
-  Task = c("Population-to-sample", "", ""),
-  Model = c("LSM","LSTM", "LSTM-V"),
+  Task = c("Population-to-sample", 
+           #"",
+           ""),
+  Model = c("LSM",
+           # "LSTM", 
+            "LSTM-V"),
   PPP = c(lsp$summaries$PostPred_PValue,
-          lstpf$summaries$PostPred_PValue,
+          #lstpf$summaries$PostPred_PValue,
           lstpv$summaries$PostPred_PValue),
   `Chi 95% CI` = c(
     
@@ -1249,9 +1269,9 @@ mot <- bind_rows(
       lsp$summaries$ObsRepChiSqDiff_95CI_LB%>%round(2)%>%format(nsmall =2),
       lsp$summaries$ObsRepChiSqDiff_95CI_UB%>%round(2)%>%format(nsmall =2), sep = " ; "),
     
-    paste(
-      lstpf$summaries$ObsRepChiSqDiff_95CI_LB%>%round(2)%>%format(nsmall =2),
-      lstpf$summaries$ObsRepChiSqDiff_95CI_UB%>%round(2)%>%format(nsmall =2), sep = " ; "),
+    # paste(
+    #   lstpf$summaries$ObsRepChiSqDiff_95CI_LB%>%round(2)%>%format(nsmall =2),
+    #   lstpf$summaries$ObsRepChiSqDiff_95CI_UB%>%round(2)%>%format(nsmall =2), sep = " ; "),
     
     paste(
       lstpv$summaries$ObsRepChiSqDiff_95CI_LB%>%round(2)%>%format(nsmall =2),
@@ -1261,10 +1281,14 @@ mot <- bind_rows(
   
   
   tibble(
-  Task = c("Logical-reasoning", "", ""),
-  Model = c("LSM","LSTM", "LSTM-V"),
+  Task = c("Probabilistic-reasoning", 
+           #"",
+           ""),
+  Model = c("LSM",
+           # "LSTM", 
+            "LSTM-V"),
   PPP = c(lsr$summaries$PostPred_PValue,
-          lstrf$summaries$PostPred_PValue,
+          #lstrf$summaries$PostPred_PValue,
           lstrv$summaries$PostPred_PValue),
   `Chi 95% CI` = c(
     
@@ -1272,9 +1296,9 @@ mot <- bind_rows(
       lsr$summaries$ObsRepChiSqDiff_95CI_LB%>%round(2)%>%format(nsmall =2),
       lsr$summaries$ObsRepChiSqDiff_95CI_UB%>%round(2)%>%format(nsmall =2), sep = " ; "),
     
-    paste(
-      lstrf$summaries$ObsRepChiSqDiff_95CI_LB%>%round(2)%>%format(nsmall =2),
-      lstrf$summaries$ObsRepChiSqDiff_95CI_UB%>%round(2)%>%format(nsmall =2), sep = " ; "),
+    # paste(
+    #   lstrf$summaries$ObsRepChiSqDiff_95CI_LB%>%round(2)%>%format(nsmall =2),
+    #   lstrf$summaries$ObsRepChiSqDiff_95CI_UB%>%round(2)%>%format(nsmall =2), sep = " ; "),
     
     paste(
       lstrv$summaries$ObsRepChiSqDiff_95CI_LB%>%round(2)%>%format(nsmall =2),
@@ -1284,10 +1308,14 @@ mot <- bind_rows(
   
   
   tibble(
-  Task = c("Self-ordered-search", "", ""),
-  Model = c("LSM","LSTM", "LSTM-V"),
+  Task = c("Self-ordered-search", 
+           #"",
+           ""),
+  Model = c("LSM",
+            #"LSTM",
+            "LSTM-V"),
   PPP = c(lsi$summaries$PostPred_PValue,
-          lstif$summaries$PostPred_PValue,
+          #lstif$summaries$PostPred_PValue,
           lstiv$summaries$PostPred_PValue),
   `Chi 95% CI` = c(
     
@@ -1295,9 +1323,9 @@ mot <- bind_rows(
       lsi$summaries$ObsRepChiSqDiff_95CI_LB%>%round(2)%>%format(nsmall =2),
       lsi$summaries$ObsRepChiSqDiff_95CI_UB%>%round(2)%>%format(nsmall =2), sep = " ; "),
     
-    paste(
-      lstif$summaries$ObsRepChiSqDiff_95CI_LB%>%round(2)%>%format(nsmall =2),
-      lstif$summaries$ObsRepChiSqDiff_95CI_UB%>%round(2)%>%format(nsmall =2), sep = " ; "),
+    # paste(
+    #   lstif$summaries$ObsRepChiSqDiff_95CI_LB%>%round(2)%>%format(nsmall =2),
+    #   lstif$summaries$ObsRepChiSqDiff_95CI_UB%>%round(2)%>%format(nsmall =2), sep = " ; "),
     
     paste(
       lstiv$summaries$ObsRepChiSqDiff_95CI_LB%>%round(2)%>%format(nsmall =2),
@@ -1307,10 +1335,14 @@ mot <- bind_rows(
   
   
   tibble(
-  Task = c("Ignore-visible-food", "", ""),
-  Model = c("LSM","LSTM", "LSTM-V"),
+  Task = c("Ignore-visible-food", 
+           #"",
+           ""),
+  Model = c("LSM",
+            #"LSTM",
+            "LSTM-V"),
   PPP = c(lsv$summaries$PostPred_PValue,
-          lstvf$summaries$PostPred_PValue,
+          #lstvf$summaries$PostPred_PValue,
           lstvv$summaries$PostPred_PValue),
   `Chi 95% CI` = c(
     
@@ -1318,9 +1350,9 @@ mot <- bind_rows(
       lsv$summaries$ObsRepChiSqDiff_95CI_LB%>%round(2)%>%format(nsmall =2),
       lsv$summaries$ObsRepChiSqDiff_95CI_UB%>%round(2)%>%format(nsmall =2), sep = " ; "),
     
-    paste(
-      lstvf$summaries$ObsRepChiSqDiff_95CI_LB%>%round(2)%>%format(nsmall =2),
-      lstvf$summaries$ObsRepChiSqDiff_95CI_UB%>%round(2)%>%format(nsmall =2), sep = " ; "),
+    # paste(
+    #   lstvf$summaries$ObsRepChiSqDiff_95CI_LB%>%round(2)%>%format(nsmall =2),
+    #   lstvf$summaries$ObsRepChiSqDiff_95CI_UB%>%round(2)%>%format(nsmall =2), sep = " ; "),
     
     paste(
       lstvv$summaries$ObsRepChiSqDiff_95CI_LB%>%round(2)%>%format(nsmall =2),
@@ -1333,7 +1365,9 @@ mot <- bind_rows(
 ```{r semt}
 kable(mot, align = c("l", "l", "c", "c"), caption = "Model fit indices", booktabs=TRUE)%>%
 kable_classic(full_width = F)%>%
-      footnote(c("LSM = Latent state model", "LSTM = Latent state-trait model","LSTM-V = Latent state-trait model with varying means", "PPP = Posterior predictive p-value. Cut-off values (two-tailed): 0.025 and 0.975", "Chi 95% CI = 95%CI of difference between predicted and observed chi-square values"))
+      footnote(c("LSM = Latent state model", 
+                # "LSTM = Latent state-trait model",
+                 "LSTM-V = Latent state-trait model with varying means", "PPP = Posterior predictive p-value. Cut-off values (two-tailed): 0.025 and 0.975", "Chi 95% CI = 95%CI of difference between predicted and observed chi-square values"))
 ```
 
 
@@ -1341,8 +1375,9 @@ kable_classic(full_width = F)%>%
 thresh <- bind_rows(
   bind_rows(
     lsa$parameters$unstandardized%>%mutate(Model = "LSM", Task = "Attention-following"),
-    lstaf$parameters$unstandardized%>%mutate(Model = "LSTM", Task = ""),
+    #lstaf$parameters$unstandardized%>%mutate(Model = "LSTM", Task = ""),
     lstav$parameters$unstandardized%>%mutate(Model = "LSTM-V", Task = ""),
+    lstav_short$parameters$unstandardized%>%mutate(Model = "LSTM-V (time point 7 onwards)", Task = ""),
     )%>%
     filter(paramHeader=="Thresholds")%>%
     select(Task, Model, param, est)%>%
@@ -1354,7 +1389,7 @@ thresh <- bind_rows(
   
    bind_rows(
     lsc$parameters$unstandardized%>%mutate(Model = "LSM", Task = "Communicative-cues"),
-    lstcf$parameters$unstandardized%>%mutate(Model = "LSTM", Task = ""),
+    #lstcf$parameters$unstandardized%>%mutate(Model = "LSTM", Task = ""),
     lstcv$parameters$unstandardized%>%mutate(Model = "LSTM-V", Task = ""),
     )%>%
     filter(paramHeader=="Thresholds")%>%
@@ -1367,7 +1402,7 @@ thresh <- bind_rows(
   
   bind_rows(
     lsp$parameters$unstandardized%>%mutate(Model = "LSM", Task = "Population-to-sample"),
-    lstpf$parameters$unstandardized%>%mutate(Model = "LSTM", Task = ""),
+    #lstpf$parameters$unstandardized%>%mutate(Model = "LSTM", Task = ""),
     lstpv$parameters$unstandardized%>%mutate(Model = "LSTM-V", Task = ""),
     )%>%
     filter(paramHeader=="Thresholds")%>%
@@ -1379,8 +1414,8 @@ thresh <- bind_rows(
     pivot_wider(names_from = Threshold, values_from = est),
   
   bind_rows(
-    lsr$parameters$unstandardized%>%mutate(Model = "LSM", Task = "Logical-reasoning"),
-    lstrf$parameters$unstandardized%>%mutate(Model = "LSTM", Task = ""),
+    lsr$parameters$unstandardized%>%mutate(Model = "LSM", Task = "Probabilistic-reasoning"),
+    #lstrf$parameters$unstandardized%>%mutate(Model = "LSTM", Task = ""),
     lstrv$parameters$unstandardized%>%mutate(Model = "LSTM-V", Task = ""),
     )%>%
     filter(paramHeader=="Thresholds")%>%
@@ -1393,7 +1428,7 @@ thresh <- bind_rows(
   
   bind_rows(
     lsi$parameters$unstandardized%>%mutate(Model = "LSM", Task = "Self-ordered-search"),
-    lstif$parameters$unstandardized%>%mutate(Model = "LSTM", Task = ""),
+    #lstif$parameters$unstandardized%>%mutate(Model = "LSTM", Task = ""),
     lstiv$parameters$unstandardized%>%mutate(Model = "LSTM-V", Task = ""),
     )%>%
     filter(paramHeader=="Thresholds")%>%
@@ -1406,7 +1441,7 @@ thresh <- bind_rows(
   
   bind_rows(
     lsv$parameters$unstandardized%>%mutate(Model = "LSM", Task = "Ignore-visible-food"),
-    lstvf$parameters$unstandardized%>%mutate(Model = "LSTM", Task = ""),
+    #lstvf$parameters$unstandardized%>%mutate(Model = "LSTM", Task = ""),
     lstvv$parameters$unstandardized%>%mutate(Model = "LSTM-V", Task = ""),
     )%>%
     filter(paramHeader=="Thresholds")%>%
@@ -1426,7 +1461,9 @@ thresh <- bind_rows(
 ```{r thresht}
 kable(thresh, caption = "Threshold parameters", align = c("l", "l", "c", "c", "c", "c", "c"), booktabs=TRUE)%>%
 kable_classic(full_width = F)%>%
-      footnote(c("LSM = Latent state model", "LSTM = Latent state-trait model","LSTM-V = Latent state-trait model with varying means", "T1-5 = Threshold parameters for response categories"))
+      footnote(c("LSM = Latent state model", 
+                 #"LSTM = Latent state-trait model",
+                 "LSTM-V = Latent state-trait model with varying means", "T1-5 = Threshold parameters for response categories"))
 ```
 
 
@@ -1450,7 +1487,7 @@ filter(paramHeader == "Means")%>%
   mutate(task = recode(task,
        "pop-to-sample" = "Population-to-sample",
        "communication" = "Communicative-cues",
-       "reasoning" = "Logical-reasoning",
+       "reasoning" = "Probabilistic-reasoning",
        "visible-food" = "Ignore-visible-food",
        "inhibit-searched" = "Self-ordered-search",
        "attention" = "Attention-following"
@@ -1475,7 +1512,7 @@ plsr <- bind_rows(
   mutate(task = recode(task,
        "pop-to-sample" = "Population-to-sample",
        "communication" = "Communicative-cues",
-       "reasoning" = "Logical-reasoning",
+       "reasoning" = "Probabilistic-reasoning",
        "visible-food" = "Ignore-visible-food",
        "inhibit-searched" = "Self-ordered-search",
        "attention" = "Attention-following"
@@ -1546,48 +1583,46 @@ plot_grid(lsm, lsrel, nrow = 2, labels = c("A", "B"), align = "v",axis = "l", re
 ```
 
 ```{r}
-lstf_con_rel <- bind_rows(
-  lstcf$parameters$unstandardized%>%
-  filter(grepl("New.Additional.Para",paramHeader))%>%
-  select(param, est, lower_2.5ci, upper_2.5ci)%>%
-  mutate(task = "communication"),
-  
-  
-  lstvf$parameters$unstandardized%>%
-  filter(grepl("New.Additional.Para",paramHeader))%>%
-  select(param, est, lower_2.5ci, upper_2.5ci)%>%
-  mutate(task = "visible-food"),
-  
-  lstrf$parameters$unstandardized%>%
-  filter(grepl("New.Additional.Para",paramHeader))%>%
-  select(param, est, lower_2.5ci, upper_2.5ci)%>%
-    mutate(task = "reasoning"),
-  
-  
-  lstpf$parameters$unstandardized%>%
-  filter(grepl("New.Additional.Para",paramHeader))%>%
-  select(param, est, lower_2.5ci, upper_2.5ci)%>%
-    mutate(task = "pop-to-sample"),
-  
-  
-  lstif$parameters$unstandardized%>%
-  filter(grepl("New.Additional.Para",paramHeader))%>%
-  select(param, est, lower_2.5ci, upper_2.5ci)%>%
-    mutate(task = "inhibit-searched"),
-  
-  lstaf$parameters$unstandardized%>%
-  filter(grepl("New.Additional.Para",paramHeader))%>%
-  select(param, est, lower_2.5ci, upper_2.5ci)%>%
-    mutate(task = "attention"),
-)%>%
-  mutate(param = recode(param, 
-                        "CON" = "consistency",
-                        "REL" = "reliability",
-                        "OCC" = "occasion-specificity"))%>%
-  dplyr::rename(value = est)
+# lstf_con_rel <- bind_rows(
+#   lstcf$parameters$unstandardized%>%
+#   filter(grepl("New.Additional.Para",paramHeader))%>%
+#   select(param, est, lower_2.5ci, upper_2.5ci)%>%
+#   mutate(task = "communication"),
+#   
+#   
+#   lstvf$parameters$unstandardized%>%
+#   filter(grepl("New.Additional.Para",paramHeader))%>%
+#   select(param, est, lower_2.5ci, upper_2.5ci)%>%
+#   mutate(task = "visible-food"),
+#   
+#   lstrf$parameters$unstandardized%>%
+#   filter(grepl("New.Additional.Para",paramHeader))%>%
+#   select(param, est, lower_2.5ci, upper_2.5ci)%>%
+#     mutate(task = "reasoning"),
+#   
+#   
+#   lstpf$parameters$unstandardized%>%
+#   filter(grepl("New.Additional.Para",paramHeader))%>%
+#   select(param, est, lower_2.5ci, upper_2.5ci)%>%
+#     mutate(task = "pop-to-sample"),
+#   
+#   
+#   lstif$parameters$unstandardized%>%
+#   filter(grepl("New.Additional.Para",paramHeader))%>%
+#   select(param, est, lower_2.5ci, upper_2.5ci)%>%
+#     mutate(task = "inhibit-searched"),
+#   
+#   lstaf$parameters$unstandardized%>%
+#   filter(grepl("New.Additional.Para",paramHeader))%>%
+#   select(param, est, lower_2.5ci, upper_2.5ci)%>%
+#     mutate(task = "attention"),
+# )%>%
+#   mutate(param = recode(param, 
+#                         "CON" = "consistency",
+#                         "REL" = "reliability",
+#                         "OCC" = "occasion-specificity"))%>%
+#   dplyr::rename(value = est)
 ```
-
-*[Jana: The way we compute consistency does not give a confidence interval for the LST model with fixed or varying means. Any chance we can get this? In the last paper we had this at least for the model with the fixed means]*
 
 ```{r}
 lstv_con_rel <- bind_rows(
@@ -1623,6 +1658,11 @@ lstv_con_rel <- bind_rows(
   filter(grepl("New.Additional.Para",paramHeader))%>%
   select(param, est, lower_2.5ci, upper_2.5ci)%>%
     mutate(task = "attention"),
+  
+  lstav_short$parameters$unstandardized%>%
+  filter(grepl("New.Additional.Para",paramHeader))%>%
+  select(param, est, lower_2.5ci, upper_2.5ci)%>%
+    mutate(task = "attention_tp7onward"),
 )%>%
   mutate(param = recode(param, 
                         "CON" = "consistency",
@@ -1634,29 +1674,29 @@ lstv_con_rel <- bind_rows(
 
 ```{r}
 lst_overview <- bind_rows(
-lstf_con_rel%>%mutate(type = "fixed means"),
+#lstf_con_rel%>%mutate(type = "fixed means"),
 lstv_con_rel%>%mutate(type = "varying means")
 )
 
 #saveRDS(lst_overview, "../saves/lst_overview.rds")
 ```
 
-
 ```{r}
 plste <- bind_rows(
-lstf_con_rel%>%mutate(type = "fixed means"),
+#lstf_con_rel%>%mutate(type = "fixed means"),
 lstv_con_rel%>%mutate(type = "varying means")
 )%>%
+  filter(task !="attention_tp7onward")%>%
   mutate(task = recode(task,
        "pop-to-sample" = "Population-to-sample",
        "communication" = "Communicative-cues",
-       "reasoning" = "Logical-reasoning",
+       "reasoning" = "Probabilistic-reasoning",
        "visible-food" = "Ignore-visible-food",
        "inhibit-searched" = "Self-ordered-search",
        "attention" = "Attention-following"
   ))%>%
   filter(param != "occasion-specificity")%>%
-  ggplot(aes(x = param, y = value, col = type))+
+  ggplot(aes(x = param, y = value))+
   geom_pointrange(aes(ymin= lower_2.5ci, ymax = upper_2.5ci), position = position_dodge(width = 0.9))+
   theme_few()+
   ylim(0,1)+
@@ -1675,19 +1715,20 @@ lstv_con_rel%>%mutate(type = "varying means")
 
 
 plste2 <- bind_rows(
-lstf_con_rel%>%mutate(type = "fixed means"),
+#lstf_con_rel%>%mutate(type = "fixed means"),
 lstv_con_rel%>%mutate(type = "varying means")
 )%>%
+    filter(task !="attention_tp7onward")%>%
   mutate(task = recode(task,
        "pop-to-sample" = "Population-to-sample",
        "communication" = "Communicative-cues",
-       "reasoning" = "Logical-reasoning",
+       "reasoning" = "Probabilistic-reasoning",
        "visible-food" = "Ignore-visible-food",
        "inhibit-searched" = "Self-ordered-search",
        "attention" = "Attention-following"
   ))%>%
   filter(param != "occasion-specificity")%>%
-  ggplot(aes(x = param, y = value, col = type))+
+  ggplot(aes(x = param, y = value))+
   geom_pointrange(aes(ymin= lower_2.5ci, ymax = upper_2.5ci), position = position_dodge(width = 0.9))+
   theme_few()+
   ylim(0,1)+
@@ -1726,7 +1767,7 @@ cor <- bind_rows(
   mutate(task = recode(task,
        "pop-to-sample" = "Population-to-sample",
        "communication" = "Communicative-cues",
-       "reasoning" = "Logical-reasoning",
+       "reasoning" = "Probabilistic-reasoning",
        "visible-food" = "Ignore-visible-food",
        "inhibit-searched" = "Self-ordered-search",
        "attention" = "Attention-following"
@@ -1787,18 +1828,19 @@ To fit the models, the response categories of 0 or 1 solved trials had to be col
 
 Supplementary Figure \@ref(fig:lseplot) visualizes the latent state means and reliability estimates from the LS model. Reliability was low for earlier time points and increased towards the end of the study. Latent means also slightly increased throughout the study and were significantly different from zero (i.e. time point 1) at time point 9 and 10. Supplementary Figure \@ref(fig:lsplot) gives the correlations between the latent states for the different time points. Correlations between latent states were moderate to low for time points below 7 and substantially higher from then on. Taken together, this pattern suggests substantial re-organization of individual differences that stabilized towards the end of the study. 
 
-In the LST model with fixed means, the consistency coefficient was estimated to be `r round(lst_overview%>%filter(task == "attention", param == "consistency", type == "fixed means")%>%pull(value),2)` which was very similar to the model with variable means (`r round(lst_overview%>%filter(task == "attention", param == "consistency", type == "varying means")%>%pull(value),2)`). This means that more than 90% of true inter-individual differences are attributable to stable (trait) differences between individuals [@Jana: das beißt sich mit dem LS model - hast Du eine Idee warum das so ist?]. Reliability (across time points) was estimated to be low (fixed means: `r round(lst_overview%>%filter(task == "attention", param == "reliability", type == "fixed means")%>%pull(value),2)`; variable means: fixed means: `r round(lst_overview%>%filter(task == "attention", param == "reliability", type == "varying means")%>%pull(value),2)`) (see Supplementary Figure \@ref(fig:lsteplot)). However, when only considering the data from time point 7 and later, reliability was substantially higher (`r round(lstav_short$parameters$unstandardized%>%filter(grepl("New.Additional.Para",paramHeader))%>%filter(param == "REL")%>%pull(est),2)`)
+In the LST model, the consistency coefficient was estimated to be `r round(lst_overview%>%filter(task == "attention", param == "consistency", type == "varying means")%>%pull(value),2)` (95% CI: `r round(lst_overview%>%filter(task == "attention", param == "consistency", type == "varying means")%>%pull(lower_2.5ci),2)` - `r round(lst_overview%>%filter(task == "attention", param == "consistency", type == "varying means")%>%pull(upper_2.5ci),2)`). This result would usually suggest that more than 90% of true inter-individual differences are attributable to stable (trait) differences between individuals. However, this result contradicts the correlations between the latent states reported above, in particular the low correlations for time points 1 - 6. One potential explanation for this discrepancy is that the assumption in the LST model that the state residual variance is the same across all time points is too restrictive. If there was a switch in strategies around time point 7, this might have affected the variance in performance between apes. To account for this possibility, we fit a second LST model only to the data from time point 7 onward. This model provided a good fit to the data (see \@ref(tab:semt)); even better compared to other models. Consistency was estimated to be high (`r round(lst_overview%>%filter(task == "attention_tp7onward", param == "consistency", type == "varying means")%>%pull(value),2)`; 95% CI: `r round(lst_overview%>%filter(task == "attention_tp7onward", param == "consistency", type == "varying means")%>%pull(lower_2.5ci),2)` - `r round(lst_overview%>%filter(task == "attention_tp7onward", param == "consistency", type == "varying means")%>%pull(upper_2.5ci),2)`) in this model, which was in line with the latent sate correlation patterns. 
+
+Reliability (across time points) was estimated to be low (`r round(lst_overview%>%filter(task == "attention", param == "reliability", type == "varying means")%>%pull(value),2)`; 95% CI: `r round(lst_overview%>%filter(task == "attention", param == "reliability", type == "varying means")%>%pull(lower_2.5ci),2)` - `r round(lst_overview%>%filter(task == "attention", param == "reliability", type == "varying means")%>%pull(upper_2.5ci),2)`; see Supplementary Figure \@ref(fig:lsteplot)). However, when only considering the data from time point 7 and later, reliability was substantially higher (`r round(lst_overview%>%filter(task == "attention_tp7onward", param == "reliability", type == "varying means")%>%pull(value),2)`; 95% CI: `r round(lst_overview%>%filter(task == "attention_tp7onward", param == "reliability", type == "varying means")%>%pull(lower_2.5ci),2)` - `r round(lst_overview%>%filter(task == "attention_tp7onward", param == "reliability", type == "varying means")%>%pull(upper_2.5ci),2)`)
 
 Taken together, there was considerable variation both in group- and individual-level performance -- particularly in the earlier time points. Towards the end of the study, group-level performance stabilized on a level above chance (see Supplementary Figure \@ref(fig:perfplot)) and individual-differences also became more stable. Presumably, some individuals changed the way they approached the task half-way through the study -- seeing it initially as a competitive and only later as a cooperative task -- so that systematic individual differences only emerged at later time points. 
-
 
 ### Communicative-cues
 
 The lowest two categories (0 and 1 correctly solved trials per test half) were collapsed due to sparsity. Thresholds could not be set equal for test half 2 at time point 2, due to a different number of observed categories for the respective test half and time-point combination. Latent means can still be compared across time.
 
-The latent state means in the LS model steadily increased over the course of the study (see Supplementary Figure \@ref(fig:lseplot)). Reliability fluctuated around a moderate level (range: `r round(range(plsr$est[plsr$task == "Communicative-cues"]),2)[1]` -- `r round(range(plsr$est[plsr$task == "Communicative-cues"]),2)[2]`). The correlations between latent states for the different time points were nevertheless generally high (Supplementary Figure \@ref(fig:lsplot)). 
+The latent state means in the LS model steadily increased over the course of the study (see Supplementary Figure \@ref(fig:lseplot)). Reliability fluctuated around a moderate level (range: `r round(range(plsr$est[plsr$task == "Communicative-cues"]),2)[1]` -- `r round(range(plsr$est[plsr$task == "Communicative-cues"]),2)[2]`). The correlations between latent states for the different time points were generally high (Supplementary Figure \@ref(fig:lsplot)), indicating realtively stable inter-individual differences in performance across time.
 
-In the LST model with fixed means, the consistency coefficient was estimated to be `r round(lst_overview%>%filter(task == "communication", param == "consistency", type == "fixed means")%>%pull(value),2)` which was somewhat lower compared to the model with variable means (`r round(lst_overview%>%filter(task == "communication", param == "consistency", type == "varying means")%>%pull(value),2)`). This means that ~ 60% to 70% of true inter-individual differences are attributable to stable (trait) differences between individuals. Reliability (across time points) was estimated to be moderate to acceptable (fixed means: `r round(lst_overview%>%filter(task == "communication", param == "reliability", type == "fixed means")%>%pull(value),2)`; variable means: fixed means: `r round(lst_overview%>%filter(task == "communication", param == "reliability", type == "varying means")%>%pull(value),2)`) (see Supplementary Figure \@ref(fig:lsteplot)).
+In the LST model with fixed means, the consistency coefficient was estimated to be `r round(lst_overview%>%filter(task == "communication", param == "consistency", type == "varying means")%>%pull(value),2)` (95% CI: `r round(lst_overview%>%filter(task == "communication", param == "consistency", type == "varying means")%>%pull(lower_2.5ci),2)` - `r round(lst_overview%>%filter(task == "communication", param == "consistency", type == "varying means")%>%pull(upper_2.5ci),2)`). This means that ~ 77% of true inter-individual differences are attributable to stable (trait) differences between individuals. Reliability (across time points) was estimated to be moderate to acceptable (`r round(lst_overview%>%filter(task == "communication", param == "reliability", type == "varying means")%>%pull(value),2)`; 95% CI: `r round(lst_overview%>%filter(task == "communication", param == "reliability", type == "varying means")%>%pull(lower_2.5ci),2)` - `r round(lst_overview%>%filter(task == "communication", param == "reliability", type == "varying means")%>%pull(upper_2.5ci),2)`; see Supplementary Figure \@ref(fig:lsteplot)).
 
 Taken together, while there was a steady increase in group-level performance (see Supplementary Figure \@ref(fig:perfplot)), individual-differences remained fairly stable. This suggests an overall learning effect that was more or less the same across individuals.
 
@@ -1808,17 +1850,17 @@ The lowest two categories (0 and 1 correctly solved trials per test half) were c
 
 In the LS model, the latent state means steadily increased until time point 8 and decreased again for the last two time points. Yet, the latent mean at time point 10 was still significantly different from 0 (i.e. time point 1, see Supplementary Figure \@ref(fig:lseplot)). Note, however, that the absolute level of performance was close to ceiling from time point 6 onward. Reliability fluctuated around a moderate level (range: `r round(range(plsr$est[plsr$task == "Ignore-visible-food"]),2)[1]` -- `r round(range(plsr$est[plsr$task == "Ignore-visible-food"]),2)[2]`). The correlations between latent states for the different time points were high (Supplementary Figure \@ref(fig:lsplot)), with the exception of time point 1, which did not correlate with most of the other time points.
 
-In the LST model with fixed means, the consistency coefficient was estimated to be `r round(lst_overview%>%filter(task == "visible-food", param == "consistency", type == "fixed means")%>%pull(value),2)` which was very similar to the model with variable means (`r round(lst_overview%>%filter(task == "visible-food", param == "consistency", type == "varying means")%>%pull(value),2)`). This means that around 60% of true inter-individual differences are attributable to stable (trait) differences between individuals. Reliability (across time points) was estimated to be moderate (fixed means: `r round(lst_overview%>%filter(task == "visible-food", param == "reliability", type == "fixed means")%>%pull(value),2)`; variable means: `r round(lst_overview%>%filter(task == "visible-food", param == "reliability", type == "varying means")%>%pull(value),2)`) (see Supplementary Figure \@ref(fig:lsteplot)).
+In the LST model, the consistency coefficient was estimated to be `r round(lst_overview%>%filter(task == "visible-food", param == "consistency", type == "varying means")%>%pull(value),2)` (95% CI: `r round(lst_overview%>%filter(task == "visible-food", param == "consistency", type == "varying means")%>%pull(lower_2.5ci),2)` - `r round(lst_overview%>%filter(task == "visible-food", param == "consistency", type == "varying means")%>%pull(upper_2.5ci),2)`). This means that around 64% of true inter-individual differences are attributable to stable (trait) differences between individuals. Reliability (across time points) was estimated to be low to moderate (`r round(lst_overview%>%filter(task == "visible-food", param == "reliability", type == "varying means")%>%pull(value),2)`; 95% CI: `r round(lst_overview%>%filter(task == "visible-food", param == "reliability", type == "varying means")%>%pull(lower_2.5ci),2)` - `r round(lst_overview%>%filter(task == "visible-food", param == "reliability", type == "varying means")%>%pull(upper_2.5ci),2)`; see Supplementary Figure \@ref(fig:lsteplot)).
 
 Taken together, there was a steady increase in group-level performance (see Supplementary Figure \@ref(fig:perfplot)) over time. Except of time point 1, individual-differences were fairly stable, suggesting a a fairly consistent learning effect across individuals from time point 2 onward.
 
-### Logical-reasoning
+### Probabilistic-reasoning
 
 The lowest two (0 and 1 correctly solved trials per test half) as well as the highest two categories (5 and 6 solved trials) were collapsed due to sparsity. Thresholds could not be set equal for test half 1 at time points 7, 8 and 9, due to a different number of observed categories for the respective test half and time-point combination. Latent means can still be compared across time.
 
-There was no change in latent state means (see Supplementary Figure \@ref(fig:lseplot)). Reliability fluctuated on a low level (range: `r round(range(plsr$est[plsr$task == "Logical-reasoning"]),2)[1]` -- `r round(range(plsr$est[plsr$task == "Logical-reasoning"]),2)[2]`). The correlations between latent states for the different time points were generally low, some even negative (Supplementary Figure \@ref(fig:lsplot)). 
+There was no change in latent state means (see Supplementary Figure \@ref(fig:lseplot)). Reliability fluctuated on a low level (range: `r round(range(plsr$est[plsr$task == "Probabilistic-reasoning"]),2)[1]` -- `r round(range(plsr$est[plsr$task == "Probabilistic-reasoning"]),2)[2]`). The correlations between latent states for the different time points were generally low, some even negative (Supplementary Figure \@ref(fig:lsplot)). 
 
-In the LST model with fixed means, the consistency coefficient was estimated to be `r round(lst_overview%>%filter(task == "reasoning", param == "consistency", type == "fixed means")%>%pull(value),2)` which was very similar to the model with variable means (`r round(lst_overview%>%filter(task == "reasoning", param == "consistency", type == "varying means")%>%pull(value),2)`). This means that around 80% of true inter-individual differences are attributable to stable (trait) differences between individuals. However, the reliability (across time points) was estimated to be very low, making the consistency estimate difficult to interpret (fixed means: `r round(lst_overview%>%filter(task == "reasoning", param == "reliability", type == "fixed means")%>%pull(value),2)`; variable means: `r round(lst_overview%>%filter(task == "reasoning", param == "reliability", type == "varying means")%>%pull(value),2)`) (see Supplementary Figure \@ref(fig:lsteplot)).
+In the LST model, the consistency coefficient was estimated to be `r round(lst_overview%>%filter(task == "reasoning", param == "consistency", type == "varying means")%>%pull(value),2)` (95% CI: `r round(lst_overview%>%filter(task == "reasoning", param == "consistency", type == "varying means")%>%pull(lower_2.5ci),2)` - `r round(lst_overview%>%filter(task == "reasoning", param == "consistency", type == "varying means")%>%pull(upper_2.5ci),2)`). This means that around 80% of true inter-individual differences are attributable to stable (trait) differences between individuals. However, the reliability (across time points) was estimated to be very low, suggesting that most of the observed variance is random noise and the task is not well suited to measure inter-individual differences in ability (`r round(lst_overview%>%filter(task == "reasoning", param == "reliability", type == "varying means")%>%pull(value),2)`; 95% CI: `r round(lst_overview%>%filter(task == "reasoning", param == "reliability", type == "varying means")%>%pull(lower_2.5ci),2)` - `r round(lst_overview%>%filter(task == "reasoning", param == "reliability", type == "varying means")%>%pull(upper_2.5ci),2)`; see Supplementary Figure \@ref(fig:lsteplot)). Thus, the consistency estimates are not meaningful in this context.
 
 In combination with the finding that group-level performance was not reliably different from chance (see Supplementary Figure \@ref(fig:perfplot)), the low correlations between latent states and low reliability estimates suggest that this task did not measure any meaningful individual-differences in logical reasoning abilities. For this reason, we did not include this task when predicting cognitive performance by external predictors. 
 
@@ -1828,7 +1870,7 @@ The lowest two categories (0 and 1 correctly solved trials per test half) were c
 
 In the LS model, the latent state means did not change over time (see Supplementary Figure \@ref(fig:lseplot)). Reliability varied on a low to moderate level (range: `r round(range(plsr$est[plsr$task == "Population-to-sample"]),2)[1]` -- `r round(range(plsr$est[plsr$task == "Population-to-sample"]),2)[2]`). The correlations between latent states for the different time points were generally high (Supplementary Figure \@ref(fig:lsplot)). 
 
-In the LST model with fixed means, the consistency coefficient was estimated to be `r round(lst_overview%>%filter(task == "pop-to-sample", param == "consistency", type == "fixed means")%>%pull(value),2)` which was very similar to the model with variable means (`r round(lst_overview%>%filter(task == "pop-to-sample", param == "consistency", type == "varying means")%>%pull(value),2)`). This means that around 80% of true inter-individual differences are attributable to stable (trait) differences between individuals. Reliability (across time points) was estimated to be acceptable (fixed means: `r round(lst_overview%>%filter(task == "pop-to-sample", param == "reliability", type == "fixed means")%>%pull(value),2)`; variable means: fixed means: `r round(lst_overview%>%filter(task == "pop-to-sample", param == "reliability", type == "varying means")%>%pull(value),2)`) (see Supplementary Figure \@ref(fig:lsteplot)).
+In the LST model, the consistency coefficient was estimated to be `r round(lst_overview%>%filter(task == "pop-to-sample", param == "consistency", type == "varying means")%>%pull(value),2)` (95% CI: `r round(lst_overview%>%filter(task == "pop-to-sample", param == "consistency", type == "varying means")%>%pull(lower_2.5ci),2)` - `r round(lst_overview%>%filter(task == "pop-to-sample", param == "consistency", type == "varying means")%>%pull(upper_2.5ci),2)`). This means that around 80% of true inter-individual differences are attributable to stable (trait) differences between individuals. Reliability (across time points) was estimated to be acceptable (`r round(lst_overview%>%filter(task == "pop-to-sample", param == "reliability", type == "varying means")%>%pull(value),2)`; 95% CI: `r round(lst_overview%>%filter(task == "pop-to-sample", param == "reliability", type == "varying means")%>%pull(lower_2.5ci),2)` - `r round(lst_overview%>%filter(task == "pop-to-sample", param == "reliability", type == "varying means")%>%pull(upper_2.5ci),2)`; see Supplementary Figure \@ref(fig:lsteplot)).
 
 In sum, the results suggest that task-level results were robust and individual-level performance was stable over time. As noted above -- and as can be seen in Supplementary Figure \@ref(fig:perfplot) -- performance on a task level was clearly above chance in all sessions.
 
@@ -1838,13 +1880,13 @@ This task had a different response pattern compared to the other tasks. The maxi
 
 From time point 6 onwards, the latent means were significanlty lower compared to the first time point (i.e. subjects made fewer errors, see Supplementary Figure \@ref(fig:lseplot)). Reliability varied between moderate and good (range: `r round(range(plsr$est[plsr$task == "Self-ordered-search"]),2)[1]` -- `r round(range(plsr$est[plsr$task == "Self-ordered-search"]),2)[2]`). The correlations between latent states for the different time points were generally high (Supplementary Figure \@ref(fig:lsplot)). 
 
-In the LST model with fixed means, the consistency coefficient was estimated to be `r round(lst_overview%>%filter(task == "inhibit-searched", param == "consistency", type == "fixed means")%>%pull(value),2)` which was very similar to the model with variable means (`r round(lst_overview%>%filter(task == "inhibit-searched", param == "consistency", type == "varying means")%>%pull(value),2)`). This means that around 80% of true inter-individual differences are attributable to stable (trait) differences between individuals. Reliability (across time points) was estimated to be acceptable (fixed means: `r round(lst_overview%>%filter(task == "inhibit-searched", param == "reliability", type == "fixed means")%>%pull(value),2)`; variable means: `r round(lst_overview%>%filter(task == "inhibit-searched", param == "reliability", type == "varying means")%>%pull(value),2)`) (see Supplementary Figure \@ref(fig:lsteplot)).
+In the LST model, the consistency coefficient was estimated to be `r round(lst_overview%>%filter(task == "inhibit-searched", param == "consistency", type == "varying means")%>%pull(value),2)` (95% CI: `r round(lst_overview%>%filter(task == "inhibit-searched", param == "consistency", type == "varying means")%>%pull(lower_2.5ci),2)` - `r round(lst_overview%>%filter(task == "inhibit-searched", param == "consistency", type == "varying means")%>%pull(upper_2.5ci),2)`). This means that around 80% of true inter-individual differences are attributable to stable (trait) differences between individuals. Reliability (across time points) was estimated to be acceptable (`r round(lst_overview%>%filter(task == "inhibit-searched", param == "reliability", type == "varying means")%>%pull(value),2)`; 95% CI: `r round(lst_overview%>%filter(task == "inhibit-searched", param == "reliability", type == "varying means")%>%pull(lower_2.5ci),2)` - `r round(lst_overview%>%filter(task == "inhibit-searched", param == "reliability", type == "varying means")%>%pull(upper_2.5ci),2)`;see Supplementary Figure \@ref(fig:lsteplot)).
 
 Taken together, the results, suggest stable individual-differences with a slight group-level decrease in error rate (see Supplementary Figure\@ref(fig:perfplot)).
 
 ### Summary
 
-The six tasks differed substantially in what they revealed about group- and individual-level variation. What stands out is the widespread change in performance over time. For all tasks except population-to-sample and logical-reasoning we observed an improvement in performance over time. This group-level change, however, has different individual-level interpretations for the different tasks. For communicative-cues, ignore-visible-food and self-ordered-search, individual differences remained relatively stable despite the group-level change suggesting stable individual differences combined with a systematic learning effect across individuals. In contrast, for attention-following, there was little stability in individual differences at earlier time points and only towards the end emerged a more stable ordering of individuals. In combination with the low reliability at earlier time points, this suggests that at least some individuals changed their response strategy in the course of the study. The combination of low reliability, chance-level performance and low correlation of latent states for logical-reasoning suggests that this task is not suited to probe individual differences in logical reasoning abilities in great apes. It is also noteworthy that the reliability estimates are on average lower compared to a previous study testing the same individuals on different tasks [@bohn2023great]. One explanation might be the increase in performance over time. At the beginning of the study, more individuals might have chosen randomly instead of using the available information provided in the task setup and the demonstrations. By definition, random variation is not reliable. With time, more and more individuals started using the available information so that inter-individual differences in how good they are in using it could be detected.   
+The six tasks differed substantially in what they revealed about group- and individual-level variation. What stands out is the widespread change in performance over time. For all tasks except population-to-sample and probabilistic-reasoning we observed an improvement in performance over time. This group-level change, however, has different individual-level interpretations for the different tasks. For communicative-cues, ignore-visible-food and self-ordered-search, individual differences remained relatively stable despite the group-level change, suggesting stable individual differences combined with a systematic learning effect across individuals. In contrast, for attention-following, there was little stability in individual differences at earlier time points and only towards the end emerged a more stable ordering of individuals. In combination with the low reliability at earlier time points, this suggests that at least some individuals changed their response strategy in the course of the study. The combination of low reliability, chance-level performance and low correlation of latent states for probabilistic-reasoning suggests that this task is not suited to probe individual differences in logical reasoning abilities in great apes. It is also noteworthy that the reliability estimates are on average lower compared to a previous study testing the same individuals on different tasks [@bohn2023great]. One explanation might be the increase in performance over time. At the beginning of the study, more individuals might have chosen randomly instead of using the available information provided in the task setup and the demonstrations. By definition, random variation is not reliable. With time, more and more individuals started using the available information so that inter-individual differences in how good they are in using it could be detected.   
 
 ## Relations between tasks {#relations-between-tasks}
 
@@ -1865,7 +1907,7 @@ cor_mod <- cor_mod_raw$parameters$stdyx.standardized%>%filter(grepl("WITH",param
     SEARCH = "Self-ordered-search",
     POP = "Population-to-sample",
     QUANT = "Quantity-discrimination",
-    REASON = "XLogical-reasoning",
+    REASON = "XProbabilistic-reasoning",
     FOOD = "Ignore-visible-food"
   ),
   param = recode(param,
@@ -1878,7 +1920,7 @@ cor_mod <- cor_mod_raw$parameters$stdyx.standardized%>%filter(grepl("WITH",param
     SEARCH = "Self-ordered-search",
     POP = "Population-to-sample",
     QUANT = "Quantity-discrimination",
-    REASON = "XLogical-reasoning",
+    REASON = "XProbabilistic-reasoning",
     FOOD = "Ignore-visible-food"
   ))%>%
   rowwise()%>%
@@ -1923,8 +1965,8 @@ pcor_mod_s <- cor_mod%>%
   theme(legend.position =  c(0.15, 0.8), legend.direction = "vertical", legend.title = element_blank(), legend.background = element_blank())
 
 pcor_mod_n <- cor_mod%>%
-  filter(task %in% c("Quantity-discrimination", "Population-to-sample", "XLogical-reasoning"),
-         task_1 %in% c("Quantity-discrimination", "Population-to-sample", "XLogical-reasoning"))%>%
+  filter(task %in% c("Quantity-discrimination", "Population-to-sample", "XProbabilistic-reasoning"),
+         task_1 %in% c("Quantity-discrimination", "Population-to-sample", "XProbabilistic-reasoning"))%>%
   ggplot(., aes(y = task, x = task_1, fill = est))+
   geom_tile(color = "white")+
   labs(x = "", y = "")+
@@ -1934,7 +1976,7 @@ pcor_mod_n <- cor_mod%>%
   #ggtitle("Model based correlations")+
   geom_text(aes(label = round(est, 2), fontface = sig), size = 3)+
   scale_y_discrete(labels = c("Pop.\nsamp.","Quan.\ndisc."))+
-  scale_x_discrete(labels = c("Quan.\ndisc.","Log.\nreas."))+
+  scale_x_discrete(labels = c("Quan.\ndisc.","Prob.\nreas."))+
   #scale_y_discrete(limits=rev, breaks = c(1:10))+
   #scale_x_discrete(breaks = c(1:9))+
   theme_few()+
@@ -1977,7 +2019,7 @@ opcor_mod
 
 Supplementary Figure\@ref(fig:mtmplot) shows the correlations between trait estimates for the different tasks reported in the present study as well as those reported in @bohn2023great. For the tasks reported in @bohn2023great we used the data from phase 2 because it was closer in time. Overall, most correlations were not significantly different from zero (i.e. the 95% CI did include zero). Because of this low average level of correlations, we decided not to explore models with higher-order factors and will only interpret the qualitative patterns. 
 
-Conceptually, the tasks can be clustered in the following broader domains: *social cognition* (attention-following, gaze-following, communicative-cues), *reasoning about quantities* (quantity-discrimination, population-to-sample), *executive functions* (delay-of-gratification, self-ordered-search, ignore-visible-food) and *inferential reasoning* (logical-reasoning, causal-inference, inference-by-exclusion). As a first step, we will evaluate whether we find evidence for such a clustering in the data.
+Conceptually, the tasks can be clustered in the following broader domains: *social cognition* (attention-following, gaze-following, communicative-cues), *reasoning about quantities* (quantity-discrimination, population-to-sample), *executive functions* (delay-of-gratification, self-ordered-search, ignore-visible-food) and *inferential reasoning* (probabilistic-reasoning, causal-inference, inference-by-exclusion). As a first step, we will evaluate whether we find evidence for such a clustering in the data.
 
 There was no significant correlation between any of the social cognition tasks. Furthermore, attention-following and gaze-following did not correlate significantly with any of the other tasks and communicative-cues correlated only with causal-inference -- a result we will discuss below. Thus, and in line with previous work [@herrmann2010structure], we found no evidence for shared cognitive processes in tasks measuring different aspects of social cognition.
 
@@ -1985,8 +2027,9 @@ The two tasks measuring reasoning about quantities did correlate significantly. 
 
 Within the executive functions measures, self-ordered-search and inhibit-visible-food were significantly correlated but none of the two correlated with delay-of-gratification. The significant correlation can be explained by the need to inhibit a premature response (selecting visible food or a cup that was previously rewarded) in both tasks. It has been argued that delay-of-gratification requires self-control (tolerating a longer waiting time to gain a more valuable reward) over and above behavioral inhibition [@beran2015comparative]. From this point of view, individual differences in the delay-of-gratification task might be due to differences in self control and less due to differences in inhibition.    
 
-Finally, for the three inferential reasoning measures we found a correlation between inference-by-exclusion and causal-inference. Logical-reasoning did not correlate with either (neither did it with any other task). This is not surprising given the results reported above: the observed variation in the logical-reasoning task was largely noise and did not reflect systematic individual differences. The correlation between causal-inference and inference-by-exclusion is most likely due to the fact that both tasks involve making inferences about the location of food based on reasoning about its physical properties. 
+Finally, for the three inferential reasoning measures we found a correlation between inference-by-exclusion and causal-inference. Probabilistic-reasoning did not correlate with either (neither did it with any other task). This is not surprising given the results reported above: the observed variation in the probabilistic-reasoning task was largely noise and did not reflect systematic individual differences. The correlation between causal-inference and inference-by-exclusion is most likely due to the fact that both tasks involve making inferences about the location of food based on reasoning about its physical properties. 
 
+<<<<<<< supplement.Rmd
 Next we turn to the correlations across domains. Perhaps the most surprising finding is the correlation between causal-inference and communicative-cues. On a closer look, the origin might be task impurity in that there are two ways to solve the causal-inference task: first, as hypothesized, by using the rattling sound to infer the location of the food. Second, by interpreting the experimenter's shaking of the cup as a communicative cue, which is very similar to the communicative-cues task. Thus, we suspect that at a least some individuals solved the task via the second route. 
 
 Finally, there was a cluster of significant correlations between delay-of-gratification, self-ordered-search, inference-by-exclusion, causal-inference, population-to-sample and quantity discrimination. Of the 15 possible correlations, only four were non-significant. One commonality between these tasks that might -- in part -- explain this pattern is that they all benefit from sustained attention to the task. Sustained attention facilitates the processing of the experimenter's demonstrations (population-to-sample, inference-by-exclusion, causal-inference, delay-of-gratification), one's actions on the setup (self-ordered-search) or visually complex stimuli (quantity discrimination). Tentative support for this idea comes from the analysis of relevant predictors [see @bohn2023great and below] in which `time spent in research` was selected as a relevant predictor of performance for all of these tasks except causal-inference. This predictor reflects individual's experience with experimental studies, which often involve sustained attention to distributions of food items, actions of conspecifics and/or demonstrations by experimenters. 
@@ -2971,7 +3014,7 @@ ppipreds <- ggplot(proj_samples_sum, aes(x = mean, y = pred, col = task))+
   geom_pointrange(aes(xmin = lci, xmax = uci), position = position_dodge(width = -0.3))+
   facet_wrap(factor~., scales = "free_y", nrow = 2)+
   scale_color_colorblind()+
-  labs(x = "", y = "")+
+  labs(x = "Model estimate", y = "")+
   theme_minimal()+
   theme(#axis.text.x = element_text(angle = 45, hjust = 1),
         #legend.box = "vertical",

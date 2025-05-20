@@ -13,12 +13,16 @@ saves/cvs_inh.rds
 saves/cvs_vis.rds
 saves/cvs_pop.rds
 
+outputs/output_old/*
+
+paper/submission/*
+
 saves/srm_1.rds
 
 analysis/supplement_files/*
 
 docs/*
-outputs/*
+
 
 # DO NOT CHANGE THE CONTENT THAT FOLLOWS HERE ...
 #   EXCEPT IF YOU PLAN TO UPDATE THE TEMPLATE

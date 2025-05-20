@@ -1,0 +1,298 @@
+DATA:
+
+File is laac2_wide.dat;
+
+VARIABLE: 
+
+NAMES =   subject task     
+Y1_1    Y1_10   Y1_2    Y1_3    Y1_4    Y1_5    Y1_6   
+Y1_7    Y1_8    Y1_9    Y10_1   Y10_10  Y10_2   Y10_3   Y10_4   Y10_5  
+Y10_6   Y10_7   Y10_8   Y10_9   Y11_1   Y11_10  Y11_2   Y11_3   Y11_4  
+Y11_5   Y11_6   Y11_7   Y11_8   Y11_9   Y12_1   Y12_10  Y12_2   Y12_3  
+Y12_4   Y12_5   Y12_6   Y12_7   Y12_8   Y12_9   Y2_1    Y2_10   Y2_2   
+Y2_3    Y2_4    Y2_5    Y2_6    Y2_7    Y2_8    Y2_9    Y3_1    Y3_10  
+Y3_2    Y3_3    Y3_4    Y3_5    Y3_6    Y3_7    Y3_8    Y3_9    Y4_1   
+Y4_10   Y4_2    Y4_3    Y4_4    Y4_5    Y4_6    Y4_7    Y4_8    Y4_9   
+Y5_1    Y5_10   Y5_2    Y5_3    Y5_4    Y5_5    Y5_6    Y5_7    Y5_8   
+Y5_9    Y6_1    Y6_10   Y6_2    Y6_3    Y6_4    Y6_5    Y6_6    Y6_7   
+Y6_8    Y6_9    Y7_1    Y7_10   Y7_2    Y7_3    Y7_4    Y7_5    Y7_6   
+Y7_7    Y7_8    Y7_9    Y8_1    Y8_10   Y8_2    Y8_3    Y8_4    Y8_5   
+Y8_6    Y8_7    Y8_8    Y8_9    Y9_1    Y9_10   Y9_2    Y9_3    Y9_4   
+Y9_5    Y9_6    Y9_7    Y9_8    Y9_9;
+ 
+ 
+USEVARIABLES =  P11 P21 P12 P22 P13 P23 P14 P24
+	       P15 P25 P16 P26 P17 P27 P18 P28 P19 P29
+	       P110 P210 ; 
+	
+Categ =   P11 P21 P12 P22 P13 P23 P14 P24
+	       P15 P25 P16 P26 P17 P27 P18 P28 P19 P29
+	       P110 P210 ; 
+	 
+
+Missing = All(-99);	
+
+useobservations are (task EQ 1);
+
+! "'attention'=1;'communication'=2;'reasoning'=3;'visible_food'=4;
+!'population'=5;'inhibit_searched'=6"
+
+DEFINE: 
+P11 = Y1_1 + Y3_1 + Y5_1 + Y7_1 + Y9_1 + Y11_1;
+P21 =  Y2_1 + Y4_1 + Y6_1 + Y8_1 + Y10_1 + Y12_1;
+
+P12 =  Y1_2 + Y3_2 + Y5_2 + Y7_2 + Y9_2 + Y11_2;
+P22 =  Y2_2 + Y4_2 + Y6_2 + Y8_2 + Y10_2 + Y12_2;
+
+P13 =  Y1_3 + Y3_3 + Y5_3 + Y7_3 + Y9_3 + Y11_3;
+P23 =  Y2_3 + Y4_3 + Y6_3 + Y8_3 + Y10_3 + Y12_3;
+
+P14 =  Y1_4 + Y3_4 + Y5_4 + Y7_4 + Y9_4 + Y11_4;
+P24 =  Y2_4 + Y4_4 + Y6_4 + Y8_4 + Y10_4 + Y12_4;
+
+P15 =  Y1_5 + Y3_5 + Y5_5 + Y7_5 + Y9_5 + Y11_5;
+P25 =  Y2_5 + Y4_5 + Y6_5 + Y8_5 + Y10_5 + Y12_5;
+
+P16 =  Y1_6 + Y3_6 + Y5_6 + Y7_6 + Y9_6 + Y11_6;
+P26 =  Y2_6 + Y4_6 + Y6_6 + Y8_6 + Y10_6 + Y12_6;
+
+P17 =  Y1_7 + Y3_7 + Y5_7 + Y7_7 + Y9_7 + Y11_7;
+P27 =  Y2_7 + Y4_7 + Y6_7 + Y8_7 + Y10_7 + Y12_7;
+
+P18 =  Y1_8 + Y3_8 + Y5_8 + Y7_8 + Y9_8 + Y11_8;
+P28 =  Y2_8 + Y4_8 + Y6_8 + Y8_8 + Y10_8 + Y12_8;
+
+P19 =  Y1_9 + Y3_9 + Y5_9 + Y7_9 + Y9_9 + Y11_9;
+P29 =  Y2_9 + Y4_9 + Y6_9 + Y8_9 + Y10_9 + Y12_9;
+
+P110 =  Y1_10 + Y3_10 + Y5_10 + Y7_10 + Y9_10 + Y11_10;
+P210 =  Y2_10 + Y4_10 + Y6_10 + Y8_10 + Y10_10 + Y12_10;
+
+
+
+
+
+IF (P11==0) THEN P11=2;
+IF (P21==0) THEN P21=2;
+IF (P12==0) THEN P12=2;
+IF (P22==0) THEN P22=2;
+IF (P13==0) THEN P13=2;
+IF (P23==0) THEN P23=2;
+IF (P14==0) THEN P14=2;
+IF (P24==0) THEN P24=2;
+IF (P15==0) THEN P15=2;
+IF (P25==0) THEN P25=2;
+IF (P16==0) THEN P16=2;
+IF (P26==0) THEN P26=2;
+IF (P17==0) THEN P17=2;
+IF (P27==0) THEN P27=2;
+IF (P18==0) THEN P18=2;
+IF (P28==0) THEN P28=2;
+IF (P19==0) THEN P19=2;
+IF (P29==0) THEN P29=2;
+IF (P110==0) THEN P110=2;
+IF (P210==0) THEN P210=2;
+
+IF (P11==1) THEN P11=2;
+IF (P21==1) THEN P21=2;
+IF (P12==1) THEN P12=2;
+IF (P22==1) THEN P22=2;
+IF (P13==1) THEN P13=2;
+IF (P23==1) THEN P23=2;
+IF (P14==1) THEN P14=2;
+IF (P24==1) THEN P24=2;
+IF (P15==1) THEN P15=2;
+IF (P25==1) THEN P25=2;
+IF (P16==1) THEN P16=2;
+IF (P26==1) THEN P26=2;
+IF (P17==1) THEN P17=2;
+IF (P27==1) THEN P27=2;
+IF (P18==1) THEN P18=2;
+IF (P28==1) THEN P28=2;
+IF (P19==1) THEN P19=2;
+IF (P29==1) THEN P29=2;
+IF (P110==1) THEN P110=2;
+IF (P210==1) THEN P210=2;
+
+
+ANALYSIS: 
+
+	ESTIMATOR = Bayes;
+	!Biter=(20000);
+	Thin=10;
+	!Bconvergence = .005;	
+	fbiter = 10000;
+	
+MODEL:
+
+
+T1 by P11@1 P21@1
+	P12@1 P22@1
+	P13@1 P23@1
+	P14@1 P24@1
+	P15@1 P25@1 !;
+!T2 by	
+	P16@1 P26@1
+	P17@1 P27@1
+	P18@1 P28@1
+	P19@1 P29@1
+	P110@1 P210@1;
+
+S1 by P11@1 P21@1;
+S2 by P12@1 P22@1;
+S3 by P13@1 P23@1;
+S4 by P14@1 P24@1;
+S5 by P15@1 P25@1;
+S6 by P16@1 P26@1;
+S7 by P17@1 P27@1;
+S8 by P18@1 P28@1;
+S9 by P19@1 P29@1;
+S10 by P110@1 P210@1;
+
+	
+[S1-S10@0];
+[T1@0];
+![T2];
+
+S1 - S10 (varS);
+T1 (varT);
+
+S1-S10 with S1-S10@0;
+!T1-T2 with S1-S10@0;
+T1 with S1-S10@0;
+
+[P11$1*-1] (tau1);
+[P11$2*-0.5] (tau2);
+[P11$3*0.2] (tau3);
+[P11$4*1.5] (tau4);
+![P11$5] (tau5);
+
+
+![P21$1] (tau1);
+![P21$2] (tau2);
+![P21$3] (tau3);
+![P21$4] (tau4);
+![P21$5] (tau5);
+
+[P12$1] (tau1);
+[P12$2] (tau2);
+[P12$3] (tau3);
+[P12$4] (tau4);
+![P12$5] (tau5);
+
+[P22$1] (tau1);
+[P22$2] (tau2);
+[P22$3] (tau3);
+[P22$4] (tau4);
+![P22$5] (tau5);
+
+[P13$1] (tau1);
+[P13$2] (tau2);
+[P13$3] (tau3);
+[P13$4] (tau4);
+![P13$5] (tau5);
+
+
+[P23$1] (tau1);
+[P23$2] (tau2);
+[P23$3] (tau3);
+[P23$4] (tau4);
+![P23$5] (tau5);
+
+![P14$1] (tau1);
+![P14$2] (tau2);
+![P14$3] (tau3);
+![P14$4] (tau4);
+![P14$5] (tau5);
+
+[P24$1] (tau1);
+[P24$2] (tau2);
+[P24$3] (tau3);
+[P24$4] (tau4);
+![P24$5] (tau5);
+
+
+[P15$1] (tau1);
+[P15$2] (tau2);
+[P15$3] (tau3);
+[P15$4] (tau4);
+![P15$5] (tau5);
+
+[P25$1] (tau1);
+[P25$2] (tau2);
+[P25$3] (tau3);
+[P25$4] (tau4);
+![P25$5] (tau5);
+
+[P16$1] (tau1);
+[P16$2] (tau2);
+[P16$3] (tau3);
+[P16$4] (tau4);
+![P16$5] (tau5);
+
+[P26$1] (tau1);
+[P26$2] (tau2);
+[P26$3] (tau3);
+[P26$4] (tau4);
+![P26$5] (tau5);
+
+[P17$1] (tau1);
+[P17$2] (tau2);
+[P17$3] (tau3);
+[P17$4] (tau4);
+![P17$5] (tau5);
+
+[P27$1] (tau1);
+[P27$2] (tau2);
+[P27$3] (tau3);
+[P27$4] (tau4);
+![P27$5] (tau5);
+
+[P18$1] (tau1);
+[P18$2] (tau2);
+[P18$3] (tau3);
+[P18$4] (tau4);
+![P18$5] (tau5);
+
+
+[P28$1] (tau1);
+[P28$2] (tau2);
+[P28$3] (tau3);
+[P28$4] (tau4);
+![P28$5] (tau5);
+
+[P19$1] (tau1);
+[P19$2] (tau2);
+[P19$3] (tau3);
+[P19$4] (tau4);
+![P19$5] (tau5);
+
+![P29$1] (tau1);
+![P29$2] (tau2);
+![P29$3] (tau3);
+![P29$4] (tau4);
+![P29$5] (tau5);
+
+[P110$1] (tau1);
+[P110$2] (tau2);
+[P110$3] (tau3);
+[P110$4] (tau4);
+![P110$5] (tau5);
+
+[P210$1] (tau1);
+[P210$2] (tau2);
+[P210$3] (tau3);
+[P210$4] (tau4);
+![P210$5] (tau5);
+
+Model constraint:
+
+NEW(con occ rel);
+con = varT / (varT + varS);
+occ = varS /(varT + varS);
+rel = (varS + varT ) / (varS + varT + 1);
+
+
+Output: stdyx tech8;
+PLOT:   TYPE = PLOT2; 
+	
