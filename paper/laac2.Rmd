@@ -30,7 +30,6 @@ author:
   - name          : "Nico Eisbrenner"
     affiliation   : "2"
     role:
-      - Formal Analysis
       - Writing - Original Draft Preparation
       - Writing - Review & Editing
       
@@ -62,6 +61,8 @@ affiliation:
     institution   : "Comparative Cognition, Messerli Research Institute, University of Veterinary Medicine Vienna, Medical University of Vienna and University of Vienna, Vienna, Austria"
   - id            : "4"
     institution   : "Wilhelm Wundt Institute of Psychology, Leipzig University, Leipzig, Germany"
+
+note: "\\clearpage"
 
 authornote: |
   Manuel Bohn was funded by a Jacobs Foundation Research Fellowship (Grant No. 2022-1484-00) and a Lower Saxony Impulse Professorship through the zukunft.niedersachsen program. We thank the Max Planck Society for the Advancement of Science.
@@ -112,6 +113,8 @@ An exception is the work by @bohn2023great. They combined several approaches to 
 The present study builds on @bohn2023great by addressing two key gaps. First, we broadened the range of cognitive domains studied, including social cognition, reasoning about quantities, executive functions, and inferential reasoning. This approach allows us to test whether their findings replicate within these domains and generalize to others. Second, by pooling data from both studies, we explored the correlations between cognitive traits within and across domains, providing a deeper analysis of the structure of great ape cognition.
 
 # Methods
+
+the study design and analysis plan were pre-registered at: https://osf.io/ycsjn. All data files and analysis scripts can be found in the associated online repository (https://github.com/ccp-eva/laac2). The supplementary material provides additional details on the statistical analysis and the results.
 
 ```{r}
 # read in data files
@@ -185,7 +188,7 @@ knitr::include_graphics("../visuals/setup.png")
 reli_summary <- readRDS("../saves/reli_summary.rds")
 ```
 
-The study involved a total of six cognitive tasks. These were based on published procedures in the field of comparative psychology. The original publications often include control conditions to rule out alternative, cognitively less demanding ways to solve the tasks. We did not include such controls here and only ran the experimental conditions. For each task, we refer to these papers to learn more about control conditions and/or a detailed discussion of the nature of the presumed underlying cognitive mechanisms. Example videos for each task can be found in the associated online repository [masked for peer review]. A second coder, unfamiliar to the purpose of the study, coded 20% of all time points for all tasks. Inter-rater reliability was excellent (lowest proportion of agreement = `r round(min(reli_summary$match),2)` for population-to-sample, lowest $\kappa$ = `r round(min(reli_summary$kappa),2)` for ignore-visible-food). Additional details can be found in the supplementary material.
+The study involved a total of six cognitive tasks. These were based on published procedures in the field of comparative psychology. The original publications often include control conditions to rule out alternative, cognitively less demanding ways to solve the tasks. We did not include such controls here and only ran the experimental conditions. For each task, we refer to these papers to learn more about control conditions and/or a detailed discussion of the nature of the presumed underlying cognitive mechanisms. Example videos for each task can be found in the associated online repository (https://github.com/ccp-eva/laac2/tree/main/videos). A second coder, unfamiliar to the purpose of the study, coded 20% of all time points for all tasks. Inter-rater reliability was excellent (lowest proportion of agreement = `r round(min(reli_summary$match),2)` for population-to-sample, lowest $\kappa$ = `r round(min(reli_summary$kappa),2)` for ignore-visible-food). Additional details can be found in the supplementary material.
 
 ### Attention-following
 
@@ -222,8 +225,6 @@ Data collection started on April 28th, 2022, lasted until October 7th, 2023 and 
 The interval between two time points was planned to be eight weeks. However, it was not always possible to follow this schedule so that some intervals were slightly longer or shorter (see supplementary material for details). The order of tasks was the same for all subjects. So was the counterbalancing within each task. This exact procedure was repeated at each time point so that the results would be comparable across participants and time points. 
 
 # Analysis, results and discussion
-
-All data files and analysis scripts can be found in the associated online repository [masked for peer review]. The supplementary material provides additional details on the statistical analysis and the results. In the following, we limit ourselves to describing only the key analysis and results. 
 
 ```{r perfplot, fig.width = 10, fig.height = 6,fig.cap = "Results from the six cognitive tasks across time points. Black crosses show mean performance at each time point across species (with 95\\% CI). The sample size varied between time points and can be found in Supplementary Figure 1. Colored dots show mean performance by species. Dashed line shows chance level performance.", out.width="100%"}
 
@@ -269,7 +270,7 @@ To explore the structure of great ape cognition we correlated latent trait estim
 
 Figure \@ref(fig:figcor) shows the correlations between trait estimates for the different tasks. Overall, most correlations were not significantly different from zero (i.e. the 95% CI did include zero). Because of this low average level of correlations, we decided not to explore models with higher-order factors and will only interpret specific qualitative patterns. 
 
-```{r figcor, include = T, fig.cap = "Correlations between trait estimates. Bold correlations have 95\\% CrI not overlapping with zero. Panels show correlations between A) all, B) social cognition, C) reasoning about quantities, and D) executive functions tasks. The correlation between the two inferential reasoning tasks is not shown in a separate panel but can be found in A). Correlations involving self-ordered-search (coded as number of errors) have been multiplied by -1 so that higher values can be interpreted as better traits for all tasks.", fig.align = "center", out.width="70%"}
+```{r figcor, include = T, fig.cap = "Correlations between trait estimates. Bold correlations have 95\\% CrI not overlapping with zero. Panels show correlations between A) all, B) social cognition, C) reasoning about quantities, and D) executive functions tasks. The correlation between the two inferential reasoning tasks is not shown in a separate panel but can be found in A). Correlations involving self-ordered-search (coded as number of errors) have been multiplied by -1 so that higher values can be interpreted as better traits for all tasks.", fig.align = "center", out.width="100%"}
 
 knitr::include_graphics("../visuals/task_level_cor.png") 
 

@@ -7,7 +7,7 @@
 
 ------------------------------------------------------------------------
 
-* Bohn, M., Völter, C., Hanus, D., Eisbrenner, N., Eckert, J., Holtmann, J., & Haun, D. (2025). [Individual differences in great ape cognition across time and domains: stability, structure, and predictability](tbd.). *PsyArXiv*.
+* Bohn, M., Völter, C., Hanus, D., Eisbrenner, N., Eckert, J., Holtmann, J., & Haun, D. (2025). [Individual differences in great ape cognition across time and domains: stability, structure, and predictability](https://osf.io/preprints/psyarxiv/qmrt5_v1). *PsyArXiv*.
 
 ### Structure
 
