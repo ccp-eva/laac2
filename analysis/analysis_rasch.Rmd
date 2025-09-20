@@ -4,17 +4,19 @@ output: html_document
 date: "2025-09-20"
 ---
 
-```{r setup, include=FALSE}
+```{r }
 ##############################################################################
 #-------------------------------  Preparation -------------------------------#
 ##############################################################################
-library(dplyr)
+library(tidyverse)
 library(stringr)
 library(brms)
+library(ggthemes)
+
 ```
 
 
-```{r cars}
+```{r }
 
 # Combine datasets from two waves
 # --> Restructure_data.R --> saves combined long-format dataset in file "laac_complete.txt"
@@ -30,7 +32,7 @@ long$trait <- 1
 long[long$task == "search", "code"] <- car::recode(long[long$task == "search", "code"], '2=1')
 ```
 
-```{r pressure, echo=FALSE}
+```{r }
 ##############################################################################
 #---------------------- Estimate Rasch models using brms --------------------#
 ##############################################################################
@@ -48,18 +50,35 @@ state <-  brm(code ~ 0 + time_cat + trial + (0 + time_cat | subject),
                  chains = 3, # to speed up sampling --> increase later
                   cores = 3,
                  iter=4000)
+
+saveRDS(state, "../saves/ls_rasch.rds")
+state <- readRDS("../saves/ls_rasch.rds")
+
 # Latent State Trait model
 LST <-  brm(code ~ 0 + time_cat + trial + (0 + time_cat || subject) + (0 + trait | subject),
                  data = task,
                  family = brmsfamily(family="bernoulli", link="logit"),
-                 chains = 2,
+                 chains = 3, # to speed up sampling --> increase later
+                  cores = 3,
                  iter=4000)
+saveRDS(LST, "../saves/lst_rasch.rds")
+
+LST <- readRDS("../saves/lst_rasch.rds")
+
 # Latent Growth Curve model
 LGC <-  brm(code ~ 0 + time_point + trial + (1 + time_point | subject),
                  data = task,
                  family = brmsfamily(family="bernoulli", link="logit"),
-                 chains = 2,
+                 chains = 3, # to speed up sampling --> increase later
+                  cores = 3,
                  iter=2000)
+
+saveRDS(LGC, "../saves/lgc_rasch.rds")
+
+LGC <- readRDS("../saves/lgc_rasch.rds")
+
+
+
 ```
 
 ```{r}
@@ -80,7 +99,7 @@ results$random$subject[11:55,]
 # (these correspond to prob. of first trial per time point)
 conditional_effects(state, "time_cat")
 # pattern of probabilities across trials
-conditional_effects(state, "variable")
+conditional_effects(state, "trial")
 
 ## LST model
 results <- summary(LST)
@@ -93,6 +112,71 @@ results <- summary(LGC)
 results$fixed["time_point",]
 ```
 
+```{r}
+cor <- results$random$subject[11:55,]%>%as_tibble(rownames = "cor")%>%
+  mutate(cor = str_remove(cor, "cor\\(time_cat"),
+         cor = str_remove(cor, "\\)"),
+         cor = str_remove(cor, "time_cat"))%>%
+  tidyr::separate(cor, sep = ",", into = c("a", "b"))%>%
+  mutate(a = as.numeric(a), 
+         b = as.numeric(b))
+```
+
+```{r}
+
+cor <- tibble()
+
+for (i in long$task) {
+  
+  task <- long %>%filter(task == i)
+  
+  state <-  brm(code ~ 0 + time_cat + trial + (0 + time_cat | subject),
+                 data = task,
+                 family = brmsfamily(family="bernoulli", link="logit"),
+                 chains = 3, # to speed up sampling --> increase later
+                 cores = 3,
+                 threads = threading(8),
+                 backend = "cmdstanr",
+                 iter=4000)
+  
+  cor_state <- results$random$subject[11:55,]%>%as_tibble(rownames = "cor")%>%
+  mutate(cor = str_remove(cor, "cor\\(time_cat"),
+         cor = str_remove(cor, "\\)"),
+         cor = str_remove(cor, "time_cat"))%>%
+  tidyr::separate(cor, sep = ",", into = c("a", "b"))%>%
+  mutate(a = as.numeric(a), 
+         b = as.numeric(b))%>%
+    mutate(task = i)
+  
+  cor <- bind_rows(cor, cor_state)
+  
+}
+
+
+
+```
+
+
+```{r}
+cor%>%
+  ggplot(aes(y = factor(b), x = factor(a), fill = Estimate))+
+    geom_tile(color = "white")+
+  labs(x = "", y = "")+
+  scale_fill_gradientn(
+    colors = c("darkgrey","darkgrey", "#CC6677", "#FFE066", "#117733"),  # Define four colors
+    values = scales::rescale(c(-0.1,0, 0.01, 0.5, 1)),  # Define the position of the points along the scale
+    limits = c(-0.1, 1),  # Ensure values match your data range
+    space = "Lab", 
+    name = "Correlation",
+    breaks = c(0, 0.5, 1)
+  ) +
+  geom_text(aes(label = round(Estimate, 2)), size = 2)+
+  scale_y_discrete(breaks = c(2,10))+
+  scale_x_discrete(breaks = c(1,9))+
+  #facet_wrap(~task, nrow = 1)+
+  theme_few()+
+  theme(legend.position = c(0.975,0.25), legend.direction = "vertical", legend.title = element_blank(), legend.background = element_blank(), strip.text = element_blank(), legend.text = element_text(size = 8), legend.key.size = unit(0.4, "cm"))
+```
 
 
 ```{r}
@@ -119,8 +203,9 @@ Multi_LST <-  brm(code ~ 0 + time_cat + trial + task + time_cat:task + trial:tas
                   + (0 + time_cat + time_cat:task || subject) + (0 + task | subject),
             data = test,
             family = brmsfamily(family="bernoulli", link="logit"),
-            chains = 2,
-            iter=1000) # decreased for model testing
+                 chains = 3, # to speed up sampling --> increase later
+                  cores = 3,
+            iter=4000) # decreased for model testing
 summary(Multi_LST)
 ```
 
