@@ -173,7 +173,7 @@ cor%>%
   geom_text(aes(label = round(Estimate, 2)), size = 2)+
   scale_y_discrete(breaks = c(2,10))+
   scale_x_discrete(breaks = c(1,9))+
-  #facet_wrap(~task, nrow = 1)+
+  facet_wrap(~task, nrow = 1)+
   theme_few()+
   theme(legend.position = c(0.975,0.25), legend.direction = "vertical", legend.title = element_blank(), legend.background = element_blank(), strip.text = element_blank(), legend.text = element_text(size = 8), legend.key.size = unit(0.4, "cm"))
 ```
