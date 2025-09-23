@@ -13,6 +13,10 @@ saves/cvs_inh.rds
 saves/cvs_vis.rds
 saves/cvs_pop.rds
 
+saves/multi_lst1.rds
+saves/multi_lst2.rds
+saves/multi_lst_cause_food_delay.rds
+
 outputs/output_old/*
 
 paper/submission/*
