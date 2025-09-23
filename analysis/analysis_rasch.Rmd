@@ -262,7 +262,10 @@ for (i in c("pop", "reas" , "comm", "vfood", "search", "attent" )) {
   
 }
 
+saveRDS(cor_bin, "../saves/ls_cor_bin.rds")
 
+
+cor_bin <- readRDS("../saves/ls_cor_bin.rds")
 
 ```
 
@@ -297,7 +300,7 @@ plot_grid(plsc_bin, plsc2, align = "v",axis = "l", rel_heights = c(1,1), ncol = 
 ```
 
 ```{r}
-ggsave("../visuals/ls_comp_bin.png", height = 6, width = 14, scale = 0.9)
+ggsave("../visuals/ls_comp_bin.pdf", height = 6, width = 14, scale = 0.9)
 ```
 
 # Multi-task LSTMs Rasch
@@ -355,7 +358,7 @@ get_variables(Multi_LST)
 ## Consistencies
 
 ```{r}
-con_samp_raw <- posterior_samples(Multi_LST2, pars = "^sd_subject", add_chain = T)%>%
+con_samp_raw <- posterior_samples(Multi_LST2_bin, pars = "^sd_subject", add_chain = T)%>%
   sample_n(5000)%>%
   pivot_longer(names_to = "param", values_to = "value", cols = -c(chain, iter))
 
@@ -388,37 +391,54 @@ con_sum <- con_samp%>%
             con_uci = hdi_upper(con))
 
 saveRDS(con_sum, "../saves/consistency_bin_sample.rds")
+
+con_sum <- readRDS("../saves/consistency_bin_sample.rds")
 ```
 
-
-### Phase 1
+#### Compare methods 
 
 ```{r}
-sum_mult$random$subject%>%as_tibble(rownames = "param")%>%
-  filter(grepl("sd\\(time_cat", param))%>%
-  mutate(t = str_remove(param, "task"),
-         t = str_remove(t, "sd\\("),
-         t = str_remove(t, "\\)"))%>%
-  separate(t, into = c("tp", "task"), sep = "\\:")%>%
-  mutate(task = ifelse(is.na(task), "cause", task),
-         time_point = str_remove(tp, "time_cat"),
-         tp_est = Estimate)%>%
-  select(task, time_point, tp_est)%>%
-  left_join(
-    sum_mult$random$subject%>%as_tibble(rownames = "param")%>%
-  filter(grepl("sd\\(", param))%>%
-  filter(!grepl("time_cat", param))%>%
-  mutate(task = str_remove(param, "sd\\(task"),
-         task = str_remove(task, "\\)"))%>%
-  mutate(trait = Estimate)%>%
-  select(task, trait)
-  )%>%
-  rowwise()%>%
+bind_rows(
+lstv_con_rel%>%filter(param == "consistency", !grepl("7", task))%>%mutate(type ="mplus_sem")%>%
+  select(-param)%>%
+  dplyr::rename(con_lci = lower_2.5ci,
+                con_uci = upper_2.5ci, 
+                con_m = value)%>%
   mutate(
-    con = trait / (trait+tp_est)
+      task = recode(task,
+       "pop-to-sample" = "Population-to-sample",
+       "communication" = "Communicative-cues",
+       "reasoning" = "Probabilistic-reasoning",
+       "visible-food" = "Ignore-visible-food",
+       "inhibit-searched" = "Self-ordered-search",
+       "attention" = "Attention-following")
+  ),
+
+con_sum%>%mutate(
+  type ="brms_binomial",
+  task = recode(task,
+       "pop" = "Population-to-sample",
+       "comm" = "Communicative-cues",
+       "reas" = "Probabilistic-reasoning",
+       "vfood" = "Ignore-visible-food",
+       "search" = "Self-ordered-search",
+       "attent" = "Attention-following")
   )
-  
+)%>%
+  ggplot(aes(x = task, y = con_m))+
+  geom_pointrange(aes(ymin= con_lci, ymax = con_uci, col = type), position = position_dodge(width = 0.2))+
+  theme_few()+
+  ylim(0,1)+
+  labs(x = "", y = "LST model estimate")+
+  scale_color_colorblind(name = "")+
+  theme(legend.direction = "vertical", legend.position = c(0.2, 0.25), legend.box = "horizontal", legend.background = element_blank()
+    )+
+  ggtitle("Consistencies across methods")
 ```
+```{r}
+ggsave("../visuals/con_comp.png",width = 8, height = 3, scale = 1.5)
+```
+
 
 ## Correlations between tasks
 
@@ -511,7 +531,7 @@ Multi_LST_bin <- readRDS("../saves/multi_lst_bin.rds")
 Multi_LST1_bin <- readRDS("../saves/multi_lst1_bin.rds")
 Multi_LST2_bin <- readRDS("../saves/multi_lst2_bin.rds")
 
-sum_mult1_bin <- summary(Multi_LST_bin)
+sum_mult_bin <- summary(Multi_LST_bin)
 sum_mult1_bin <- summary(Multi_LST1_bin)
 sum_mult2_bin <- summary(Multi_LST2_bin)
 ```
@@ -578,10 +598,10 @@ p_cor_bin <- cor_mult_bin%>%
   scale_fill_gradient2(low = "#CC6677", high = "#117733", mid = "white", 
   midpoint = 0, limit = c(-1,1), space = "Lab", 
   name="Correlation")+
-  #ggtitle("Model based correlations")+
+  ggtitle("brms binomial model")+
   geom_text(aes(label = round(Estimate, 2), fontface = sig), size = 3)+
-  scale_y_discrete(breaks = c(1:10),labels = c(str_remove(str_remove(sort(unique(cor_mult$task)), "Z"),"X")))+
-  scale_x_discrete(guide = guide_axis(angle = 90), labels = c(str_remove(str_remove(sort(unique(cor_mult$task_1)), "Z"),"X")))+
+  scale_y_discrete(breaks = c(1:10),labels = c(str_remove(str_remove(sort(unique(cor_mult_bin$task)), "Z"),"X")))+
+  scale_x_discrete(guide = guide_axis(angle = 90), labels = c(str_remove(str_remove(sort(unique(cor_mult_bin$task_1)), "Z"),"X")))+
   #scale_y_discrete(limits=rev, breaks = c(1:10))+
   #scale_x_discrete(breaks = c(1:9))+
   theme_few()+
@@ -589,9 +609,9 @@ p_cor_bin <- cor_mult_bin%>%
 ```
 
 ```{r}
-plot_grid(p_cor_bin, p_cor_rasch)
+plot_grid(p_cor_bin, pcor_mod_a)
 ```
 
 ```{r}
-ggsave("../visuals/cor_comp.pdf",width = 14, height = 6, scale = 1)
+ggsave("../visuals/cor_comp_bin.pdf",width = 14, height = 6, scale = 1)
 ```
