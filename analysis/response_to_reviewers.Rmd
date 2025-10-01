@@ -1,0 +1,237 @@
+---
+title: "Response to reviewers"
+output: html_document
+date: "2025-09-30"
+---
+
+```{r, include = F}
+knitr::opts_chunk$set(echo=F, warning=FALSE, message=FALSE, size="small")
+
+opts <- options(knitr.kable.NA = "")
+```
+
+```{r, cache = F, include = F}
+library(png)
+library(grid)
+library(xtable)
+library(tidybayes)
+library(ggridges)
+library(glue)
+library(brms)
+library(stringr)
+library(forcats)
+library(ggthemes)
+library(ggpubr)
+library(reshape)
+library(ggExtra)
+library(tidybayes)
+library(tidyboot)
+library(MplusAutomation)
+library(kableExtra)
+library(knitr)
+library(ggstance)
+library(magick)
+library(pdftools)
+library(projpred)
+library(bayesplot)
+library(loo)
+library(directlabels)
+library(tidyverse)
+library(cowplot)
+library(readxl)
+
+source("../utils/custom_facet.R")
+
+cor_func <- function(x) {
+  x %>%
+    corrr::correlate()%>%
+    gather(time_point, cor, -term)%>%
+    mutate(cor = replace(cor, duplicated(cor), NA))%>%
+    drop_na(cor)
+}
+
+library(coda)
+
+estimate_mode <- function(s) {
+  d <- density(s)
+  return(d$x[which.max(d$y)])
+}
+
+hdi_upper<- function(s){
+  m <- HPDinterval(mcmc(s))
+  return(m["var1","upper"])
+}
+
+hdi_lower<- function(s){
+  m <- HPDinterval(mcmc(s))
+  return(m["var1","lower"])
+}
+
+```
+
+```{r}
+# read in data files
+data_task <- read.csv("../data/laac2_data_task.csv")%>%
+  mutate(task = recode(task,
+       "population" = "Population-to-sample",
+       "communication" = "Communicative-cues",
+       "reasoning" = "Probabilistic-reasoning",
+       "visible_food" = "Ignore-visible-food",
+       "inhibit_searched" = "Self-ordered-search",
+       "attention" = "Attention-following"
+  ))
+
+data_trial <- read.csv("../data/laac2_data_trial.csv")%>%
+  mutate(task = recode(task,
+       "population" = "Population-to-sample",
+       "communication" = "Communicative-cues",
+       "reasoning" = "Probabilistic-reasoning",
+       "visible_food" = "Ignore-visible-food",
+       "inhibit_searched" = "Self-ordered-search",
+       "attention" = "Attention-following"
+  ))
+```
+
+```{r }
+
+# Combine datasets from two waves
+# --> Restructure_data.R --> saves combined long-format dataset in file "laac_complete.txt"
+#long <- read.csv("laac_complete.txt", sep="", na.strings="-99")
+
+long <- read.csv("../data/laac_complete.txt", sep="", na.strings="-99")
+
+# create categorical variables indicating time point and stable trait level
+long$trial <- as.factor(long$trial)
+long$time_cat <- as.factor(long$time_point)
+long$trait <- 1
+# recode search task to binary response
+long[long$task == "search", "code"] <- car::recode(long[long$task == "search", "code"], '2=1')
+
+long_bin <- long%>%
+  filter(!is.na(code))%>%
+  group_by(time_point, subject, task, time_cat, trait)%>%
+  summarise(n = length(code), 
+            sum = sum(code))%>%
+  ungroup()
+
+long_bin_all <- long_bin%>%
+  mutate(phase = ifelse(task %in% c("cause", "delay", "gaze", "inference", "quant"), 1, 2))%>%
+  mutate(time_point = ifelse(phase == 1, time_point - 4, time_point))%>%
+  filter(time_point > 0)%>%
+  mutate(time_cat = as.factor(time_point))
+
+for (i in unique(long_bin_all$task)) {
+  
+  long_bin_all%>%filter(task == i)%>%write_csv(paste0("../data/data_",i,".csv"))
+  
+}
+
+```
+
+# Search patterns self-ordered search
+
+```{r}
+search_dat_ind <- read_csv("../data/inhibit_searched_data.csv")%>%
+  rowwise()%>%
+  mutate(search_pattern = paste0(search_1, search_2, search_3))%>%
+  group_by(subject, group,time_point, search_pattern)%>%
+  summarise(freq = n())%>%
+  group_by(subject, time_point)%>%
+  mutate(prop_dominant = freq/sum(freq))%>%
+  group_by(subject, time_point)%>%
+  filter(prop_dominant == max(prop_dominant))
+
+
+search_dat_agg <- search_dat_ind%>%
+  group_by(time_point)%>%
+  tidyboot_mean(column = prop_dominant)
+
+ggplot()+
+  geom_point(data =search_dat_ind, aes(x = factor(time_point), y = prop_dominant), alpha = 0.1)+
+  geom_line(data =search_dat_ind, aes(x = factor(time_point), y = prop_dominant, group = subject), alpha = 0.1)+
+  #geom_point(data =search_dat_agg, aes(x = time_point, y = mean), col = "firebrick")+
+  geom_pointrange(data =search_dat_agg, aes(x = time_point, y = mean, ymin = ci_lower, ymax = ci_upper), col = "firebrick")+
+  labs(x = "Time point", y = "Proportion most dominant search pattern")+
+  geom_line(data =search_dat_agg, aes(x = time_point, y = mean), col = "firebrick")+
+  theme_bw()
+```
+```{r}
+search_dat_ind%>%
+  ggplot(aes(x=factor(time_point), y = subject, fill = prop_dominant))+
+  geom_tile()+
+  facet_grid(group~., scales = "free_y", space = "free_y")+
+  labs(x = "Time point", y = "Subject")+
+  scale_fill_viridis_c()
+```
+
+```{r}
+ggsave("../visuals/prop_search_ind.png", height = 10, width = 6)
+```
+
+
+
+```{r}
+search_dat_agg_pat <- read_csv("../data/inhibit_searched_data.csv")%>%
+  rowwise()%>%
+  mutate(search_pattern = paste0(search_1, search_2, search_3))%>%
+  group_by(time_point, search_pattern)%>%
+  summarise(n = n())%>%
+  group_by(time_point)%>%
+  mutate(sum = sum(n))%>%
+  rowwise()%>%
+  mutate(prop = n/sum)
+
+search_dat_agg_pat%>%
+  ggplot(aes(x = search_pattern, y = prop))+
+  geom_bar(stat = "identity")+
+  facet_grid(time_point~.)+
+  theme_bw()
+
+search_dat_agg_pat%>%
+  filter(search_pattern %in% c("123", "132", "213", "231", "312", "321"))%>%
+  ggplot(aes(x = factor(time_point), y = prop, col = search_pattern))+
+  geom_point()+
+  geom_line(aes(group = search_pattern))+
+  labs(x = "Time point", y = "Proportion strategy")+
+  scale_color_colorblind()+
+  theme_bw()
+```
+
+# Correlated slopes
+
+```{r}
+
+data_ind <- data_trial%>%
+  group_by(task, subject, time_point)%>%
+  summarise(sum = sum(code), 
+            n = n())%>%
+  mutate(id = paste(task, subject, sep = "_"))
+
+# reference model 
+  bmr <-  brm(sum|trials(n) ~ time_point,
+                 data = data_ind%>% filter(id == "Attention-following_abeeku"),
+                 family = binomial(),
+                 chains = 3,
+                 cores = 3,
+                 iter=2000)
+
+
+
+ind_slopes <- tibble()
+
+for (i in unique(data_ind$id)) {
+    
+ dx <- data_ind%>%filter(id == i)
+
+ bmij <- update(bmr, newdata = data_ind)
+ 
+ x <- fixef(bmi)%>%as_tibble(rownames = "param")%>%filter(param == "time_point")%>%mutate(id = i)
+
+ ind_slopes <- bind_rows(ind_slopes, x)   
+ 
+ saveRDS(ind_slopes, "../saves/id_slopes.rds")
+  
+}
+
+```
+

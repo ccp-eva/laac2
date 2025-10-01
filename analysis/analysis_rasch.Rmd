@@ -62,6 +62,8 @@ long_bin_all <- long_bin%>%
   mutate(time_point = ifelse(phase == 1, time_point - 4, time_point))%>%
   filter(time_point > 0)%>%
   mutate(time_cat = as.factor(time_point))
+
+
 ```
 
 ```{r }
