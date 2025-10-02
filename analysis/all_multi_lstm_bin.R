@@ -20,7 +20,7 @@ long_bin <- long%>%
   ungroup()
 
 long_bin_all <- long_bin%>%
-  filter(!subject %in% c("tayo", "sari", "frank", "hodari"))%>%
+  filter(!subject %in% c("frank", "hodari"))%>%
   mutate(phase = ifelse(task %in% c("cause", "delay", "gaze", "inference", "quant"), 1, 2))%>%
   mutate(time_point = ifelse(phase == 1, time_point - 4, time_point))%>%
   filter(time_point > 0)%>%

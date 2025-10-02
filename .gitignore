@@ -19,6 +19,7 @@ saves/multi_lst_cause_food_delay.rds
 saves/multi_lst_bin.rds
 saves/multi_lst1_bin.rds
 saves/multi_lst2_bin.rds
+saves/multi_lst_bin_ex_infants.rds
 
 outputs/output_old/*
 

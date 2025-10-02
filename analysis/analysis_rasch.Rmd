@@ -63,6 +63,8 @@ long_bin_all <- long_bin%>%
   filter(time_point > 0)%>%
   mutate(time_cat = as.factor(time_point))
 
+
+table(long_bin_all$subject,long_bin_all$task)
 ```
 
 ```{r }
@@ -236,7 +238,9 @@ cor_bin <- tibble()
 
 for (i in c("pop", "reas" , "comm", "vfood", "search", "attent" )) {
   
-  task <- long_bin %>%filter(!subject %in% c("tayo", "sari", "frank", "hodari"))%>%filter(task == i)
+  task <- long_bin %>%
+    filter(!subject %in% c("frank", "hodari"))%>%
+    filter(task == i)
   
   state <-  brm(sum|trials(n) ~ 0 + time_cat + (0 + time_cat | subject),
                  data = task,
@@ -265,15 +269,15 @@ for (i in c("pop", "reas" , "comm", "vfood", "search", "attent" )) {
 
 saveRDS(cor_bin, "../saves/ls_cor_bin_ex_infants.rds")
 
-
-cor_bin <- readRDS("../saves/ls_cor_bin_ex_infants.rds")
+#cor_bin <- readRDS("../saves/ls_cor_bin.rds")
+cor_bin_ex_inf <- readRDS("../saves/ls_cor_bin_ex_infants.rds")
 
 ```
 
 
 
 ```{r}
-plsc_bin <- cor_bin%>%
+plsc_bin <- cor_bin_ex_inf%>%
   mutate(task = factor(task, levels = c("attent",  "comm", "vfood", "pop", "reas","search")))%>%
   ggplot(aes(y = factor(b), x = factor(a), fill = Estimate))+
     geom_tile(color = "white")+
@@ -359,7 +363,8 @@ get_variables(Multi_LST)
 ## Consistencies
 
 ```{r}
-con_samp_raw <- posterior_samples(Multi_LST2_bin, pars = "^sd_subject", add_chain = T)%>%
+# rasch
+con_samp_raw <- posterior_samples(Multi_LST2, pars = "^sd_subject", add_chain = T)%>%
   sample_n(5000)%>%
   pivot_longer(names_to = "param", values_to = "value", cols = -c(chain, iter))
 
@@ -391,9 +396,46 @@ con_sum <- con_samp%>%
             con_lci = hdi_lower(con), 
             con_uci = hdi_upper(con))
 
-saveRDS(con_sum, "../saves/consistency_bin_sample.rds")
+saveRDS(con_sum, "../saves/consistency_sample.rds")
 
-con_sum <- readRDS("../saves/consistency_bin_sample.rds")
+con_sum <- readRDS("../saves/consistency_sample.rds")
+
+# binomial
+con_samp_raw_bin <- posterior_samples(Multi_LST2_bin, pars = "^sd_subject", add_chain = T)%>%
+  sample_n(5000)%>%
+  pivot_longer(names_to = "param", values_to = "value", cols = -c(chain, iter))
+
+con_samp_bin <- con_samp_raw_bin%>%
+  mutate(t = str_remove(param, "sd_subject\\__"),
+         t = str_remove(t, "task"))%>%
+  separate(t, into = c("tp", "task"), sep = "\\:")%>%
+  filter(grepl("cat", tp))%>%
+  mutate(task = ifelse(is.na(task), "attent", task),
+         time_point = str_remove(tp, "time_cat"),
+         tp_samp = value)%>%
+  select(task, time_point, tp_samp, chain, iter)%>%
+  left_join(
+    con_samp_raw%>%
+    filter(!grepl("time_cat", param))%>%
+    mutate(task = str_remove(param, "sd_subject\\__task"))%>%
+    mutate(trait_samp = value)%>%
+    select(task, trait_samp, chain, iter)
+  )%>%
+  rowwise()%>%
+  mutate(
+    con = trait_samp / (trait_samp+tp_samp)
+  )
+
+
+con_sum_bin <- con_samp_bin%>%
+  group_by(task)%>%
+  summarise(con_m = estimate_mode(con), 
+            con_lci = hdi_lower(con), 
+            con_uci = hdi_upper(con))
+
+saveRDS(con_sum_bin, "../saves/consistency_bin_sample.rds")
+
+con_sum_bin <- readRDS("../saves/consistency_bin_sample.rds")
 ```
 
 #### Compare methods 
@@ -417,6 +459,17 @@ lstv_con_rel%>%filter(param == "consistency", !grepl("7", task))%>%mutate(type =
 
 con_sum%>%mutate(
   type ="brms_binomial",
+  task = recode(task,
+       "pop" = "Population-to-sample",
+       "comm" = "Communicative-cues",
+       "reas" = "Probabilistic-reasoning",
+       "vfood" = "Ignore-visible-food",
+       "search" = "Self-ordered-search",
+       "attent" = "Attention-following")
+  ),
+
+con_sum%>%mutate(
+  type ="brms_rasch",
   task = recode(task,
        "pop" = "Population-to-sample",
        "comm" = "Communicative-cues",
