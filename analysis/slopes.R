@@ -3,7 +3,7 @@ library(brms)
 
 t <- c("attent", "comm","pop","reas","search","vfood","cause","delay","gaze","inference","quant")
 
-task <- t[1]
+task <- t[7]
 
 d <- read_csv(paste0("../data/data_",task,".csv"))
 

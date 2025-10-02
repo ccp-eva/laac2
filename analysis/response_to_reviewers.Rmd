@@ -120,12 +120,6 @@ long_bin_all <- long_bin%>%
   filter(time_point > 0)%>%
   mutate(time_cat = as.factor(time_point))
 
-for (i in unique(long_bin_all$task)) {
-  
-  long_bin_all%>%filter(task == i)%>%write_csv(paste0("../data/data_",i,".csv"))
-  
-}
-
 ```
 
 # Search patterns self-ordered search
@@ -200,38 +194,96 @@ search_dat_agg_pat%>%
 # Correlated slopes
 
 ```{r}
-
-data_ind <- data_trial%>%
-  group_by(task, subject, time_point)%>%
-  summarise(sum = sum(code), 
-            n = n())%>%
-  mutate(id = paste(task, subject, sep = "_"))
+ds <- long_bin_all%>%mutate(id = paste(subject, task, sep = "_"))
 
 # reference model 
-  bmr <-  brm(sum|trials(n) ~ time_point,
-                 data = data_ind%>% filter(id == "Attention-following_abeeku"),
-                 family = binomial(),
-                 chains = 3,
-                 cores = 3,
-                 iter=2000)
+bmr <-  brm(sum|trials(n) ~ time_point,
+            data = ds%>%filter(id == unique(ds$id)[1]),
+            family = binomial(),
+            chains = 3,
+            cores = 3,
+            iter=2000)
 
+#ind_slopes <- tibble()
 
-
-ind_slopes <- tibble()
-
-for (i in unique(data_ind$id)) {
-    
- dx <- data_ind%>%filter(id == i)
-
- bmij <- update(bmr, newdata = data_ind)
- 
- x <- fixef(bmi)%>%as_tibble(rownames = "param")%>%filter(param == "time_point")%>%mutate(id = i)
-
- ind_slopes <- bind_rows(ind_slopes, x)   
- 
- saveRDS(ind_slopes, "../saves/id_slopes.rds")
+for (i in unique(ds$id)) {
+  
+  dx <- ds%>%filter(id == i)
+  
+  bmij <- update(bmr, newdata = dx)
+  
+  x <- summary(bmij)$fixed%>%as_tibble(rownames = "param")%>%filter(param == "time_point")%>%mutate(id = i)
+  
+  ind_slopes <- bind_rows(ind_slopes, xchains = 3, cores = 3)   
+  
+  saveRDS(ind_slopes, paste0("../saves/id_slopes.rds"))
   
 }
 
 ```
+```{r}
+dslopes <- ind_slopes%>%
+  filter(Rhat <2)%>%
+  separate(id, into = c("subject", "task"))%>%
+  select(Estimate, subject, task)%>%
+  pivot_wider(names_from = task, values_from = Estimate)
 
+
+cor_slopes <- corrr::correlate(dslopes)%>%
+    gather(task, cor, -term)%>%
+    mutate(cor = replace(cor, duplicated(cor), NA))%>%
+    drop_na(cor)%>%
+  mutate(b = recode(term,
+    attent = "ZAttention-following",
+    gaze = "ZGaze-following",
+    cause = "Causal-inference",
+    inference = "Inference-by-exclusion",
+    delay = "Delay-of-gratification",
+    comm = "ZCommunicative-cues",
+    search = "Self-ordered-search",
+    pop = "Population-to-sample",
+    quant = "Quantity-discrimination",
+    reas = "XProbabilistic-reasoning",
+    vfood = "Ignore-visible-food"
+  ),
+  a = recode(task,
+    attent = "ZAttention-following",
+    gaze = "ZGaze-following",
+    cause = "Causal-inference",
+    inference = "Inference-by-exclusion",
+    delay = "Delay-of-gratification",
+    comm = "ZCommunicative-cues",
+    search = "Self-ordered-search",
+    pop = "Population-to-sample",
+    quant = "Quantity-discrimination",
+    reas = "XProbabilistic-reasoning",
+    vfood = "Ignore-visible-food"
+  ))%>%
+   rowwise()%>%
+  mutate(id = paste(sort(c(b, a)), collapse = "_"))%>%
+  separate(id, into = c("task", "task_1"), sep = "_")%>%
+  arrange(task, task_1)%>%
+  mutate(order = as.numeric(factor(task)),
+         order_1 = as.numeric(factor(task_1)))
+```
+```{r}
+cor_slopes%>%
+  ggplot(aes(y = factor(order), x = factor(order_1), fill = cor))+
+  geom_tile(color = "white")+
+  labs(x = "", y = "")+
+  scale_fill_gradient2(low = "#CC6677", high = "#117733", mid = "white", 
+  midpoint = 0, limit = c(-1,1), space = "Lab", 
+  name="Correlation")+
+  ggtitle("Correlations between slopes for time_point")+
+  geom_text(aes(label = round(cor, 2)), size = 3)+
+  scale_y_discrete(breaks = c(1:10),labels = c(str_remove(str_remove(sort(unique(cor_slopes$task)), "Z"),"X")))+
+  scale_x_discrete(guide = guide_axis(angle = 90), labels = c(str_remove(str_remove(sort(unique(cor_slopes$task_1)), "Z"),"X")))+
+  #scale_y_discrete(limits=rev, breaks = c(1:10))+
+  #scale_x_discrete(breaks = c(1:9))+
+  theme_few()+
+  theme(legend.position =  c(0.15, 0.8), legend.direction = "vertical", legend.title = element_blank(), legend.background = element_blank())
+```
+
+```{r}
+ggsave("../visuals/cor_slopes.png", height = 6, width = 8)
+```

@@ -63,7 +63,6 @@ long_bin_all <- long_bin%>%
   filter(time_point > 0)%>%
   mutate(time_cat = as.factor(time_point))
 
-
 ```
 
 ```{r }
@@ -237,7 +236,7 @@ cor_bin <- tibble()
 
 for (i in c("pop", "reas" , "comm", "vfood", "search", "attent" )) {
   
-  task <- long_bin %>%filter(task == i)
+  task <- long_bin %>%filter(!subject %in% c("tayo", "sari", "frank", "hodari"))%>%filter(task == i)
   
   state <-  brm(sum|trials(n) ~ 0 + time_cat + (0 + time_cat | subject),
                  data = task,
@@ -264,10 +263,10 @@ for (i in c("pop", "reas" , "comm", "vfood", "search", "attent" )) {
   
 }
 
-saveRDS(cor_bin, "../saves/ls_cor_bin.rds")
+saveRDS(cor_bin, "../saves/ls_cor_bin_ex_infants.rds")
 
 
-cor_bin <- readRDS("../saves/ls_cor_bin.rds")
+cor_bin <- readRDS("../saves/ls_cor_bin_ex_infants.rds")
 
 ```
 

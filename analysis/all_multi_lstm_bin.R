@@ -20,6 +20,7 @@ long_bin <- long%>%
   ungroup()
 
 long_bin_all <- long_bin%>%
+  filter(!subject %in% c("tayo", "sari", "frank", "hodari"))%>%
   mutate(phase = ifelse(task %in% c("cause", "delay", "gaze", "inference", "quant"), 1, 2))%>%
   mutate(time_point = ifelse(phase == 1, time_point - 4, time_point))%>%
   filter(time_point > 0)%>%
@@ -36,4 +37,4 @@ Multi_LST_bin <-  brm(sum|trials(n) ~ 0 + time_cat + task + time_cat:task +
                   control = list(adapt_delta = 0.95, max_treedepth = 20),
                   iter=15000) # decreased for model testing
 
-saveRDS(Multi_LST_bin, "../saves/multi_lst_bin.rds")
+saveRDS(Multi_LST_bin, "../saves/multi_lst_bin_ex_infants.rds")
