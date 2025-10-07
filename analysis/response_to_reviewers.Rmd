@@ -120,6 +120,8 @@ long_bin_all <- long_bin%>%
   filter(time_point > 0)%>%
   mutate(time_cat = as.factor(time_point))
 
+write_csv(long_bin_all, "../data/data_binomial_modles_combined.csv")
+
 ```
 
 # Search patterns self-ordered search

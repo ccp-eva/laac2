@@ -415,7 +415,7 @@ con_samp_bin <- con_samp_raw_bin%>%
          tp_samp = value)%>%
   select(task, time_point, tp_samp, chain, iter)%>%
   left_join(
-    con_samp_raw%>%
+    con_samp_raw_bin%>%
     filter(!grepl("time_cat", param))%>%
     mutate(task = str_remove(param, "sd_subject\\__task"))%>%
     mutate(trait_samp = value)%>%
@@ -468,7 +468,7 @@ con_sum%>%mutate(
        "attent" = "Attention-following")
   ),
 
-con_sum%>%mutate(
+con_sum_bin%>%mutate(
   type ="brms_rasch",
   task = recode(task,
        "pop" = "Population-to-sample",
