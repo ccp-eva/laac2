@@ -3524,6 +3524,8 @@ Supplementary Figure \@ref(fig:lstmplotcomp) shows ...
 #          param = str_remove(param, "\\)"),
 #          param = str_remove_all(param, "task"))%>%
 #   tidyr::separate(param, sep = ",", into = c("a", "b"))%>%
+#   filter(a != "reas", 
+#          b != "reas")%>%
 #   mutate(Estimate = ifelse(a == "search" | b == "search", Estimate*-1, Estimate))%>%
 #   mutate(b = recode(b,
 #     attent = "ZAttention-following",
@@ -3558,7 +3560,7 @@ Supplementary Figure \@ref(fig:lstmplotcomp) shows ...
 #    add_row(task = "ZCommunicative-cues",task_1 = "ZCommunicative-cues", Estimate = 0)%>%
 #   arrange(task, task_1)%>%
 #   mutate(
-#     zero = 0, 
+#     zero = 0,
 #     sig = ifelse(between(zero, `l-95% CI`, `u-95% CI`), "plain", "bold"),
 #     sig = ifelse(is.na(sig), "plain", sig))%>%
 #   mutate(order = as.numeric(factor(task)),
@@ -3579,7 +3581,7 @@ p_cor_bin <- cor_mult_bin%>%
   name="Correlation")+
 #  ggtitle("brms binomial model")+
   geom_text(aes(label = round(Estimate, 2), fontface = sig), size = 3)+
-  scale_y_discrete(breaks = c(1:10),labels = c(str_remove(str_remove(sort(unique(cor_mult_bin$task)), "Z"),"X")))+
+  scale_y_discrete(breaks = c(1:9),labels = c(str_remove(str_remove(sort(unique(cor_mult_bin$task)), "Z"),"X")))+
   scale_x_discrete(guide = guide_axis(angle = 90), labels = c(str_remove(str_remove(sort(unique(cor_mult_bin$task_1)), "Z"),"X")))+
   #scale_y_discrete(limits=rev, breaks = c(1:10))+
   #scale_x_discrete(breaks = c(1:9))+
