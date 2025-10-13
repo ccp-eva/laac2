@@ -170,6 +170,7 @@ ggsave("../visuals/prop_search_ind.png", height = 10, width = 6)
 search_dat_agg_pat <- read_csv("../data/inhibit_searched_data.csv")%>%
   rowwise()%>%
   mutate(search_pattern = paste0(search_1, search_2, search_3))%>%
+  mutate(search_pattern = ifelse(search_pattern %in% c("123", "132", "213", "231", "312", "321"), search_pattern, "redunant search"))%>%
   group_by(time_point, search_pattern)%>%
   summarise(n = n())%>%
   group_by(time_point)%>%
@@ -184,7 +185,7 @@ search_dat_agg_pat%>%
   theme_bw()
 
 search_dat_agg_pat%>%
-  filter(search_pattern %in% c("123", "132", "213", "231", "312", "321"))%>%
+  #filter(search_pattern %in% c("123", "132", "213", "231", "312", "321"))%>%
   ggplot(aes(x = factor(time_point), y = prop, col = search_pattern))+
   geom_point()+
   geom_line(aes(group = search_pattern))+
@@ -289,3 +290,26 @@ cor_slopes%>%
 ```{r}
 ggsave("../visuals/cor_slopes.png", height = 6, width = 8)
 ```
+
+# Trial 1 data
+
+```{r}
+pt1 <- data_trial%>%
+  filter(time_point == 1)%>%
+  group_by(task, trial)%>%
+  tidyboot_mean(col = code)
+
+
+pt1%>%
+  filter(task %in% c("Attention-following", "Communicative-cues"))%>%
+  ggplot(aes(x = factor(trial), y = mean, col = task))+
+  geom_hline(yintercept = 0.5, lty = 3, alpha = 0.5)+
+  geom_line(aes(group = task))+
+  geom_pointrange(aes(ymin = ci_lower, ymax = ci_upper, col = task))+
+  theme_bw()+
+  facet_grid(task~.)+
+  scale_color_colorblind(guide = "none")+
+  labs(y = "Proportion correct", x = "Trial (session 1)")+
+  ylim(0,1)
+```
+

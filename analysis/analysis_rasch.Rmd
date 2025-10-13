@@ -160,7 +160,7 @@ cor <- results$random$subject[11:55,]%>%as_tibble(rownames = "cor")%>%
 ```{r}
 
 # Latent state correlations rasch model
-
+state_means_rasch <- tibble()
 cor_rasch <- tibble()
 
 for (i in c("pop", "reas" , "comm", "vfood", "search", "attent" )) {
@@ -172,12 +172,16 @@ for (i in c("pop", "reas" , "comm", "vfood", "search", "attent" )) {
                  family = brmsfamily(family="bernoulli", link="logit"),
                  chains = 3, # to speed up sampling --> increase later
                  cores = 3,
-                 threads = threading(8),
+                 #threads = threading(8),
                  backend = "cmdstanr",
-                 iter=2000)
+                 iter=3000)
   
   
   results <- summary(state)
+  
+  state_means <- results$fixed%>%as_tibble(rownames = "time_point")%>%filter(grepl("time_cat", time_point))%>%mutate(task = i)
+  
+  state_means_rasch <- bind_state_means_rasch(state_means_rasch, state_means)
   
   cor_state <- results$random$subject[11:55,]%>%as_tibble(rownames = "cor")%>%
   mutate(cor = str_remove(cor, "cor\\(time_cat"),
@@ -192,6 +196,8 @@ for (i in c("pop", "reas" , "comm", "vfood", "search", "attent" )) {
   
 }
 
+saveRDS(cor_rasch, "../saves/latent_state_cor_rasch.rds")
+saveRDS(state_means_rasch, "../saves/latent_state_means_rasch.rds")
 
 
 ```

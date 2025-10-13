@@ -94,7 +94,8 @@ data_task <- read.csv("../data/laac2_data_task.csv")%>%
        "visible_food" = "Ignore-visible-food",
        "inhibit_searched" = "Self-ordered-search",
        "attention" = "Attention-following"
-  ))
+  ))%>%
+  mutate(task = factor(task, levels = c("Population-to-sample","Probabilistic-reasoning","Communicative-cues", "Ignore-visible-food", "Self-ordered-search","Attention-following" )))
 
 data_trial <- read.csv("../data/laac2_data_trial.csv")%>%
   mutate(task = recode(task,
@@ -104,7 +105,8 @@ data_trial <- read.csv("../data/laac2_data_trial.csv")%>%
        "visible_food" = "Ignore-visible-food",
        "inhibit_searched" = "Self-ordered-search",
        "attention" = "Attention-following"
-  ))
+  ))%>%
+  mutate(task = factor(task, levels = c("Population-to-sample","Probabilistic-reasoning","Communicative-cues", "Ignore-visible-food", "Self-ordered-search","Attention-following" )))
 ```
 
 # Overview
@@ -198,13 +200,19 @@ The tasks we selected are based on published procedures and are commonly used in
 
 <!-- Example videos for each task can be found in the associated online repository in [`videos/`](https://github.com/ccp-eva/laac2/tree/master/videos). -->
 
-Example videos for each task can be found in the associated online repository in [*masked for peer revie*w]. 
+Example videos for each task can be found in the associated online repository in [*masked for peer review*]. The tasks are presented in the order in which they were administered (see upplementary Figure \@ref(fig:setup)). 
 
-### Attention-following
+### Population-to-sample
 
-The Attention-following task was loosely modeled after @kaminski2004body. The setup consisted of two identical cups placed on the sliding table and a large opaque screen that was longer than the width of the sliding table (Supplementary Figure \@ref(fig:setup)F). The experimenter placed both cups on the table and showed the ape that they were empty. Then, the experimenter baited both cups in view of the ape and placed the opaque screen in the center between the two cups, perpendicular to the mesh. Next, the experimenter moved to one side and looked at the cup in front of them. Then, the experimenter pushed the sliding table forward and the ape was allowed to choose one of the cups by pointing at it. If the ape chose the cup that the experimenter was looking at, they received the food item. If they choose the other cup, they did not. Because the experimenter could not see if the ape chose the other cup, the trial was terminated if the ape was at the mesh (in a position to make a choice) and did not choose the cup the experimenter was looking at within 3s. We coded whether the ape chose the side the experimenter was looking at (correct choice) or not. Apes received twelve trials. The side at which the experimenter looked was counterbalanced with same number of looks to each side and looks to the same side not more than two times in a row.
+The task was modeled after @eckert2018intuitive. During the test, apes saw two transparent buckets filled with pellets and carrot pieces (the carrot pieces had roughly the same size and shape as the pellets). Each bucket contained 80 food items. The distribution of pellets to carrot pieces was 4:1 in bucket A, and 1:4 in bucket B. Pellets are preferred food items in comparison to carrots. The experimenter placed both buckets on a table, one left, one right (Supplementary Figure \@ref(fig:setup)A). In the beginning of a trial, the experimenter picked up the bucket on the right side, tilted it forward so the ape could see inside, placed it back on the table and turned it around 360°. The same procedure was repeated with the other bucket. Next, the experimenter looked at the ceiling, inserted each hand in the bucket in front of it and drew one item from the bucket without the ape seeing which type (E picked always of the majority type). The food items remained hidden in the experimenter's fists. Next, the experimenter extended the arms (in parallel) towards the ape who was then allowed to make a choice by pointing to one of the fists. The ape received the chosen sample. In half of the trials, the experimenter crossed arms when moving the fists towards the ape to ensure that the apes made a choice between samples and not just chose the side where the favorable population was still visible. In between trials, the buckets were refilled to restore the original distributions. Apes received twelve trials. We coded whether the ape chose the sample from the population with the higher number of high quality food items. The location of the buckets (left and right) was counterbalanced, with the buckets in the same location no more than two times in a row. The crossing of the hands was also counterbalanced with no more than two crossings in a row.
 
-We assume that apes follow the experimenters focus of attention to determine whether or not their request could be seen and thus be successful.
+We assume that apes reasoned about the probability of the sample being a high quality item based on observing the ratio in the population.
+
+### Probabilistic-reasoning
+
+The task was modeled after @hanus2014maths. Three identical cups were presented side-by-side on a sliding table, with the cup in the middle sometimes positioned closer to the left cup and sometimes closer to the right. (Supplementary Figure \@ref(fig:setup)B). Two half-open boxes served as occluders to block the ape’s view when shuffling the cups. Each trial started by showing the ape that all three cups (one on one side of the table, two on the other) were empty. After placing the occluders over both sides of the table, the experimenter put one piece of food on top of each occluder. Next, the experimenter hid each piece of food under the cup(s) behind the occluders. In case of the occluder with the two cups, the food was randomly placed under one of the two cups while both cups were visited and even shuffled. Finally, both occluders were lifted and the table pushed forwards, allowing the ape to choose one of the three cups, from which they then received the content. We coded whether the ape chose the certain cup (i.e. the cup from the side of the table with only one cup). Apes received 12 trials. The side with one cup was counterbalanced, with the same constellation appearing not more than two times in a row on the same side.
+
+We assume that apes would infer that the cup from the tray with only one cup certainly contains food while the other cups contain food only in 50% of cases.  
 
 ### Communicative-cues
 
@@ -218,24 +226,17 @@ The task was modeled after @volter2022inhibitory. The task involved two opaque c
 
 We assume that apes need to inhibit selecting the visible food item and instead use their short-term memory to remember where the food was hidden. 
 
-### Probabilistic-reasoning
-
-The task was modeled after @hanus2014maths. Three identical cups were presented side-by-side on a sliding table, with the cup in the middle sometimes positioned closer to the left cup and sometimes closer to the right. (Supplementary Figure \@ref(fig:setup)B). Two half-open boxes served as occluders to block the ape’s view when shuffling the cups. Each trial started by showing the ape that all three cups (one on one side of the table, two on the other) were empty. After placing the occluders over both sides of the table, the experimenter put one piece of food on top of each occluder. Next, the experimenter hid each piece of food under the cup(s) behind the occluders. In case of the occluder with the two cups, the food was randomly placed under one of the two cups while both cups were visited and even shuffled. Finally, both occluders were lifted and the table pushed forwards, allowing the ape to choose one of the three cups, from which they then received the content. We coded whether the ape chose the certain cup (i.e. the cup from the side of the table with only one cup). Apes received 12 trials. The side with one cup was counterbalanced, with the same constellation appearing not more than two times in a row on the same side.
-
-We assume that apes would infer that the cup from the tray with only one cup certainly contains food while the other cups contain food only in 50% of cases.  
-
-
-### Population-to-sample
-
-The task was modeled after @eckert2018intuitive. During the test, apes saw two transparent buckets filled with pellets and carrot pieces (the carrot pieces had roughly the same size and shape as the pellets). Each bucket contained 80 food items. The distribution of pellets to carrot pieces was 4:1 in bucket A, and 1:4 in bucket B. Pellets are preferred food items in comparison to carrots. The experimenter placed both buckets on a table, one left, one right (Supplementary Figure \@ref(fig:setup)A). In the beginning of a trial, the experimenter picked up the bucket on the right side, tilted it forward so the ape could see inside, placed it back on the table and turned it around 360°. The same procedure was repeated with the other bucket. Next, the experimenter looked at the ceiling, inserted each hand in the bucket in front of it and drew one item from the bucket without the ape seeing which type (E picked always of the majority type). The food items remained hidden in the experimenter's fists. Next, the experimenter extended the arms (in parallel) towards the ape who was then allowed to make a choice by pointing to one of the fists. The ape received the chosen sample. In half of the trials, the experimenter crossed arms when moving the fists towards the ape to ensure that the apes made a choice between samples and not just chose the side where the favorable population was still visible. In between trials, the buckets were refilled to restore the original distributions. Apes received twelve trials. We coded whether the ape chose the sample from the population with the higher number of high quality food items. The location of the buckets (left and right) was counterbalanced, with the buckets in the same location no more than two times in a row. The crossing of the hands was also counterbalanced with no more than two crossings in a row.
-
-We assume that apes reasoned about the probability of the sample being a high quality item based on observing the ratio in the population.
-
 ### Self-ordered-search
 
 The task was modeled after @volter2019chimpanzees [see also @petrides1995impairments; @diamond1997prefrontal]. Three identical cups were placed equidistantly on a sliding table directly in front of the ape (Supplementary Figure \@ref(fig:setup)E). The experimenter baited all three cups in full view of the ape. Next, the experimenter pushed the sliding table forwards for the ape to choose one of the cups by pointing. After the choice, the table was pulled back and the ape received the food. After a 3s pause, the table was pushed forward again for a second choice. This procedure was repeated for a third choice. If the ape chose a baited cup, they received the food, if not, not. We coded the number of times the ape chose and empty cup (i.e. chose a cup they already chose before). Please note that this outcome variable differed from the other tasks in two ways: first, possible values were 0, 1, and 2 (instead of just 0 and 1) and second, a lower score indicated better performance. Apes received twelve trials. No counterbalancing was needed.
 
 We assume that apes use their working memory abilities to remember where they had already searched and which cups still contained food.
+
+### Attention-following
+
+The Attention-following task was loosely modeled after @kaminski2004body. The setup consisted of two identical cups placed on the sliding table and a large opaque screen that was longer than the width of the sliding table (Supplementary Figure \@ref(fig:setup)F). The experimenter placed both cups on the table and showed the ape that they were empty. Then, the experimenter baited both cups in view of the ape and placed the opaque screen in the center between the two cups, perpendicular to the mesh. Next, the experimenter moved to one side and looked at the cup in front of them. Then, the experimenter pushed the sliding table forward and the ape was allowed to choose one of the cups by pointing at it. If the ape chose the cup that the experimenter was looking at, they received the food item. If they choose the other cup, they did not. Because the experimenter could not see if the ape chose the other cup, the trial was terminated if the ape was at the mesh (in a position to make a choice) and did not choose the cup the experimenter was looking at within 3s. We coded whether the ape chose the side the experimenter was looking at (correct choice) or not. Apes received twelve trials. The side at which the experimenter looked was counterbalanced with same number of looks to each side and looks to the same side not more than two times in a row.
+
+We assume that apes follow the experimenters focus of attention to determine whether or not their request could be seen and thus be successful.
 
 ### Reliability coding 
 
@@ -261,6 +262,10 @@ In addition to the data from the cognitive tasks, we collected data for a range 
 Predictors could either vary with the individual (stable individual characteristics; e.g. sex or rearing history), vary with individual and time point (variable individual characteristics; e.g. sickness or sociality), vary with group membership (group life; e.g. time spent outdoors or disturbances) or vary with the testing arrangements and thus with individual, time point and session (testing arrangements; e.g. presence of an observer or participation in other tests).
 
 Most predictors were collected via a diary that the animal caretakers filled out on a daily basis. Here, the caretakers were asked a range of questions about the presence of a predictor and its severity.
+
+### Time point
+
+To capture change in performance that was due to repeatedly doing the same tasks, we included a variable in the model enumerating the time point at which the data was collected. Variable name in model: `Time point`.
 
 ### Stable individual characteristics
 
@@ -1194,7 +1199,138 @@ lstvv <- readModels("../outputs/laac2_LST_food_equalSvar_means.out")
 
 ```{r}
 mot <- bind_rows(
+  
   tibble(
+  Task = c("Population-to-sample", 
+           #"",
+           ""),
+  Model = c("LSM",
+           # "LSTM", 
+            "LSTM-V"),
+  PPP = c(lsp$summaries$PostPred_PValue,
+          #lstpf$summaries$PostPred_PValue,
+          lstpv$summaries$PostPred_PValue),
+  `Chi 95% CI` = c(
+    
+    paste(
+      lsp$summaries$ObsRepChiSqDiff_95CI_LB%>%round(2)%>%format(nsmall =2),
+      lsp$summaries$ObsRepChiSqDiff_95CI_UB%>%round(2)%>%format(nsmall =2), sep = " ; "),
+    
+    # paste(
+    #   lstpf$summaries$ObsRepChiSqDiff_95CI_LB%>%round(2)%>%format(nsmall =2),
+    #   lstpf$summaries$ObsRepChiSqDiff_95CI_UB%>%round(2)%>%format(nsmall =2), sep = " ; "),
+    
+    paste(
+      lstpv$summaries$ObsRepChiSqDiff_95CI_LB%>%round(2)%>%format(nsmall =2),
+      lstpv$summaries$ObsRepChiSqDiff_95CI_UB%>%round(2)%>%format(nsmall =2), sep = " ; ")
+    
+    )),
+  
+    tibble(
+  Task = c("Probabilistic-reasoning", 
+           #"",
+           ""),
+  Model = c("LSM",
+           # "LSTM", 
+            "LSTM-V"),
+  PPP = c(lsr$summaries$PostPred_PValue,
+          #lstrf$summaries$PostPred_PValue,
+          lstrv$summaries$PostPred_PValue),
+  `Chi 95% CI` = c(
+    
+    paste(
+      lsr$summaries$ObsRepChiSqDiff_95CI_LB%>%round(2)%>%format(nsmall =2),
+      lsr$summaries$ObsRepChiSqDiff_95CI_UB%>%round(2)%>%format(nsmall =2), sep = " ; "),
+    
+    # paste(
+    #   lstrf$summaries$ObsRepChiSqDiff_95CI_LB%>%round(2)%>%format(nsmall =2),
+    #   lstrf$summaries$ObsRepChiSqDiff_95CI_UB%>%round(2)%>%format(nsmall =2), sep = " ; "),
+    
+    paste(
+      lstrv$summaries$ObsRepChiSqDiff_95CI_LB%>%round(2)%>%format(nsmall =2),
+      lstrv$summaries$ObsRepChiSqDiff_95CI_UB%>%round(2)%>%format(nsmall =2), sep = " ; ")
+    
+    )),
+  
+    tibble(
+  Task = c("Communicative-cues",
+           #"",
+           ""),
+  Model = c("LSM",
+            #"LSTM", 
+            "LSTM-V"),
+  PPP = c(lsc$summaries$PostPred_PValue,
+          #lstcf$summaries$PostPred_PValue,
+          lstcv$summaries$PostPred_PValue),
+  `Chi 95% CI` = c(
+    
+    paste(
+      lsc$summaries$ObsRepChiSqDiff_95CI_LB%>%round(2)%>%format(nsmall =2),
+      lsc$summaries$ObsRepChiSqDiff_95CI_UB%>%round(2)%>%format(nsmall =2), sep = " ; "),
+    
+    # paste(
+    #   lstcf$summaries$ObsRepChiSqDiff_95CI_LB%>%round(2)%>%format(nsmall =2),
+    #   lstcf$summaries$ObsRepChiSqDiff_95CI_UB%>%round(2)%>%format(nsmall =2), sep = " ; "),
+    
+    paste(
+      lstcv$summaries$ObsRepChiSqDiff_95CI_LB%>%round(2)%>%format(nsmall =2),
+      lstcv$summaries$ObsRepChiSqDiff_95CI_UB%>%round(2)%>%format(nsmall =2), sep = " ; ")
+    
+    )),
+  
+  
+    tibble(
+  Task = c("Ignore-visible-food", 
+           #"",
+           ""),
+  Model = c("LSM",
+            #"LSTM",
+            "LSTM-V"),
+  PPP = c(lsv$summaries$PostPred_PValue,
+          #lstvf$summaries$PostPred_PValue,
+          lstvv$summaries$PostPred_PValue),
+  `Chi 95% CI` = c(
+    
+    paste(
+      lsv$summaries$ObsRepChiSqDiff_95CI_LB%>%round(2)%>%format(nsmall =2),
+      lsv$summaries$ObsRepChiSqDiff_95CI_UB%>%round(2)%>%format(nsmall =2), sep = " ; "),
+    
+    # paste(
+    #   lstvf$summaries$ObsRepChiSqDiff_95CI_LB%>%round(2)%>%format(nsmall =2),
+    #   lstvf$summaries$ObsRepChiSqDiff_95CI_UB%>%round(2)%>%format(nsmall =2), sep = " ; "),
+    
+    paste(
+      lstvv$summaries$ObsRepChiSqDiff_95CI_LB%>%round(2)%>%format(nsmall =2),
+      lstvv$summaries$ObsRepChiSqDiff_95CI_UB%>%round(2)%>%format(nsmall =2), sep = " ; ")
+    
+    )), 
+  tibble(
+  Task = c("Self-ordered-search", 
+           #"",
+           ""),
+  Model = c("LSM",
+            #"LSTM",
+            "LSTM-V"),
+  PPP = c(lsi$summaries$PostPred_PValue,
+          #lstif$summaries$PostPred_PValue,
+          lstiv$summaries$PostPred_PValue),
+  `Chi 95% CI` = c(
+    
+    paste(
+      lsi$summaries$ObsRepChiSqDiff_95CI_LB%>%round(2)%>%format(nsmall =2),
+      lsi$summaries$ObsRepChiSqDiff_95CI_UB%>%round(2)%>%format(nsmall =2), sep = " ; "),
+    
+    # paste(
+    #   lstif$summaries$ObsRepChiSqDiff_95CI_LB%>%round(2)%>%format(nsmall =2),
+    #   lstif$summaries$ObsRepChiSqDiff_95CI_UB%>%round(2)%>%format(nsmall =2), sep = " ; "),
+    
+    paste(
+      lstiv$summaries$ObsRepChiSqDiff_95CI_LB%>%round(2)%>%format(nsmall =2),
+      lstiv$summaries$ObsRepChiSqDiff_95CI_UB%>%round(2)%>%format(nsmall =2), sep = " ; ")
+    
+    )),
+  
+    tibble(
   Task = c("Attention-following", "",
            #"",
            ""),
@@ -1223,142 +1359,8 @@ mot <- bind_rows(
       lstav_short$summaries$ObsRepChiSqDiff_95CI_LB%>%round(2)%>%format(nsmall =2),
       lstav_short$summaries$ObsRepChiSqDiff_95CI_UB%>%round(2)%>%format(nsmall =2), sep = " ; ")
     
-    )),
-  
-  
-  tibble(
-  Task = c("Communicative-cues",
-           #"",
-           ""),
-  Model = c("LSM",
-            #"LSTM", 
-            "LSTM-V"),
-  PPP = c(lsc$summaries$PostPred_PValue,
-          #lstcf$summaries$PostPred_PValue,
-          lstcv$summaries$PostPred_PValue),
-  `Chi 95% CI` = c(
-    
-    paste(
-      lsc$summaries$ObsRepChiSqDiff_95CI_LB%>%round(2)%>%format(nsmall =2),
-      lsc$summaries$ObsRepChiSqDiff_95CI_UB%>%round(2)%>%format(nsmall =2), sep = " ; "),
-    
-    # paste(
-    #   lstcf$summaries$ObsRepChiSqDiff_95CI_LB%>%round(2)%>%format(nsmall =2),
-    #   lstcf$summaries$ObsRepChiSqDiff_95CI_UB%>%round(2)%>%format(nsmall =2), sep = " ; "),
-    
-    paste(
-      lstcv$summaries$ObsRepChiSqDiff_95CI_LB%>%round(2)%>%format(nsmall =2),
-      lstcv$summaries$ObsRepChiSqDiff_95CI_UB%>%round(2)%>%format(nsmall =2), sep = " ; ")
-    
-    )),
-  
-  
-  tibble(
-  Task = c("Population-to-sample", 
-           #"",
-           ""),
-  Model = c("LSM",
-           # "LSTM", 
-            "LSTM-V"),
-  PPP = c(lsp$summaries$PostPred_PValue,
-          #lstpf$summaries$PostPred_PValue,
-          lstpv$summaries$PostPred_PValue),
-  `Chi 95% CI` = c(
-    
-    paste(
-      lsp$summaries$ObsRepChiSqDiff_95CI_LB%>%round(2)%>%format(nsmall =2),
-      lsp$summaries$ObsRepChiSqDiff_95CI_UB%>%round(2)%>%format(nsmall =2), sep = " ; "),
-    
-    # paste(
-    #   lstpf$summaries$ObsRepChiSqDiff_95CI_LB%>%round(2)%>%format(nsmall =2),
-    #   lstpf$summaries$ObsRepChiSqDiff_95CI_UB%>%round(2)%>%format(nsmall =2), sep = " ; "),
-    
-    paste(
-      lstpv$summaries$ObsRepChiSqDiff_95CI_LB%>%round(2)%>%format(nsmall =2),
-      lstpv$summaries$ObsRepChiSqDiff_95CI_UB%>%round(2)%>%format(nsmall =2), sep = " ; ")
-    
-    )),
-  
-  
-  tibble(
-  Task = c("Probabilistic-reasoning", 
-           #"",
-           ""),
-  Model = c("LSM",
-           # "LSTM", 
-            "LSTM-V"),
-  PPP = c(lsr$summaries$PostPred_PValue,
-          #lstrf$summaries$PostPred_PValue,
-          lstrv$summaries$PostPred_PValue),
-  `Chi 95% CI` = c(
-    
-    paste(
-      lsr$summaries$ObsRepChiSqDiff_95CI_LB%>%round(2)%>%format(nsmall =2),
-      lsr$summaries$ObsRepChiSqDiff_95CI_UB%>%round(2)%>%format(nsmall =2), sep = " ; "),
-    
-    # paste(
-    #   lstrf$summaries$ObsRepChiSqDiff_95CI_LB%>%round(2)%>%format(nsmall =2),
-    #   lstrf$summaries$ObsRepChiSqDiff_95CI_UB%>%round(2)%>%format(nsmall =2), sep = " ; "),
-    
-    paste(
-      lstrv$summaries$ObsRepChiSqDiff_95CI_LB%>%round(2)%>%format(nsmall =2),
-      lstrv$summaries$ObsRepChiSqDiff_95CI_UB%>%round(2)%>%format(nsmall =2), sep = " ; ")
-    
-    )),
-  
-  
-  tibble(
-  Task = c("Self-ordered-search", 
-           #"",
-           ""),
-  Model = c("LSM",
-            #"LSTM",
-            "LSTM-V"),
-  PPP = c(lsi$summaries$PostPred_PValue,
-          #lstif$summaries$PostPred_PValue,
-          lstiv$summaries$PostPred_PValue),
-  `Chi 95% CI` = c(
-    
-    paste(
-      lsi$summaries$ObsRepChiSqDiff_95CI_LB%>%round(2)%>%format(nsmall =2),
-      lsi$summaries$ObsRepChiSqDiff_95CI_UB%>%round(2)%>%format(nsmall =2), sep = " ; "),
-    
-    # paste(
-    #   lstif$summaries$ObsRepChiSqDiff_95CI_LB%>%round(2)%>%format(nsmall =2),
-    #   lstif$summaries$ObsRepChiSqDiff_95CI_UB%>%round(2)%>%format(nsmall =2), sep = " ; "),
-    
-    paste(
-      lstiv$summaries$ObsRepChiSqDiff_95CI_LB%>%round(2)%>%format(nsmall =2),
-      lstiv$summaries$ObsRepChiSqDiff_95CI_UB%>%round(2)%>%format(nsmall =2), sep = " ; ")
-    
-    )),
-  
-  
-  tibble(
-  Task = c("Ignore-visible-food", 
-           #"",
-           ""),
-  Model = c("LSM",
-            #"LSTM",
-            "LSTM-V"),
-  PPP = c(lsv$summaries$PostPred_PValue,
-          #lstvf$summaries$PostPred_PValue,
-          lstvv$summaries$PostPred_PValue),
-  `Chi 95% CI` = c(
-    
-    paste(
-      lsv$summaries$ObsRepChiSqDiff_95CI_LB%>%round(2)%>%format(nsmall =2),
-      lsv$summaries$ObsRepChiSqDiff_95CI_UB%>%round(2)%>%format(nsmall =2), sep = " ; "),
-    
-    # paste(
-    #   lstvf$summaries$ObsRepChiSqDiff_95CI_LB%>%round(2)%>%format(nsmall =2),
-    #   lstvf$summaries$ObsRepChiSqDiff_95CI_UB%>%round(2)%>%format(nsmall =2), sep = " ; "),
-    
-    paste(
-      lstvv$summaries$ObsRepChiSqDiff_95CI_LB%>%round(2)%>%format(nsmall =2),
-      lstvv$summaries$ObsRepChiSqDiff_95CI_UB%>%round(2)%>%format(nsmall =2), sep = " ; ")
-    
     ))
+
 )
 ```
 
@@ -1370,37 +1372,10 @@ kable_classic(full_width = F)%>%
                  "LSTM-V = Latent state-trait model with varying means", "PPP = Posterior predictive p-value. Cut-off values (two-tailed): 0.025 and 0.975", "Chi 95% CI = 95%CI of difference between predicted and observed chi-square values"))
 ```
 
-
 ```{r}
 thresh <- bind_rows(
-  bind_rows(
-    lsa$parameters$unstandardized%>%mutate(Model = "LSM", Task = "Attention-following"),
-    #lstaf$parameters$unstandardized%>%mutate(Model = "LSTM", Task = ""),
-    lstav$parameters$unstandardized%>%mutate(Model = "LSTM-V", Task = ""),
-    lstav_short$parameters$unstandardized%>%mutate(Model = "LSTM-V (time point 7 onwards)", Task = ""),
-    )%>%
-    filter(paramHeader=="Thresholds")%>%
-    select(Task, Model, param, est)%>%
-    filter(grepl("P11\\$",param))%>%
-    separate(param,into = c("tp","Threshold"), sep = "\\$")%>%
-    mutate(Threshold = paste("T", Threshold, sep = ""))%>%
-    select(-tp)%>%
-    pivot_wider(names_from = Threshold, values_from = est),
-  
-   bind_rows(
-    lsc$parameters$unstandardized%>%mutate(Model = "LSM", Task = "Communicative-cues"),
-    #lstcf$parameters$unstandardized%>%mutate(Model = "LSTM", Task = ""),
-    lstcv$parameters$unstandardized%>%mutate(Model = "LSTM-V", Task = ""),
-    )%>%
-    filter(paramHeader=="Thresholds")%>%
-    select(Task, Model, param, est)%>%
-    filter(grepl("P11\\$",param))%>%
-    separate(param,into = c("tp","Threshold"), sep = "\\$")%>%
-    mutate(Threshold = paste("T", Threshold, sep = ""))%>%
-    select(-tp)%>%
-    pivot_wider(names_from = Threshold, values_from = est),
-  
-  bind_rows(
+    
+      bind_rows(
     lsp$parameters$unstandardized%>%mutate(Model = "LSM", Task = "Population-to-sample"),
     #lstpf$parameters$unstandardized%>%mutate(Model = "LSTM", Task = ""),
     lstpv$parameters$unstandardized%>%mutate(Model = "LSTM-V", Task = ""),
@@ -1426,6 +1401,37 @@ thresh <- bind_rows(
     select(-tp)%>%
     pivot_wider(names_from = Threshold, values_from = est),
   
+     bind_rows(
+    lsc$parameters$unstandardized%>%mutate(Model = "LSM", Task = "Communicative-cues"),
+    #lstcf$parameters$unstandardized%>%mutate(Model = "LSTM", Task = ""),
+    lstcv$parameters$unstandardized%>%mutate(Model = "LSTM-V", Task = ""),
+    )%>%
+    filter(paramHeader=="Thresholds")%>%
+    select(Task, Model, param, est)%>%
+    filter(grepl("P11\\$",param))%>%
+    separate(param,into = c("tp","Threshold"), sep = "\\$")%>%
+    mutate(Threshold = paste("T", Threshold, sep = ""))%>%
+    select(-tp)%>%
+    pivot_wider(names_from = Threshold, values_from = est),
+    
+    
+
+    bind_rows(
+    lsv$parameters$unstandardized%>%mutate(Model = "LSM", Task = "Ignore-visible-food"),
+    #lstvf$parameters$unstandardized%>%mutate(Model = "LSTM", Task = ""),
+    lstvv$parameters$unstandardized%>%mutate(Model = "LSTM-V", Task = ""),
+    )%>%
+    filter(paramHeader=="Thresholds")%>%
+    select(Task, Model, param, est)%>%
+    filter(grepl("P11\\$",param))%>%
+    separate(param,into = c("tp","Threshold"), sep = "\\$")%>%
+    mutate(Threshold = paste("T", Threshold, sep = ""))%>%
+    select(-tp)%>%
+    pivot_wider(names_from = Threshold, values_from = est),
+
+  
+
+  
   bind_rows(
     lsi$parameters$unstandardized%>%mutate(Model = "LSM", Task = "Self-ordered-search"),
     #lstif$parameters$unstandardized%>%mutate(Model = "LSTM", Task = ""),
@@ -1439,10 +1445,11 @@ thresh <- bind_rows(
     select(-tp)%>%
     pivot_wider(names_from = Threshold, values_from = est),
   
-  bind_rows(
-    lsv$parameters$unstandardized%>%mutate(Model = "LSM", Task = "Ignore-visible-food"),
-    #lstvf$parameters$unstandardized%>%mutate(Model = "LSTM", Task = ""),
-    lstvv$parameters$unstandardized%>%mutate(Model = "LSTM-V", Task = ""),
+    bind_rows(
+      lsa$parameters$unstandardized%>%mutate(Model = "LSM", Task = "Attention-following"),
+    #lstaf$parameters$unstandardized%>%mutate(Model = "LSTM", Task = ""),
+    lstav$parameters$unstandardized%>%mutate(Model = "LSTM-V", Task = ""),
+    lstav_short$parameters$unstandardized%>%mutate(Model = "LSTM-V (time point 7 onwards)", Task = ""),
     )%>%
     filter(paramHeader=="Thresholds")%>%
     select(Task, Model, param, est)%>%
@@ -1450,7 +1457,7 @@ thresh <- bind_rows(
     separate(param,into = c("tp","Threshold"), sep = "\\$")%>%
     mutate(Threshold = paste("T", Threshold, sep = ""))%>%
     select(-tp)%>%
-    pivot_wider(names_from = Threshold, values_from = est),
+    pivot_wider(names_from = Threshold, values_from = est)
   
 
 )%>%mutate_all(~replace(., is.na(.), ""))
@@ -1491,7 +1498,8 @@ filter(paramHeader == "Means")%>%
        "visible-food" = "Ignore-visible-food",
        "inhibit-searched" = "Self-ordered-search",
        "attention" = "Attention-following"
-  ))
+  ))%>%
+  mutate(task = factor(task, levels = c("Population-to-sample","Probabilistic-reasoning","Communicative-cues", "Ignore-visible-food", "Self-ordered-search","Attention-following" )))
 
 
 plsr <- bind_rows(
@@ -1516,7 +1524,8 @@ plsr <- bind_rows(
        "visible-food" = "Ignore-visible-food",
        "inhibit-searched" = "Self-ordered-search",
        "attention" = "Attention-following"
-  ))
+  ))%>%
+  mutate(task = factor(task, levels = c("Population-to-sample","Probabilistic-reasoning","Communicative-cues", "Ignore-visible-food", "Self-ordered-search","Attention-following" )))
 ```
 
 ```{r}
@@ -1695,6 +1704,7 @@ lstv_con_rel%>%mutate(type = "varying means")
        "inhibit-searched" = "Self-ordered-search",
        "attention" = "Attention-following"
   ))%>%
+  mutate(task = factor(task, levels = c("Population-to-sample","Probabilistic-reasoning","Communicative-cues", "Ignore-visible-food", "Self-ordered-search","Attention-following" )))%>%
   filter(param != "occasion-specificity")%>%
   ggplot(aes(x = param, y = value))+
   geom_pointrange(aes(ymin= lower_2.5ci, ymax = upper_2.5ci), position = position_dodge(width = 0.9))+
@@ -1727,6 +1737,7 @@ lstv_con_rel%>%mutate(type = "varying means")
        "inhibit-searched" = "Self-ordered-search",
        "attention" = "Attention-following"
   ))%>%
+  mutate(task = factor(task, levels = c("Population-to-sample","Probabilistic-reasoning","Communicative-cues", "Ignore-visible-food", "Self-ordered-search","Attention-following" )))%>%
   filter(param != "occasion-specificity")%>%
   ggplot(aes(x = param, y = value))+
   geom_pointrange(aes(ymin= lower_2.5ci, ymax = upper_2.5ci), position = position_dodge(width = 0.9))+
@@ -1771,7 +1782,8 @@ cor <- bind_rows(
        "visible-food" = "Ignore-visible-food",
        "inhibit-searched" = "Self-ordered-search",
        "attention" = "Attention-following"
-  ))
+  ))%>%
+  mutate(task = factor(task, levels = c("Population-to-sample","Probabilistic-reasoning","Communicative-cues", "Ignore-visible-food", "Self-ordered-search","Attention-following" )))
 
 plsc <- cor%>%
   ggplot(aes(y = paramHeader, x = param, fill = est))+
@@ -1883,6 +1895,41 @@ From time point 6 onwards, the latent means were significantly lower compared to
 In the LST model, the consistency coefficient was estimated to be `r round(lst_overview%>%filter(task == "inhibit-searched", param == "consistency", type == "varying means")%>%pull(value),2)` (95% CI: `r round(lst_overview%>%filter(task == "inhibit-searched", param == "consistency", type == "varying means")%>%pull(lower_2.5ci),2)` - `r round(lst_overview%>%filter(task == "inhibit-searched", param == "consistency", type == "varying means")%>%pull(upper_2.5ci),2)`). This means that around 80% of true inter-individual differences are attributable to stable (trait) differences between individuals. Reliability (across time points) was estimated to be acceptable (`r round(lst_overview%>%filter(task == "inhibit-searched", param == "reliability", type == "varying means")%>%pull(value),2)`; 95% CI: `r round(lst_overview%>%filter(task == "inhibit-searched", param == "reliability", type == "varying means")%>%pull(lower_2.5ci),2)` - `r round(lst_overview%>%filter(task == "inhibit-searched", param == "reliability", type == "varying means")%>%pull(upper_2.5ci),2)`;see Supplementary Figure \@ref(fig:lsteplot)).
 
 Taken together, the results suggest stable individual-differences with a slight group-level decrease in error rate (see Supplementary Figure\@ref(fig:perfplot)).
+
+#### Response strategies
+
+Performance in the self-ordered-search task greatly benefits from using search strategies, for example, a serial strategy in which the participant starts on the left from the point of view of the experimenter (position 1), then chooses the middle (position 2) and then the right cup (position 3). In principle, any systematic search strategy is beneficial. To assess whether apes made use of such a strategy, we visualize their search patterns. 
+
+```{r}
+search_dat_agg_pat <- read_csv("../data/inhibit_searched_data.csv")%>%
+  rowwise()%>%
+  mutate(search_pattern = paste0(search_1, search_2, search_3))%>%
+  mutate(search_pattern = ifelse(search_pattern %in% c("123", "132", "213", "231", "312", "321"), search_pattern, "redunant search"),
+         serial = ifelse(search_pattern %in% c("123", "321"), "serial", "other"))%>%
+  group_by(time_point, search_pattern, serial)%>%
+  summarise(n = n())%>%
+  group_by(time_point)%>%
+  mutate(sum = sum(n))%>%
+  rowwise()%>%
+  mutate(prop = n/sum)
+
+searchp <- search_dat_agg_pat%>%
+  #filter(search_pattern %in% c("123", "132", "213", "231", "312", "321"))%>%
+  ggplot(aes(x = factor(time_point), y = prop, col = search_pattern, lty =serial))+
+  geom_point()+
+  geom_line(aes(group = search_pattern))+
+  labs(x = "Time point", y = "Proportion search strategy")+
+  scale_color_colorblind(name = "Search pattern")+
+  scale_linetype(name = "Strategy")+
+  theme_bw()
+```
+
+
+```{r searchp, fig.height=4, fig.width=8, fig.cap = "Search strategies in the self-ordered-search task across sessions. Colors show search patterns, the orange line shows searches in which the ape made at least one redundant search. Dashed lines show serial searches.", out.width="100%"}
+searchp
+```
+
+Supplementary Figure\@ref(fig:searchp) shows that, over time, apes performed less redundant searches (reflecting the overall improvement in performance). This decrease was paralleled by an increase of the two most dominant search patterns, 123 and 321. Thus, apes seem to improve in performance by developing a serial search strategy which allows them to offload memory demands. All other search strategies remained more or less constant.  
 
 ### Summary
 
@@ -2040,45 +2087,43 @@ Finally, there was a cluster of significant correlations between delay-of-gratif
 
 ### Relations between learning rates {#relations-between-slopes}
 
-In addition to analyzing the correlations between trait estimates, we analysed the correlations between learning rates. This analysis addresses the potential concern that the correlations between the trait estimates for the different tasks reflect differences in associative learning abilities, in that some individuals consistently learn faster than others which leads to individual differences in performance.
+In addition to analyzing the correlations between trait estimates, we analysed the correlations between learning rates. This analysis addresses the potential concern that the correlations between the trait estimates for the different tasks reflect differences in associative learning abilities, in that some individuals consistently learn faster than others which leads to individual differences in the trait estimates.
 
-To assess correlations between learning rates, for each individual, we fit a model to the data from each task, predicting performance by time point (`brms` notation: `sum|trials(n) ~ time_point`; with `sum` being the number of correct responses per time point, `n` being the number of trials per time point and `time_point` enumerating the time point (1 to 10)).
+To assess correlations between learning rates, for each individual, we fit a model to the data from each task, predicting performance by time point (`brms` notation: `sum|trials(n) ~ time_point`; with `sum` being the number of correct responses per time point, `n` being the number of trials per time point and `time_point` enumerating the time point (1 to 10)). In the next step, we computed the pairwise correlations between these estimates for each combination of tasks.   
 
-Some individuals only 
+Some individuals contributed very little data for some tasks (i.e. few trials on few time points), making it difficult to estimate the corresponding slope. To exclude such cases in which the slope could not be reliably estimated, we excluded all models that did not converge (i.e. Rhat values > 2 for the slope estimate).  
 
 ```{r}
-long_bin_all <- read_csv("../data/data_binomial_modles_combined.csv")
-
-ds <- long_bin_all%>%mutate(id = paste(subject, task, sep = "_"))%>%
-  filter(task != "reas")%>%
-  mutate(time_point = scale(time_point))
-
-# reference model 
-bmr <-  brm(sum|trials(n) ~ time_point,
-            data = ds%>%filter(id == unique(ds$id)[1]),
-            family = binomial(),
-            chains = 3,
-            cores = 3,
-            iter=2000)
-
-ind_slopes <- tibble()
-
-for (i in unique(ds$id)) {
-  
-  dx <- ds%>%filter(id == i)
-  
-  bmij <- update(bmr, newdata = dx, chains = 3, cores = 3)
-  
-  x <- summary(bmij)$fixed%>%as_tibble(rownames = "param")%>%filter(param == "time_point")%>%mutate(id = i)
-  
-  ind_slopes <- bind_rows(ind_slopes, x)   
-  
-  saveRDS(ind_slopes, paste0("../saves/id_slopes.rds"))
-  
-}
-
+# long_bin_all <- read_csv("../data/data_binomial_modles_combined.csv")
+# 
+# ds <- long_bin_all%>%mutate(id = paste(subject, task, sep = "_"))%>%
+#   filter(task != "reas")%>%
+#   mutate(time_point = scale(time_point))
+# 
+# # reference model 
+# bmr <-  brm(sum|trials(n) ~ time_point,
+#             data = ds%>%filter(id == unique(ds$id)[1]),
+#             family = binomial(),
+#             chains = 3,
+#             cores = 3,
+#             iter=2000)
+# 
+# ind_slopes <- tibble()
+# 
+# for (i in unique(ds$id)) {
+#   
+#   dx <- ds%>%filter(id == i)
+#   
+#   bmij <- update(bmr, newdata = dx, chains = 3, cores = 3)
+#   
+#   x <- summary(bmij)$fixed%>%as_tibble(rownames = "param")%>%filter(param == "time_point")%>%mutate(id = i)
+#   
+#   ind_slopes <- bind_rows(ind_slopes, x)   
+#   
+#   saveRDS(ind_slopes, paste0("../saves/id_slopes.rds"))
+#   
+# }
 ```
-
 
 ```{r}
 
@@ -2127,16 +2172,16 @@ cor_slopes <- corrr::correlate(dslopes)%>%
          order_1 = as.numeric(factor(task_1)))
 ```
 ```{r}
-cor_slopes%>%
+slope_plot <- cor_slopes%>%
   ggplot(aes(y = factor(order), x = factor(order_1), fill = cor))+
   geom_tile(color = "white")+
   labs(x = "", y = "")+
   scale_fill_gradient2(low = "#CC6677", high = "#117733", mid = "white", 
   midpoint = 0, limit = c(-1,1), space = "Lab", 
   name="Correlation")+
-  ggtitle("Correlations between slopes for time_point")+
+  #ggtitle("Correlations between slopes for time_point")+
   geom_text(aes(label = round(cor, 2)), size = 3)+
-  scale_y_discrete(breaks = c(1:10),labels = c(str_remove(str_remove(sort(unique(cor_slopes$task)), "Z"),"X")))+
+  scale_y_discrete(breaks = c(1:9),labels = c(str_remove(str_remove(sort(unique(cor_slopes$task)), "Z"),"X")))+
   scale_x_discrete(guide = guide_axis(angle = 90), labels = c(str_remove(str_remove(sort(unique(cor_slopes$task_1)), "Z"),"X")))+
   #scale_y_discrete(limits=rev, breaks = c(1:10))+
   #scale_x_discrete(breaks = c(1:9))+
@@ -2145,8 +2190,14 @@ cor_slopes%>%
 ```
 
 ```{r}
-ggsave("../visuals/cor_slopes.png", height = 6, width = 8)
+#ggsave("../visuals/cor_slopes.png", height = 8, width = 8)
 ```
+
+```{r slopeplot, fig.height=8, fig.width=8, fig.cap = "Correlations between slope estimates.", out.width="75%"}
+slope_plot
+```
+
+Supplementary Figure\@ref(fig:slopeplot) shows the correlations between slope estimates. In contrast to the associative learning hypothesis, which predicted strong, positive correlations across all tasks, we find a mix of positive and negative correlations with most most values being very close to zero and otherwise no clear pattern. For example, from an associative learning perspective, one would expect a strong correlation between the communicative-cues and causal-inference tasks because both involve the experimenter touching the cup that contains the food. Yet, the correlation is essentially zero. Furthermore, for the two tasks that show the strongest increase in performance over time on a group level (communicative-cues and ignore-visible-food), the individual-level slopes are negatively correlated. On the other hand, the self-ordered-search task does not involve any experimenter-given cues that could be used for learning, yet we see the strongest correlation between the slopes for this task with other tasks in which the experimenter's behavior is predictive of the reward (e.g. population-to-sample).   
 
 
 ## Predictability {#predictability}
@@ -3171,3 +3222,372 @@ The predictors that were selected more than once influenced performance in varia
 
 ::: {#refs}
 :::
+
+# Appendix
+
+```{r }
+
+# Combine datasets from two waves
+
+long <- read.csv("../data/laac_complete.txt", sep="", na.strings="-99")
+
+# create categorical variables indicating time point and stable trait level
+long$trial <- as.factor(long$trial)
+long$time_cat <- as.factor(long$time_point)
+long$trait <- 1
+# recode search task to binary response
+long[long$task == "search", "code"] <- car::recode(long[long$task == "search", "code"], '2=1')
+```
+
+## Rasch model analysis
+
+Alternative analytical approach. 
+
+Pros: 
+
+Cons:
+* more uncertainty in the estimates
+* To estimate the correlations between tasks, it requires selecting the same number of time points from the two studies and treating them as if they were the same. In practice this meant that we selected the last 10 time points from the 14 time points of phase 2 of the study by @bohn2023great and re-coded them so that time point 4 was matched with time point 1 from the current study, 5 with 2 and so on. This is problematic because it neglects the temporal dynamics happening in the study prior to the 4th time point. Furthermore, the time difference between two time points was different in the two studies (2 weeks in @bohn2023great and 8 weeks in the current study).
+
+### Latent state models
+```{r}
+# # Latent state correlations rasch model
+# state_means_rasch <- tibble()
+# cor_rasch <- tibble()
+# 
+# for (i in c("pop", "reas" , "comm", "vfood", "search", "attent" )) {
+#   
+#   task <- long %>%filter(task == i)
+#   
+#   state <-  brm(code ~ 0 + time_cat + trial + (0 + time_cat | subject),
+#                  data = task,
+#                  family = brmsfamily(family="bernoulli", link="logit"),
+#                  chains = 4,
+#                  cores = 4,
+#                  #threads = threading(8),
+#                  #backend = "cmdstanr",
+#                  iter=3000)
+#   
+#   
+#   results <- summary(state)
+#   
+#   state_means <- results$fixed%>%as_tibble(rownames = "time_point")%>%filter(grepl("time_cat", time_point))%>%mutate(task = i)
+#   
+#   state_means_rasch <- bind_rows(state_means_rasch, state_means)
+#   
+#   cor_state <- results$random$subject[11:55,]%>%as_tibble(rownames = "cor")%>%
+#   mutate(cor = str_remove(cor, "cor\\(time_cat"),
+#          cor = str_remove(cor, "\\)"),
+#          cor = str_remove(cor, "time_cat"))%>%
+#   tidyr::separate(cor, sep = ",", into = c("a", "b"))%>%
+#   mutate(a = as.numeric(a), 
+#          b = as.numeric(b))%>%
+#     mutate(task = i)
+#   
+#   cor_rasch <- bind_rows(cor_rasch, cor_state)
+#   
+# }
+# 
+# saveRDS(cor_rasch, "../saves/latent_state_cor_rasch.rds")
+# saveRDS(state_means_rasch, "../saves/latent_state_means_rasch.rds")
+
+cor_rasch <- readRDS("../saves/latent_state_cor_rasch.rds")
+state_means_rasch <- readRDS("../saves/latent_state_means_rasch.rds")
+
+
+
+```
+
+
+```{r}
+plsm_rasch <- state_means_rasch%>%
+  mutate(task = recode(task,
+       "pop" = "Population-to-sample",
+       "comm" = "Communicative-cues",
+       "reas" = "Probabilistic-reasoning",
+       "vfood" = "Ignore-visible-food",
+       "search" = "Self-ordered-search",
+       "attent" = "Attention-following"))%>%
+  mutate(task = factor(task, levels = c("Population-to-sample","Probabilistic-reasoning","Communicative-cues", "Ignore-visible-food", "Self-ordered-search","Attention-following" )))%>%
+  mutate(time_point = str_remove(time_point, "time_cat"))%>%
+  ggplot(., aes(x = time_point, y = Estimate))+
+  #geom_hline(aes(yintercept = ref), lty = 3, alpha = .75)+
+  labs(x = "Time point",y = "Latent state mean (easiness)")+
+  geom_line(aes(group = task),alpha = .75)+
+  #geom_line(data = lsep%>%filter(time_point > 14), aes(group = task, x = time_point),position = position_dodge(width = 0.2), alpha = .75)+
+  geom_pointrange(aes(ymin = `l-95% CI`, ymax = `u-95% CI`), alpha = .75)+
+  facet_grid(~task)+
+  #scale_shape_manual(values = c(16,4), name = "", labels = c("includes 0", "different from 0"))+
+  #geom_vline(xintercept = 14.5, size = 1)+
+  #scale_x_continuous(breaks = c(1,10), labels = c(1,10))+
+  theme_few()+
+  theme(legend.direction = "vertical", legend.position = c(0.075, 0.9), legend.box = "horizontal", legend.background = element_blank(), strip.background = element_blank(),
+  strip.text.y = element_blank(), axis.title.x = element_blank(), axis.ticks.x = element_blank(), axis.text.x = element_blank(),
+    axis.text = element_text(size = 8),       # Smaller axis text
+    axis.title = element_text(size = 10),     # Smaller axis titles
+    legend.text = element_text(size = 6),     # Smaller legend text
+    strip.text = element_text(size = 8)      # Smaller plot title
+    )
+```
+
+```{r lseplotrasch, fig.height = 3, fig.width=8, fig.cap = "Latent means and reliability estimates with 95\\% CrI for each time point based on Rasch-model.", out.width="100%"}
+plsm_rasch
+```
+
+Supplementary Figure \@ref(fig:lsplotrasch) shows ... 
+
+```{r}
+plsc_rasch <- cor_rasch%>%
+  mutate(task = recode(task,
+       "pop" = "Population-to-sample",
+       "comm" = "Communicative-cues",
+       "reas" = "Probabilistic-reasoning",
+       "vfood" = "Ignore-visible-food",
+       "search" = "Self-ordered-search",
+       "attent" = "Attention-following"))%>%
+  mutate(task = factor(task, levels = c("Population-to-sample","Probabilistic-reasoning","Communicative-cues", "Ignore-visible-food", "Self-ordered-search","Attention-following" )))%>%
+  ggplot(aes(y = factor(b), x = factor(a), fill = Estimate))+
+    geom_tile(color = "white")+
+  labs(x = "", y = "")+
+  scale_fill_gradient2(low = "#CC6677", high = "#117733", mid = "#FFE066", 
+   midpoint = 0.5, limit = c(0,1), space = "Lab", 
+   name="Correlation", guide = "none")+
+  geom_text(aes(label = round(Estimate, 2)), size = 2)+
+  scale_y_discrete(limits=rev, breaks = c(1:10))+
+  scale_x_discrete(breaks = c(1:9))+
+  facet_wrap(~task, ncol = 3)+
+  theme_few()+
+  theme(legend.position = c(0.9,0.85), legend.direction = "vertical", legend.title = element_blank(), legend.background = element_blank())
+```
+
+```{r lsplotrasch, fig.height=4, fig.cap = "Correlations between latent state estimates based on the Rasch model for the different tasks.", out.width="100%"}
+plsc_rasch
+```
+
+Supplementary Figure \@ref(fig:lsplotrasch) shows ... 
+
+### Latent state trait models
+
+```{r}
+# run script multi_lstm2.R for Rasch model 
+# run script multi_lstm2_bin.R for binomial model
+
+#Multi_LST2 <- readRDS("../saves/multi_lst2.rds")
+#Multi_LST2_bin <- readRDS("../saves/multi_lst2_bin.rds")
+```
+
+```{r}
+# # rasch
+# con_samp_raw <- posterior_samples(Multi_LST2, pars = "^sd_subject", add_chain = T)%>%
+#   sample_n(5000)%>%
+#   pivot_longer(names_to = "param", values_to = "value", cols = -c(chain, iter))
+# 
+# con_samp <- con_samp_raw%>%
+#   mutate(t = str_remove(param, "sd_subject\\__"),
+#          t = str_remove(t, "task"))%>%
+#   separate(t, into = c("tp", "task"), sep = "\\:")%>%
+#   filter(grepl("cat", tp))%>%
+#   mutate(task = ifelse(is.na(task), "attent", task),
+#          time_point = str_remove(tp, "time_cat"),
+#          tp_samp = value)%>%
+#   select(task, time_point, tp_samp, chain, iter)%>%
+#   left_join(
+#     con_samp_raw%>%
+#     filter(!grepl("time_cat", param))%>%
+#     mutate(task = str_remove(param, "sd_subject\\__task"))%>%
+#     mutate(trait_samp = value)%>%
+#     select(task, trait_samp, chain, iter)
+#   )%>%
+#   rowwise()%>%
+#   mutate(
+#     con = trait_samp / (trait_samp+tp_samp)
+#   )
+# 
+# 
+# con_sum <- con_samp%>%
+#   group_by(task)%>%
+#   summarise(con_m = estimate_mode(con), 
+#             con_lci = hdi_lower(con), 
+#             con_uci = hdi_upper(con))
+# 
+# saveRDS(con_sum, "../saves/consistency_sample.rds")
+
+con_sum <- readRDS("../saves/consistency_sample.rds")
+
+# # binomial
+# con_samp_raw_bin <- posterior_samples(Multi_LST2_bin, pars = "^sd_subject", add_chain = T)%>%
+#   sample_n(5000)%>%
+#   pivot_longer(names_to = "param", values_to = "value", cols = -c(chain, iter))
+# 
+# con_samp_bin <- con_samp_raw_bin%>%
+#   mutate(t = str_remove(param, "sd_subject\\__"),
+#          t = str_remove(t, "task"))%>%
+#   separate(t, into = c("tp", "task"), sep = "\\:")%>%
+#   filter(grepl("cat", tp))%>%
+#   mutate(task = ifelse(is.na(task), "attent", task),
+#          time_point = str_remove(tp, "time_cat"),
+#          tp_samp = value)%>%
+#   select(task, time_point, tp_samp, chain, iter)%>%
+#   left_join(
+#     con_samp_raw_bin%>%
+#     filter(!grepl("time_cat", param))%>%
+#     mutate(task = str_remove(param, "sd_subject\\__task"))%>%
+#     mutate(trait_samp = value)%>%
+#     select(task, trait_samp, chain, iter)
+#   )%>%
+#   rowwise()%>%
+#   mutate(
+#     con = trait_samp / (trait_samp+tp_samp)
+#   )
+# 
+# 
+# con_sum_bin <- con_samp_bin%>%
+#   group_by(task)%>%
+#   summarise(con_m = estimate_mode(con), 
+#             con_lci = hdi_lower(con), 
+#             con_uci = hdi_upper(con))
+# 
+# saveRDS(con_sum_bin, "../saves/consistency_bin_sample.rds")
+# 
+con_sum_bin <- readRDS("../saves/consistency_bin_sample.rds")
+```
+
+```{r}
+con_comp <- bind_rows(
+lstv_con_rel%>%filter(param == "consistency", !grepl("7", task))%>%mutate(type ="mplus_sem")%>%
+  select(-param)%>%
+  dplyr::rename(con_lci = lower_2.5ci,
+                con_uci = upper_2.5ci, 
+                con_m = value)%>%
+  mutate(
+      task = recode(task,
+       "pop-to-sample" = "Population-to-sample",
+       "communication" = "Communicative-cues",
+       "reasoning" = "Probabilistic-reasoning",
+       "visible-food" = "Ignore-visible-food",
+       "inhibit-searched" = "Self-ordered-search",
+       "attention" = "Attention-following")
+  ),
+
+con_sum%>%mutate(
+  type ="brms_rasch",
+  task = recode(task,
+       "pop" = "Population-to-sample",
+       "comm" = "Communicative-cues",
+       "reas" = "Probabilistic-reasoning",
+       "vfood" = "Ignore-visible-food",
+       "search" = "Self-ordered-search",
+       "attent" = "Attention-following")
+   ),
+
+con_sum_bin%>%mutate(
+  type ="brms_binomial",
+  task = recode(task,
+       "pop" = "Population-to-sample",
+       "comm" = "Communicative-cues",
+       "reas" = "Probabilistic-reasoning",
+       "vfood" = "Ignore-visible-food",
+       "search" = "Self-ordered-search",
+       "attent" = "Attention-following")
+  )
+)%>%
+  ggplot(aes(x = task, y = con_m))+
+  geom_pointrange(aes(ymin= con_lci, ymax = con_uci, col = type), position = position_dodge(width = 0.2))+
+  theme_few()+
+  ylim(0,1)+
+  labs(x = "", y = "Consistency estimate")+
+  scale_color_colorblind(name = "")+
+  theme(legend.direction = "vertical", legend.position = c(0.2, 0.25), legend.box = "horizontal", legend.background = element_blank()
+    )
+```
+
+
+```{r lstmplotcomp, fig.height=4,fig.width=10, fig.cap = "Consistency estiamtes for the different tasks by estimation methods.", out.width="100%"}
+con_comp
+```
+
+Supplementary Figure \@ref(fig:lstmplotcomp) shows ... 
+
+### Relations between tasks
+
+```{r}
+# run script all_multi_lstm_bin.R
+# Multi_LST_bin <- readRDS("../saves/multi_lst_bin.rds")
+# sum_mult_bin <- summary(Multi_LST_bin)
+```
+
+
+```{r}
+# cor_mult_bin <- sum_mult_bin$random$subject%>%as_tibble(rownames = "param")%>%
+#   filter(grepl("cor\\(", param))%>%
+#     mutate(param = str_remove(param, "cor\\("),
+#          param = str_remove(param, "\\)"),
+#          param = str_remove_all(param, "task"))%>%
+#   tidyr::separate(param, sep = ",", into = c("a", "b"))%>%
+#   mutate(Estimate = ifelse(a == "search" | b == "search", Estimate*-1, Estimate))%>%
+#   mutate(b = recode(b,
+#     attent = "ZAttention-following",
+#     gaze = "ZGaze-following",
+#     cause = "Causal-inference",
+#     inference = "Inference-by-exclusion",
+#     delay = "Delay-of-gratification",
+#     comm = "ZCommunicative-cues",
+#     search = "Self-ordered-search",
+#     pop = "Population-to-sample",
+#     quant = "Quantity-discrimination",
+#     reas = "XProbabilistic-reasoning",
+#     vfood = "Ignore-visible-food"
+#   ),
+#   a = recode(a,
+#     attent = "ZAttention-following",
+#     gaze = "ZGaze-following",
+#     cause = "Causal-inference",
+#     inference = "Inference-by-exclusion",
+#     delay = "Delay-of-gratification",
+#     comm = "ZCommunicative-cues",
+#     search = "Self-ordered-search",
+#     pop = "Population-to-sample",
+#     quant = "Quantity-discrimination",
+#     reas = "XProbabilistic-reasoning",
+#     vfood = "Ignore-visible-food"
+#   ))%>%
+#    rowwise()%>%
+#   mutate(id = paste(sort(c(b, a)), collapse = "_"))%>%
+#   separate(id, into = c("task", "task_1"), sep = "_")%>%
+#   add_row(task_1 = "Ignore-visible-food", task = "Ignore-visible-food", Estimate = 0)%>%
+#    add_row(task = "ZCommunicative-cues",task_1 = "ZCommunicative-cues", Estimate = 0)%>%
+#   arrange(task, task_1)%>%
+#   mutate(
+#     zero = 0, 
+#     sig = ifelse(between(zero, `l-95% CI`, `u-95% CI`), "plain", "bold"),
+#     sig = ifelse(is.na(sig), "plain", sig))%>%
+#   mutate(order = as.numeric(factor(task)),
+#          order_1 = as.numeric(factor(task_1)))
+# 
+# saveRDS(cor_mult_bin, "../saves/cor_mult_bin.rds")
+
+cor_mult_bin <- readRDS("../saves/cor_mult_bin.rds")
+```
+
+```{r}
+p_cor_bin <- cor_mult_bin%>%
+  ggplot(aes(y = factor(order), x = factor(order_1), fill = Estimate))+
+  geom_tile(color = "white")+
+  labs(x = "", y = "")+
+  scale_fill_gradient2(low = "#CC6677", high = "#117733", mid = "white", 
+  midpoint = 0, limit = c(-1,1), space = "Lab", 
+  name="Correlation")+
+#  ggtitle("brms binomial model")+
+  geom_text(aes(label = round(Estimate, 2), fontface = sig), size = 3)+
+  scale_y_discrete(breaks = c(1:10),labels = c(str_remove(str_remove(sort(unique(cor_mult_bin$task)), "Z"),"X")))+
+  scale_x_discrete(guide = guide_axis(angle = 90), labels = c(str_remove(str_remove(sort(unique(cor_mult_bin$task_1)), "Z"),"X")))+
+  #scale_y_discrete(limits=rev, breaks = c(1:10))+
+  #scale_x_discrete(breaks = c(1:9))+
+  theme_few()+
+  theme(legend.position =  c(0.15, 0.8), legend.direction = "vertical", legend.title = element_blank(), legend.background = element_blank())
+```
+
+```{r corbinplot, fig.height=8, fig.width=10, fig.cap = "Correlations between trait estimates based on a binomial model. Bold correlations are different from zero as judged by the 95\\% CrI.", out.width="100%"}
+p_cor_bin
+```
+Supplementary Figure \@ref(fig:corbinplot) shows ... 
