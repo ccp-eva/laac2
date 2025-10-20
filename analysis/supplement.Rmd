@@ -1138,6 +1138,7 @@ cor_data <- data_task%>%
 
 rel_plot <- cor_data%>%
   mutate(time_span = factor(abs(as.numeric(term) - as.numeric(time_point))*6))%>%
+  mutate(task = factor(task, levels = c("Population-to-sample","Probabilistic-reasoning","Communicative-cues", "Ignore-visible-food", "Self-ordered-search","Attention-following" )))%>%
   ggplot(aes(x = time_span, y = value))+
   geom_point(alpha = .5, size = 0.75)+
   geom_hline(yintercept = 0, lty = 2, col = "black", alpha = .75)+
@@ -1834,17 +1835,26 @@ plsc
 #ggsave("../visuals/ls_lst.png", height = 7, width = 12, scale = 1)
 ```
 
-### Attention-following
 
-To fit the models, the response categories of 0 or 1 solved trials had to be collapsed into one category due to sparsity. Furthermore, the thresholds could not be set equal for test-half 2 at time point 1 and 9 as well as test-half 1 at time point 4 due to a different number of observed categories for the respective test halves and time point combination. Latent means can still be compared across time for the state factors based on the respective other test half.
+### Population-to-sample
 
-Supplementary Figure \@ref(fig:lseplot) visualizes the latent state means and reliability estimates from the LS model. Reliability was low for earlier time points and increased towards the end of the study. Latent means also slightly increased throughout the study and were significantly different from zero (i.e. time point 1) at time point 9 and 10. Supplementary Figure \@ref(fig:lsplot) gives the correlations between the latent states for the different time points. Correlations between latent states were moderate to low for time points below 7 and substantially higher from then on. Taken together, this pattern suggests substantial re-organization of individual differences that stabilized towards the end of the study. 
+The lowest two categories (0 and 1 correctly solved trials per test half) were collapsed due to sparsity. Thresholds could not be set equal for test half 1 at time point 3 and for test half 2 at time point 8 and 10, due to a different number of observed categories for the respective test half and time-point combination. Latent means can still be compared across time.
 
-In the LST model, the consistency coefficient was estimated to be `r round(lst_overview%>%filter(task == "attention", param == "consistency", type == "varying means")%>%pull(value),2)` (95% CI: `r round(lst_overview%>%filter(task == "attention", param == "consistency", type == "varying means")%>%pull(lower_2.5ci),2)` - `r round(lst_overview%>%filter(task == "attention", param == "consistency", type == "varying means")%>%pull(upper_2.5ci),2)`). This result would usually suggest that more than 90% of true inter-individual differences are attributable to stable (trait) differences between individuals. However, the high consistency estimate contradicts the correlations between the latent states reported above, in particular the low correlations for time points 1 - 6. One potential explanation for this discrepancy is that the assumption in the LST model that the state residual variance is the same across all time points is too restrictive. If there was a switch in strategies around time point 7, it might have affected the variance in performance between apes. To account for the possibility of a chnage in strategies, we fit a second LST model only to the data from time point 7 onward. This model provided a good fit to the data (see \@ref(tab:semt)); even better compared to other models. Consistency was estimated to be high (`r round(lst_overview%>%filter(task == "attention_tp7onward", param == "consistency", type == "varying means")%>%pull(value),2)`; 95% CI: `r round(lst_overview%>%filter(task == "attention_tp7onward", param == "consistency", type == "varying means")%>%pull(lower_2.5ci),2)` - `r round(lst_overview%>%filter(task == "attention_tp7onward", param == "consistency", type == "varying means")%>%pull(upper_2.5ci),2)`) in this model, which was in line with the latent state correlation patterns. 
+In the LS model, the latent state means did not change over time (see Supplementary Figure \@ref(fig:lseplot)). Reliability varied on a low to moderate level (range: `r round(range(plsr$est[plsr$task == "Population-to-sample"]),2)[1]` -- `r round(range(plsr$est[plsr$task == "Population-to-sample"]),2)[2]`). The correlations between latent states for the different time points were generally high (Supplementary Figure \@ref(fig:lsplot)). 
 
-Reliability (across time points) was estimated to be low (`r round(lst_overview%>%filter(task == "attention", param == "reliability", type == "varying means")%>%pull(value),2)`; 95% CI: `r round(lst_overview%>%filter(task == "attention", param == "reliability", type == "varying means")%>%pull(lower_2.5ci),2)` - `r round(lst_overview%>%filter(task == "attention", param == "reliability", type == "varying means")%>%pull(upper_2.5ci),2)`; see Supplementary Figure \@ref(fig:lsteplot)). However, when only considering the data from time point 7 and later, reliability was substantially higher (`r round(lst_overview%>%filter(task == "attention_tp7onward", param == "reliability", type == "varying means")%>%pull(value),2)`; 95% CI: `r round(lst_overview%>%filter(task == "attention_tp7onward", param == "reliability", type == "varying means")%>%pull(lower_2.5ci),2)` - `r round(lst_overview%>%filter(task == "attention_tp7onward", param == "reliability", type == "varying means")%>%pull(upper_2.5ci),2)`)
+In the LST model, the consistency coefficient was estimated to be `r round(lst_overview%>%filter(task == "pop-to-sample", param == "consistency", type == "varying means")%>%pull(value),2)` (95% CI: `r round(lst_overview%>%filter(task == "pop-to-sample", param == "consistency", type == "varying means")%>%pull(lower_2.5ci),2)` - `r round(lst_overview%>%filter(task == "pop-to-sample", param == "consistency", type == "varying means")%>%pull(upper_2.5ci),2)`). This means that around 80% of true inter-individual differences are attributable to stable (trait) differences between individuals. Reliability (across time points) was estimated to be acceptable (`r round(lst_overview%>%filter(task == "pop-to-sample", param == "reliability", type == "varying means")%>%pull(value),2)`; 95% CI: `r round(lst_overview%>%filter(task == "pop-to-sample", param == "reliability", type == "varying means")%>%pull(lower_2.5ci),2)` - `r round(lst_overview%>%filter(task == "pop-to-sample", param == "reliability", type == "varying means")%>%pull(upper_2.5ci),2)`; see Supplementary Figure \@ref(fig:lsteplot)).
 
-Taken together, there was considerable variation both in group- and individual-level performance -- particularly in the earlier time points. Towards the end of the study, group-level performance stabilized on a level above chance (see Supplementary Figure \@ref(fig:perfplot)) and individual-differences also became more stable. Presumably, some individuals changed the way they approached the task half-way through the study -- seeing it initially as a competitive and only later as a cooperative task -- so that systematic individual differences only emerged at later time points. 
+In sum, the results suggest that task-level results were robust and individual-level performance was stable over time. As noted above -- and as can be seen in Supplementary Figure \@ref(fig:perfplot) -- performance on a task level was clearly above chance in all sessions.
+
+### Probabilistic-reasoning
+
+The lowest two (0 and 1 correctly solved trials per test half) as well as the highest two categories (5 and 6 solved trials) were collapsed due to sparsity. Thresholds could not be set equal for test half 1 at time points 7, 8 and 9, due to a different number of observed categories for the respective test half and time-point combination. Latent means can still be compared across time.
+
+There was no change in latent state means (see Supplementary Figure \@ref(fig:lseplot)). Reliability fluctuated on a low level (range: `r round(range(plsr$est[plsr$task == "Probabilistic-reasoning"]),2)[1]` -- `r round(range(plsr$est[plsr$task == "Probabilistic-reasoning"]),2)[2]`). The correlations between latent states for the different time points were generally low, some even negative (Supplementary Figure \@ref(fig:lsplot)). 
+
+In the LST model, the consistency coefficient was estimated to be `r round(lst_overview%>%filter(task == "reasoning", param == "consistency", type == "varying means")%>%pull(value),2)` (95% CI: `r round(lst_overview%>%filter(task == "reasoning", param == "consistency", type == "varying means")%>%pull(lower_2.5ci),2)` - `r round(lst_overview%>%filter(task == "reasoning", param == "consistency", type == "varying means")%>%pull(upper_2.5ci),2)`). This means that around 80% of true inter-individual differences are attributable to stable (trait) differences between individuals. However, the reliability (across time points) was estimated to be very low, suggesting that most of the observed variance is random noise and the task is not well suited to measure inter-individual differences in ability (`r round(lst_overview%>%filter(task == "reasoning", param == "reliability", type == "varying means")%>%pull(value),2)`; 95% CI: `r round(lst_overview%>%filter(task == "reasoning", param == "reliability", type == "varying means")%>%pull(lower_2.5ci),2)` - `r round(lst_overview%>%filter(task == "reasoning", param == "reliability", type == "varying means")%>%pull(upper_2.5ci),2)`; see Supplementary Figure \@ref(fig:lsteplot)). Thus, the consistency estimates are not meaningful in this context.
+
+In combination with the finding that group-level performance was not reliably different from chance (see Supplementary Figure \@ref(fig:perfplot)), the low correlations between latent states and low reliability estimates suggest that this task did not measure any meaningful individual-differences in logical reasoning abilities. The task might not be suited to tap in to this particular logical reasoning ability at all. For this reason, we did not include this task when investigating the structure of individual differences and when predicting cognitive performance by external predictors. 
 
 ### Communicative-cues
 
@@ -1865,26 +1875,6 @@ In the LS model, the latent state means steadily increased until time point 8 an
 In the LST model, the consistency coefficient was estimated to be `r round(lst_overview%>%filter(task == "visible-food", param == "consistency", type == "varying means")%>%pull(value),2)` (95% CI: `r round(lst_overview%>%filter(task == "visible-food", param == "consistency", type == "varying means")%>%pull(lower_2.5ci),2)` - `r round(lst_overview%>%filter(task == "visible-food", param == "consistency", type == "varying means")%>%pull(upper_2.5ci),2)`). This means that around 64% of true inter-individual differences are attributable to stable (trait) differences between individuals. Reliability (across time points) was estimated to be low to moderate (`r round(lst_overview%>%filter(task == "visible-food", param == "reliability", type == "varying means")%>%pull(value),2)`; 95% CI: `r round(lst_overview%>%filter(task == "visible-food", param == "reliability", type == "varying means")%>%pull(lower_2.5ci),2)` - `r round(lst_overview%>%filter(task == "visible-food", param == "reliability", type == "varying means")%>%pull(upper_2.5ci),2)`; see Supplementary Figure \@ref(fig:lsteplot)).
 
 Taken together, there was a steady increase in group-level performance (see Supplementary Figure \@ref(fig:perfplot)) over time. Except of time point 1, individual-differences were fairly stable, suggesting a a fairly consistent learning effect across individuals from time point 2 onward.
-
-### Probabilistic-reasoning
-
-The lowest two (0 and 1 correctly solved trials per test half) as well as the highest two categories (5 and 6 solved trials) were collapsed due to sparsity. Thresholds could not be set equal for test half 1 at time points 7, 8 and 9, due to a different number of observed categories for the respective test half and time-point combination. Latent means can still be compared across time.
-
-There was no change in latent state means (see Supplementary Figure \@ref(fig:lseplot)). Reliability fluctuated on a low level (range: `r round(range(plsr$est[plsr$task == "Probabilistic-reasoning"]),2)[1]` -- `r round(range(plsr$est[plsr$task == "Probabilistic-reasoning"]),2)[2]`). The correlations between latent states for the different time points were generally low, some even negative (Supplementary Figure \@ref(fig:lsplot)). 
-
-In the LST model, the consistency coefficient was estimated to be `r round(lst_overview%>%filter(task == "reasoning", param == "consistency", type == "varying means")%>%pull(value),2)` (95% CI: `r round(lst_overview%>%filter(task == "reasoning", param == "consistency", type == "varying means")%>%pull(lower_2.5ci),2)` - `r round(lst_overview%>%filter(task == "reasoning", param == "consistency", type == "varying means")%>%pull(upper_2.5ci),2)`). This means that around 80% of true inter-individual differences are attributable to stable (trait) differences between individuals. However, the reliability (across time points) was estimated to be very low, suggesting that most of the observed variance is random noise and the task is not well suited to measure inter-individual differences in ability (`r round(lst_overview%>%filter(task == "reasoning", param == "reliability", type == "varying means")%>%pull(value),2)`; 95% CI: `r round(lst_overview%>%filter(task == "reasoning", param == "reliability", type == "varying means")%>%pull(lower_2.5ci),2)` - `r round(lst_overview%>%filter(task == "reasoning", param == "reliability", type == "varying means")%>%pull(upper_2.5ci),2)`; see Supplementary Figure \@ref(fig:lsteplot)). Thus, the consistency estimates are not meaningful in this context.
-
-In combination with the finding that group-level performance was not reliably different from chance (see Supplementary Figure \@ref(fig:perfplot)), the low correlations between latent states and low reliability estimates suggest that this task did not measure any meaningful individual-differences in logical reasoning abilities. The task might not be suited to tap in to this particular logical reasoning ability at all. For this reason, we did not include this task when investigating the structure of individual differences and when predicting cognitive performance by external predictors. 
-
-### Population-to-sample
-
-The lowest two categories (0 and 1 correctly solved trials per test half) were collapsed due to sparsity. Thresholds could not be set equal for test half 1 at time point 3 and for test half 2 at time point 8 and 10, due to a different number of observed categories for the respective test half and time-point combination. Latent means can still be compared across time.
-
-In the LS model, the latent state means did not change over time (see Supplementary Figure \@ref(fig:lseplot)). Reliability varied on a low to moderate level (range: `r round(range(plsr$est[plsr$task == "Population-to-sample"]),2)[1]` -- `r round(range(plsr$est[plsr$task == "Population-to-sample"]),2)[2]`). The correlations between latent states for the different time points were generally high (Supplementary Figure \@ref(fig:lsplot)). 
-
-In the LST model, the consistency coefficient was estimated to be `r round(lst_overview%>%filter(task == "pop-to-sample", param == "consistency", type == "varying means")%>%pull(value),2)` (95% CI: `r round(lst_overview%>%filter(task == "pop-to-sample", param == "consistency", type == "varying means")%>%pull(lower_2.5ci),2)` - `r round(lst_overview%>%filter(task == "pop-to-sample", param == "consistency", type == "varying means")%>%pull(upper_2.5ci),2)`). This means that around 80% of true inter-individual differences are attributable to stable (trait) differences between individuals. Reliability (across time points) was estimated to be acceptable (`r round(lst_overview%>%filter(task == "pop-to-sample", param == "reliability", type == "varying means")%>%pull(value),2)`; 95% CI: `r round(lst_overview%>%filter(task == "pop-to-sample", param == "reliability", type == "varying means")%>%pull(lower_2.5ci),2)` - `r round(lst_overview%>%filter(task == "pop-to-sample", param == "reliability", type == "varying means")%>%pull(upper_2.5ci),2)`; see Supplementary Figure \@ref(fig:lsteplot)).
-
-In sum, the results suggest that task-level results were robust and individual-level performance was stable over time. As noted above -- and as can be seen in Supplementary Figure \@ref(fig:perfplot) -- performance on a task level was clearly above chance in all sessions.
 
 ### Self-ordered-search
 
@@ -1930,6 +1920,18 @@ searchp
 ```
 
 Supplementary Figure\@ref(fig:searchp) shows that, over time, apes performed less redundant searches (reflecting the overall improvement in performance). This decrease was paralleled by an increase of the two most dominant search patterns, 123 and 321. Thus, apes seem to improve in performance by developing a serial search strategy which allows them to offload memory demands. All other search strategies remained more or less constant.  
+
+### Attention-following
+
+To fit the models, the response categories of 0 or 1 solved trials had to be collapsed into one category due to sparsity. Furthermore, the thresholds could not be set equal for test-half 2 at time point 1 and 9 as well as test-half 1 at time point 4 due to a different number of observed categories for the respective test halves and time point combination. Latent means can still be compared across time for the state factors based on the respective other test half.
+
+Supplementary Figure \@ref(fig:lseplot) visualizes the latent state means and reliability estimates from the LS model. Reliability was low for earlier time points and increased towards the end of the study. Latent means also slightly increased throughout the study and were significantly different from zero (i.e. time point 1) at time point 9 and 10. Supplementary Figure \@ref(fig:lsplot) gives the correlations between the latent states for the different time points. Correlations between latent states were moderate to low for time points below 7 and substantially higher from then on. Taken together, this pattern suggests substantial re-organization of individual differences that stabilized towards the end of the study. 
+
+In the LST model, the consistency coefficient was estimated to be `r round(lst_overview%>%filter(task == "attention", param == "consistency", type == "varying means")%>%pull(value),2)` (95% CI: `r round(lst_overview%>%filter(task == "attention", param == "consistency", type == "varying means")%>%pull(lower_2.5ci),2)` - `r round(lst_overview%>%filter(task == "attention", param == "consistency", type == "varying means")%>%pull(upper_2.5ci),2)`). This result would usually suggest that more than 90% of true inter-individual differences are attributable to stable (trait) differences between individuals. However, the high consistency estimate contradicts the correlations between the latent states reported above, in particular the low correlations for time points 1 - 6. One potential explanation for this discrepancy is that the assumption in the LST model that the state residual variance is the same across all time points is too restrictive. If there was a switch in strategies around time point 7, it might have affected the variance in performance between apes. To account for the possibility of a chnage in strategies, we fit a second LST model only to the data from time point 7 onward. This model provided a good fit to the data (see \@ref(tab:semt)); even better compared to other models. Consistency was estimated to be high (`r round(lst_overview%>%filter(task == "attention_tp7onward", param == "consistency", type == "varying means")%>%pull(value),2)`; 95% CI: `r round(lst_overview%>%filter(task == "attention_tp7onward", param == "consistency", type == "varying means")%>%pull(lower_2.5ci),2)` - `r round(lst_overview%>%filter(task == "attention_tp7onward", param == "consistency", type == "varying means")%>%pull(upper_2.5ci),2)`) in this model, which was in line with the latent state correlation patterns. 
+
+Reliability (across time points) was estimated to be low (`r round(lst_overview%>%filter(task == "attention", param == "reliability", type == "varying means")%>%pull(value),2)`; 95% CI: `r round(lst_overview%>%filter(task == "attention", param == "reliability", type == "varying means")%>%pull(lower_2.5ci),2)` - `r round(lst_overview%>%filter(task == "attention", param == "reliability", type == "varying means")%>%pull(upper_2.5ci),2)`; see Supplementary Figure \@ref(fig:lsteplot)). However, when only considering the data from time point 7 and later, reliability was substantially higher (`r round(lst_overview%>%filter(task == "attention_tp7onward", param == "reliability", type == "varying means")%>%pull(value),2)`; 95% CI: `r round(lst_overview%>%filter(task == "attention_tp7onward", param == "reliability", type == "varying means")%>%pull(lower_2.5ci),2)` - `r round(lst_overview%>%filter(task == "attention_tp7onward", param == "reliability", type == "varying means")%>%pull(upper_2.5ci),2)`)
+
+Taken together, there was considerable variation both in group- and individual-level performance -- particularly in the earlier time points. Towards the end of the study, group-level performance stabilized on a level above chance (see Supplementary Figure \@ref(fig:perfplot)) and individual-differences also became more stable. Presumably, some individuals changed the way they approached the task half-way through the study -- seeing it initially as a competitive and only later as a cooperative task -- so that systematic individual differences only emerged at later time points. 
 
 ### Summary
 
@@ -2067,9 +2069,33 @@ opcor_mod
 #ggsave("../visuals/task_level_cor.png", height = 6, width = 8, scale = 1)
 ```
 
+For this analysis, we also included data from the tasks (excluding the switching task) reported in @bohn2023great because they tested the same individuals. The following descriptions are verbatim copies from the supplementary material of @bohn2023great.
+
+### Tasks from Bohn et al., 2023
+
+#### Gaze Following
+
+The gaze following task was modeled after @brauer2005all. The experimenter sat opposite the ape and handed over food at a constant pace. That is, the experimenter picked up a piece of food, briefly held it out in front of her face and then handed it over to the participant. After a predetermined (but varying) number of food items had been handed over, the experimenter again picked up a food item, held it in front of her face and then looked up (i.e., moving her head up). The experimenter looked to the ceiling, no object of particular interest was placed there. After 10s, the experimenter looked down again, handed over the food and the trial ended. We coded whether the participant looked up during the 10s interval. Apes received eight gaze following trials. We assume that participants look up because they assume that the experimenter's attention is focused on a potentially noteworthy object.
+
+#### Direct causal inference
+
+The direct causal inference task was modeled after @call2004inferences. Two identical cups with a lid were placed left and right on the table. The experimenter covered the table with the occluder, retrieved a piece of food, showed it to the ape, and hid it in one the cups outside the participant's view. Next, the experimenter removed the occluder, picked up the baited cup and shook it three times, which produced a rattling sound. Next, the cup was put back in place, the sliding table pushed forwards, and the participant made a choice by pointing to one of the cups. If they picked the baited cup, their choice was coded as correct, and they received the reward. If they chose the empty cup, they did not. Participants received 12 trials. The location of the food was counterbalanced; six times in the right cup and six times in the left. Direct causal inference trials were intermixed with inference by exclusion trials (see below). We assume that apes locate the food by reasoning that the food -- a solid object -- causes the rattling sound and therefore must be in the shaken cup.
+
+#### Inference by exclusion
+
+Inference by exclusion trials were also modeled after @call2004inferences and followed a very similar procedure compared to direct causal inference trials. After covering the two cups with the occluder, the experimenter placed the food in one of the cups and covered both with the lid. Next, they removed the occluder, picked up the empty cup and shook it three times. In contrast to the direct causal inference trials, this did not produce any sound. The experimenter then pushed the sliding table forward and the participant made a choice by pointing to one of the cups. Correct choice was coded when the baited (non-shaken) cup was chosen. If correct, the food was given to the ape. There were 12 inference by exclusion trials, intermixed with direct causal inference trials. The order was counterbalanced: six times the left cup was baited, six times the right. We assume that apes reason that the absence of a sound suggests that the shaken cup is empty. Because they saw a piece of food being hidden, they exclude the empty cup and infer that the food is more likely to be in the non-shaken cup.
+
+#### Quantity discrimination
+
+For this task, we followed the general procedure of @hanus2007discrete. Two small plates were presented left and right on the table. The experimenter covered the plates with the occluder and placed five small food pieces on one plate and seven on the other. Then they pushed the sliding table forwards, and the participant made a choice. We coded as correct when the subject chose the plate with the larger quantity. Participants always received the food from the plate they chose. There were 12 trials, six with the larger quantity on the right and six on the left (order counterbalanced). We assume that apes identify the larger of the two food amounts based on discrete quantity estimation.
+
+#### Delay of gratification
+
+This task replaced the switching task in Phase 2. The procedure was adapted from @rosati2007evolutionary. Two small plates including one and two pieces of pellet were presented left and right on the table. E moved the plate with the smaller reward forward allowing the subject to choose immediately, while the plate with the larger reward was moved forward after a delay of 20 seconds. We coded whether the subject selected the larger delayed reward (correct choice) or the smaller immediate reward (incorrect choice) as well as the waiting time in cases where the immediate reward was chosen. Subjects received 12 trials, with the side on which the immediate reward was presented counterbalanced. We assume that, in order to choose the larger reward, apes inhibit choosing the immediate smaller reward.
+
 ### Relations between trait estimates {#relations-between-traits}
 
-Supplementary Figure\@ref(fig:mtmplot) shows the correlations between trait estimates for the different tasks reported in the present study as well as those reported in @bohn2023great. For the tasks reported in @bohn2023great we used the data from phase 2 because it was closer in time. Overall, most correlations were not significantly different from zero (i.e. the 95% CI did include zero). Because of the low average level of correlations, we decided not to explore models with higher-order factors and will only interpret the qualitative patterns. 
+Trait estimates for the tasks from @bohn2023great were computed based on the data from phase 2 because it was closer in time. Supplementary Figure\@ref(fig:mtmplot) shows the correlations between trait estimates for all tasks. Overall, most correlations were not significantly different from zero (i.e. the 95% CI did include zero). Because of the low average level of correlations, we decided not to explore models with higher-order factors and will only interpret the qualitative patterns. 
 
 Conceptually, the tasks can be clustered in the following broader domains: *social cognition* (attention-following, gaze-following, communicative-cues), *reasoning about quantities* (quantity-discrimination, population-to-sample), *executive functions* (delay-of-gratification, self-ordered-search, ignore-visible-food) and *inferential reasoning* (probabilistic-reasoning, causal-inference, inference-by-exclusion). As a first step, we will evaluate whether we find evidence for such a clustering in the data.
 
@@ -2422,12 +2448,13 @@ df_trials <- data_trial%>%
 # saveRDS(cvs_vis,"../saves/cvs_vis.rds")
 
 ```
-### Attention-following
+
+### Population-to-sample
 
 ```{r}
-# cvs_att <- readRDS("../saves/cvs_att.rds")
+# cvs_pop <- readRDS("../saves/cvs_pop.rds")
 # 
-# att_varselp <- summary(cvs_att, stats = c('elpd', 'rmse'))$perf_sub%>%
+# pop_varselp <- summary(cvs_pop, stats = c('elpd', 'rmse'))$perf_sub%>%
 #   as_tibble()%>%
 #   pivot_longer(cols = c(elpd,rmse), values_to = "value", names_to = "stat")%>%
 #   pivot_longer(cols = c(elpd.se,rmse.se), values_to = "se", names_to = "se_term")%>%
@@ -2435,52 +2462,51 @@ df_trials <- data_trial%>%
 #   filter(grepl(stat,se_term))%>%
 #   select(-se_term)%>%
 #   mutate(ranking_fulldata = factor(ifelse(ranking_fulldata == "(Intercept)","none",ranking_fulldata)),
-#          select = ifelse(ranking_fulldata  %in% c("(1 | subject)", "group", "time_point", "time_in_leipzig"), "yes", "no"))
+#          select = ifelse(ranking_fulldata  %in% c("(1 | subject)", "time_in_leipzig", "group", "rearing", "sex", "rel_rank"), "yes", "no"))
 # 
-# saveRDS(att_varselp, "../saves/cvs_att_summary.rds")
+# saveRDS(pop_varselp, "../saves/cvs_pop_summary.rds")
 
-
-att_varselp <- readRDS("../saves/cvs_att_summary.rds")%>%
+pop_varselp <- readRDS("../saves/cvs_pop_summary.rds")%>%
   mutate(ranking_fulldata = recode(ranking_fulldata,
-    time_in_leipzig = "Time spent in research",
-    rearing = "Rearing history",
-    group = "Group",
-    observer = "Observer present",
-    observer_mod = "Observer present",
-    sex = "Sex",
-    rel_rank = "Rank",
-    rank = "Rank",
-    age = "Age",
-    sick_severity = "Sickness severity",
-    test_tp = "Study participation (day)",
-    test_day = "Study participation (time point)",
-    time_outdoors = "Time spent outdoors",
-    time_point = "Time point",
-    dist_mean = "Disturbance",
-    le_mean = "Life event",
-    sociality = "Sociality",
-    a_chimp = "Chimpanzee group A",
-    b_chimp = "Chimpanzee group B",
-    bonobos = "Bonobo",
-    orangs = "Orangutan",
-    gorilla = "Gorilla",
-    f = "Female", 
-    m = "Male",
-    hand = "Hand-reared",
-    mother = "Mother-reared",
-    `(1 | subject)` = "(1 | Subject)"
+                                   time_in_leipzig = "Time spent in research",
+                                   rearing = "Rearing history",
+                                   group = "Group",
+                                   observer = "Observer present",
+                                   observer_mod = "Observer present",
+                                   sex = "Sex",
+                                   rel_rank = "Rank",
+                                   rank = "Rank",
+                                   age = "Age",
+                                   sick_severity = "Sickness severity",
+                                   test_tp = "Study participation (day)",
+                                   test_day = "Study participation (time point)",
+                                   time_outdoors = "Time spent outdoors",
+                                   time_point = "Time point",
+                                   dist_mean = "Disturbance",
+                                   le_mean = "Life event",
+                                   sociality = "Sociality",
+                                   a_chimp = "Chimpanzee group A",
+                                   b_chimp = "Chimpanzee group B",
+                                   bonobos = "Bonobo",
+                                   orangs = "Orangutan",
+                                   gorilla = "Gorilla",
+                                   f = "Female", 
+                                   m = "Male",
+                                   hand = "Hand-reared",
+                                   mother = "Mother-reared",
+                                   `(1 | subject)` = "(1 | Subject)"
   ))
 
 
-pattsel <- att_varselp%>%
-ggplot(aes(x = size, y = value))+
+ppopsel <- pop_varselp%>%
+  ggplot(aes(x = size, y = value))+
   #geom_hline(data = ref_com_p1, aes(yintercept = value), lty = 3)+
   geom_line(col = "black", alpha = .5)+
   geom_pointrange(aes(ymin = value - se, ymax = value + se, col = select), size = 0.5, pch = 4)+
   facet_grid(stat~., scale = "free_y")+
   scale_color_manual(name = "relevant", values = c("black", "firebrick"))+
   labs(y = "", x = "Predictors")+
-  scale_x_continuous(labels = unique(att_varselp$ranking_fulldata), breaks = unique(att_varselp$size))+
+  scale_x_continuous(labels = unique(pop_varselp$ranking_fulldata), breaks = unique(pop_varselp$size))+
   theme_few()+
   theme(axis.text.x = element_text(angle = 45, hjust = 1),
         legend.position = c(0.5,0.9), legend.direction = "horizontal", legend.background = element_blank())
@@ -2489,12 +2515,12 @@ ggplot(aes(x = size, y = value))+
 
 
 ```{r}
-# att_sol_terms <- c("time_point","group", "time_in_leipzig")
-# proj_att_cv <- project(cvs_att,  solution_terms = att_sol_terms)
+# pop_sol_terms <- c("time_in_leipzig", "group", "rearing", "sex", "rel_rank")
+# proj_pop_cv <- project(cvs_pop,  solution_terms = pop_sol_terms)
 # 
-# proj_samples_att <- as.matrix(proj_att_cv)%>%
+# proj_samples_pop <- as.matrix(proj_pop_cv)%>%
 #   as_tibble()%>%
-#   pivot_longer(cols =c(2:7), names_to = "pred", values_to = "value")%>%
+#   pivot_longer(cols =c(2:9), names_to = "pred", values_to = "value")%>%
 #   filter(!pred%in%c("test_tp", "sigma", "Intercept"))%>%
 #   mutate(factor = ifelse(grepl("group", pred), "group", "other predictors"),
 #          pred = str_remove(pred,"b_"),
@@ -2502,46 +2528,46 @@ ggplot(aes(x = size, y = value))+
 #          pred = str_remove(pred,"rel_"),
 #          species = ifelse(factor == "group", pred,factor))
 # 
-# saveRDS(proj_samples_att,"../saves/proj_cvs_att.rds")
+# saveRDS(proj_samples_pop,"../saves/proj_cvs_pop.rds")
 
-proj_samples_att <- readRDS("../saves/proj_cvs_att.rds")%>%
+proj_samples_pop <- readRDS("../saves/proj_cvs_pop.rds")%>%
   filter(!grepl("Intercept",pred))%>%
   mutate(pred = recode(pred,
-    time_in_leipzig = "Time spent in research",
-    rearing = "Rearing history",
-    group = "Group",
-    observer = "Observer present",
-    observer_mod = "Observer present",
-    sex = "Sex",
-    rel_rank = "Rank",
-    rank = "Rank",
-    age = "Age",
-    time_point = "Time point",
-    sick_severity = "Sickness severity",
-    test_tp = "Study participation (day)",
-    test_day = "Study participation (time point)",
-    time_outdoors = "Time spent outdoors",
-    dist_mean = "Disturbance",
-    le_mean = "Life event",
-    sociality = "Sociality",
-    a_chimp = "Chimpanzee group A",
-    b_chimp = "Chimpanzee group B",
-    bonobos = "Bonobo",
-    orangs = "Orangutan",
-    gorilla = "Gorilla",
-    sexf = "Sex (female)",
-    rearinghand = "Rearing (hand-reared)",
-    observer_modyes = "Observer present",
-    `(1 | subject)` = "(1 | Subject)"
+                       time_in_leipzig = "Time spent in research",
+                       rearing = "Rearing history",
+                       group = "Group",
+                       observer = "Observer present",
+                       observer_mod = "Observer present",
+                       sex = "Sex",
+                       rel_rank = "Rank",
+                       rank = "Rank",
+                       age = "Age",
+                       time_point = "Time point",
+                       sick_severity = "Sickness severity",
+                       test_tp = "Study participation (day)",
+                       test_day = "Study participation (time point)",
+                       time_outdoors = "Time spent outdoors",
+                       dist_mean = "Disturbance",
+                       le_mean = "Life event",
+                       sociality = "Sociality",
+                       a_chimp = "Chimpanzee group A",
+                       b_chimp = "Chimpanzee group B",
+                       bonobos = "Bonobo",
+                       orangs = "Orangutan",
+                       gorilla = "Gorilla",
+                       sexf = "Sex (female)",
+                       rearinghand = "Rearing (hand-reared)",
+                       observer_modyes = "Observer present",
+                       `(1 | subject)` = "(1 | Subject)"
   ))%>%
   mutate(factor = recode(factor,
-    group = "Group",
-    sex = "Sex",
-    rearing = "Rearing history"
+                         group = "Group",
+                         sex = "Sex",
+                         rearing = "Rearing history"
   ))
-  
 
-pattpro <- ggplot(proj_samples_att, aes(x = value, y = pred)) +
+
+ppoppro <- ggplot(proj_samples_pop, aes(x = value, y = pred)) +
   geom_vline(xintercept = 0, lty = 2, alpha = .75)+
   geom_density_ridges(alpha = .5, scale = .7) +
   facet_wrap(~factor, scales = "free")+
@@ -2550,10 +2576,10 @@ pattpro <- ggplot(proj_samples_att, aes(x = value, y = pred)) +
   theme(panel.border = element_rect(color = "black",fill = NA,size = 1))
 ```
 
-Supplementary Figure \@ref(fig:attselp) visualizes the results. Out of the 13 predictor variables we analysed, we selected `time point`, `group`, and `time spent in research` to be relevant in addition to the random intercept term. When inspecting the projected posterior distribution for `time spent in research`, we found that less experienced apes performed better. With respect to `group`, in comparison to the reference group, the Gorillas, the Chimpanzee group B performed worse while the Bonobos performed better. The results for `time point` mirrored the results above in that they suggested a better performance at later time points.
+Supplementary Figure \@ref(fig:popselp) visualizes the results. The selected predictors were `time spent in research`, `rearing history`,  `group`, `sex` and `rank`. The results for `time spent in research` suggest that more experience apes performed better. All groups except the Chimpanzee A group outperformed the Gorillas. Females (`sex`) performed better while hand-reared (`rearing history`) individuals performed worse. Finally, higher ranking (`rank`) individuals performed better. 
 
-```{r attselp, fig.height=4,fig.width=10, fig.cap = "Predictor selection for attention-following. A) Elpd and RMSE values (with standard error) for predictors, ordered by importance (left to right) according to the cross-validated projection prediction model. Note that the random intercept term was forced to be the last one to be included. B) Projections for the selected predictors based on the submodel. Reference level for group are Gorillas.", out.width="100%"}
-ggarrange(pattsel, pattpro, labels = c("A","B"), widths = c(1,1))
+```{r popselp, fig.height=4,fig.width=10, fig.cap = "Predictor selection for population-to-sample. A) Elpd and RMSE values (with standard error) for predictors, ordered by importance (left to right) according to the cross-validated projection prediction model. Note that the random intercept term was forced to be the last one to be included. B) Projections for the selected predictors based on the submodel. Reference level for group are Gorillas.", out.width="100%"}
+ggarrange(ppopsel, ppoppro, labels = c("A","B"), widths = c(1,1))
 ```
 
 ### Communicative-cues
@@ -2825,138 +2851,7 @@ Supplementary Figure \@ref(fig:visselp) visualizes the results. The selected pre
 ggarrange(pvissel, pvispro, labels = c("A","B"), widths = c(1,1))
 ```
 
-### Population-to-sample
 
-```{r}
-# cvs_pop <- readRDS("../saves/cvs_pop.rds")
-# 
-# pop_varselp <- summary(cvs_pop, stats = c('elpd', 'rmse'))$perf_sub%>%
-#   as_tibble()%>%
-#   pivot_longer(cols = c(elpd,rmse), values_to = "value", names_to = "stat")%>%
-#   pivot_longer(cols = c(elpd.se,rmse.se), values_to = "se", names_to = "se_term")%>%
-#   rowwise()%>%
-#   filter(grepl(stat,se_term))%>%
-#   select(-se_term)%>%
-#   mutate(ranking_fulldata = factor(ifelse(ranking_fulldata == "(Intercept)","none",ranking_fulldata)),
-#          select = ifelse(ranking_fulldata  %in% c("(1 | subject)", "time_in_leipzig", "group", "rearing", "sex", "rel_rank"), "yes", "no"))
-# 
-# saveRDS(pop_varselp, "../saves/cvs_pop_summary.rds")
-
-pop_varselp <- readRDS("../saves/cvs_pop_summary.rds")%>%
-  mutate(ranking_fulldata = recode(ranking_fulldata,
-                                   time_in_leipzig = "Time spent in research",
-                                   rearing = "Rearing history",
-                                   group = "Group",
-                                   observer = "Observer present",
-                                   observer_mod = "Observer present",
-                                   sex = "Sex",
-                                   rel_rank = "Rank",
-                                   rank = "Rank",
-                                   age = "Age",
-                                   sick_severity = "Sickness severity",
-                                   test_tp = "Study participation (day)",
-                                   test_day = "Study participation (time point)",
-                                   time_outdoors = "Time spent outdoors",
-                                   time_point = "Time point",
-                                   dist_mean = "Disturbance",
-                                   le_mean = "Life event",
-                                   sociality = "Sociality",
-                                   a_chimp = "Chimpanzee group A",
-                                   b_chimp = "Chimpanzee group B",
-                                   bonobos = "Bonobo",
-                                   orangs = "Orangutan",
-                                   gorilla = "Gorilla",
-                                   f = "Female", 
-                                   m = "Male",
-                                   hand = "Hand-reared",
-                                   mother = "Mother-reared",
-                                   `(1 | subject)` = "(1 | Subject)"
-  ))
-
-
-ppopsel <- pop_varselp%>%
-  ggplot(aes(x = size, y = value))+
-  #geom_hline(data = ref_com_p1, aes(yintercept = value), lty = 3)+
-  geom_line(col = "black", alpha = .5)+
-  geom_pointrange(aes(ymin = value - se, ymax = value + se, col = select), size = 0.5, pch = 4)+
-  facet_grid(stat~., scale = "free_y")+
-  scale_color_manual(name = "relevant", values = c("black", "firebrick"))+
-  labs(y = "", x = "Predictors")+
-  scale_x_continuous(labels = unique(pop_varselp$ranking_fulldata), breaks = unique(pop_varselp$size))+
-  theme_few()+
-  theme(axis.text.x = element_text(angle = 45, hjust = 1),
-        legend.position = c(0.5,0.9), legend.direction = "horizontal", legend.background = element_blank())
-
-```
-
-
-```{r}
-# pop_sol_terms <- c("time_in_leipzig", "group", "rearing", "sex", "rel_rank")
-# proj_pop_cv <- project(cvs_pop,  solution_terms = pop_sol_terms)
-# 
-# proj_samples_pop <- as.matrix(proj_pop_cv)%>%
-#   as_tibble()%>%
-#   pivot_longer(cols =c(2:9), names_to = "pred", values_to = "value")%>%
-#   filter(!pred%in%c("test_tp", "sigma", "Intercept"))%>%
-#   mutate(factor = ifelse(grepl("group", pred), "group", "other predictors"),
-#          pred = str_remove(pred,"b_"),
-#          pred = str_remove(pred,"group"),
-#          pred = str_remove(pred,"rel_"),
-#          species = ifelse(factor == "group", pred,factor))
-# 
-# saveRDS(proj_samples_pop,"../saves/proj_cvs_pop.rds")
-
-proj_samples_pop <- readRDS("../saves/proj_cvs_pop.rds")%>%
-  filter(!grepl("Intercept",pred))%>%
-  mutate(pred = recode(pred,
-                       time_in_leipzig = "Time spent in research",
-                       rearing = "Rearing history",
-                       group = "Group",
-                       observer = "Observer present",
-                       observer_mod = "Observer present",
-                       sex = "Sex",
-                       rel_rank = "Rank",
-                       rank = "Rank",
-                       age = "Age",
-                       time_point = "Time point",
-                       sick_severity = "Sickness severity",
-                       test_tp = "Study participation (day)",
-                       test_day = "Study participation (time point)",
-                       time_outdoors = "Time spent outdoors",
-                       dist_mean = "Disturbance",
-                       le_mean = "Life event",
-                       sociality = "Sociality",
-                       a_chimp = "Chimpanzee group A",
-                       b_chimp = "Chimpanzee group B",
-                       bonobos = "Bonobo",
-                       orangs = "Orangutan",
-                       gorilla = "Gorilla",
-                       sexf = "Sex (female)",
-                       rearinghand = "Rearing (hand-reared)",
-                       observer_modyes = "Observer present",
-                       `(1 | subject)` = "(1 | Subject)"
-  ))%>%
-  mutate(factor = recode(factor,
-                         group = "Group",
-                         sex = "Sex",
-                         rearing = "Rearing history"
-  ))
-
-
-ppoppro <- ggplot(proj_samples_pop, aes(x = value, y = pred)) +
-  geom_vline(xintercept = 0, lty = 2, alpha = .75)+
-  geom_density_ridges(alpha = .5, scale = .7) +
-  facet_wrap(~factor, scales = "free")+
-  labs(y = "", x = "Estimate")+
-  theme_minimal()+
-  theme(panel.border = element_rect(color = "black",fill = NA,size = 1))
-```
-
-Supplementary Figure \@ref(fig:popselp) visualizes the results. The selected predictors were `time spent in research`, `rearing history`,  `group`, `sex` and `rank`. The results for `time spent in research` suggest that more experience apes performed better. All groups except the Chimpanzee A group outperformed the Gorillas. Females (`sex`) performed better while hand-reared (`rearing history`) individuals performed worse. Finally, higher ranking (`rank`) individuals performed better. 
-
-```{r popselp, fig.height=4,fig.width=10, fig.cap = "Predictor selection for population-to-sample. A) Elpd and RMSE values (with standard error) for predictors, ordered by importance (left to right) according to the cross-validated projection prediction model. Note that the random intercept term was forced to be the last one to be included. B) Projections for the selected predictors based on the submodel. Reference level for group are Gorillas.", out.width="100%"}
-ggarrange(ppopsel, ppoppro, labels = c("A","B"), widths = c(1,1))
-```
 
 
 ### Self-ordered-search
@@ -3094,6 +2989,140 @@ Supplementary Figure \@ref(fig:inhselp) visualizes the results. The selected pre
 ggarrange(pinhsel, pinhpro, labels = c("A","B"), widths = c(1,1))
 ```
 
+### Attention-following
+
+```{r}
+# cvs_att <- readRDS("../saves/cvs_att.rds")
+# 
+# att_varselp <- summary(cvs_att, stats = c('elpd', 'rmse'))$perf_sub%>%
+#   as_tibble()%>%
+#   pivot_longer(cols = c(elpd,rmse), values_to = "value", names_to = "stat")%>%
+#   pivot_longer(cols = c(elpd.se,rmse.se), values_to = "se", names_to = "se_term")%>%
+#   rowwise()%>%
+#   filter(grepl(stat,se_term))%>%
+#   select(-se_term)%>%
+#   mutate(ranking_fulldata = factor(ifelse(ranking_fulldata == "(Intercept)","none",ranking_fulldata)),
+#          select = ifelse(ranking_fulldata  %in% c("(1 | subject)", "group", "time_point", "time_in_leipzig"), "yes", "no"))
+# 
+# saveRDS(att_varselp, "../saves/cvs_att_summary.rds")
+
+
+att_varselp <- readRDS("../saves/cvs_att_summary.rds")%>%
+  mutate(ranking_fulldata = recode(ranking_fulldata,
+    time_in_leipzig = "Time spent in research",
+    rearing = "Rearing history",
+    group = "Group",
+    observer = "Observer present",
+    observer_mod = "Observer present",
+    sex = "Sex",
+    rel_rank = "Rank",
+    rank = "Rank",
+    age = "Age",
+    sick_severity = "Sickness severity",
+    test_tp = "Study participation (day)",
+    test_day = "Study participation (time point)",
+    time_outdoors = "Time spent outdoors",
+    time_point = "Time point",
+    dist_mean = "Disturbance",
+    le_mean = "Life event",
+    sociality = "Sociality",
+    a_chimp = "Chimpanzee group A",
+    b_chimp = "Chimpanzee group B",
+    bonobos = "Bonobo",
+    orangs = "Orangutan",
+    gorilla = "Gorilla",
+    f = "Female", 
+    m = "Male",
+    hand = "Hand-reared",
+    mother = "Mother-reared",
+    `(1 | subject)` = "(1 | Subject)"
+  ))
+
+
+pattsel <- att_varselp%>%
+ggplot(aes(x = size, y = value))+
+  #geom_hline(data = ref_com_p1, aes(yintercept = value), lty = 3)+
+  geom_line(col = "black", alpha = .5)+
+  geom_pointrange(aes(ymin = value - se, ymax = value + se, col = select), size = 0.5, pch = 4)+
+  facet_grid(stat~., scale = "free_y")+
+  scale_color_manual(name = "relevant", values = c("black", "firebrick"))+
+  labs(y = "", x = "Predictors")+
+  scale_x_continuous(labels = unique(att_varselp$ranking_fulldata), breaks = unique(att_varselp$size))+
+  theme_few()+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = c(0.5,0.9), legend.direction = "horizontal", legend.background = element_blank())
+
+```
+
+
+```{r}
+# att_sol_terms <- c("time_point","group", "time_in_leipzig")
+# proj_att_cv <- project(cvs_att,  solution_terms = att_sol_terms)
+# 
+# proj_samples_att <- as.matrix(proj_att_cv)%>%
+#   as_tibble()%>%
+#   pivot_longer(cols =c(2:7), names_to = "pred", values_to = "value")%>%
+#   filter(!pred%in%c("test_tp", "sigma", "Intercept"))%>%
+#   mutate(factor = ifelse(grepl("group", pred), "group", "other predictors"),
+#          pred = str_remove(pred,"b_"),
+#          pred = str_remove(pred,"group"),
+#          pred = str_remove(pred,"rel_"),
+#          species = ifelse(factor == "group", pred,factor))
+# 
+# saveRDS(proj_samples_att,"../saves/proj_cvs_att.rds")
+
+proj_samples_att <- readRDS("../saves/proj_cvs_att.rds")%>%
+  filter(!grepl("Intercept",pred))%>%
+  mutate(pred = recode(pred,
+    time_in_leipzig = "Time spent in research",
+    rearing = "Rearing history",
+    group = "Group",
+    observer = "Observer present",
+    observer_mod = "Observer present",
+    sex = "Sex",
+    rel_rank = "Rank",
+    rank = "Rank",
+    age = "Age",
+    time_point = "Time point",
+    sick_severity = "Sickness severity",
+    test_tp = "Study participation (day)",
+    test_day = "Study participation (time point)",
+    time_outdoors = "Time spent outdoors",
+    dist_mean = "Disturbance",
+    le_mean = "Life event",
+    sociality = "Sociality",
+    a_chimp = "Chimpanzee group A",
+    b_chimp = "Chimpanzee group B",
+    bonobos = "Bonobo",
+    orangs = "Orangutan",
+    gorilla = "Gorilla",
+    sexf = "Sex (female)",
+    rearinghand = "Rearing (hand-reared)",
+    observer_modyes = "Observer present",
+    `(1 | subject)` = "(1 | Subject)"
+  ))%>%
+  mutate(factor = recode(factor,
+    group = "Group",
+    sex = "Sex",
+    rearing = "Rearing history"
+  ))
+  
+
+pattpro <- ggplot(proj_samples_att, aes(x = value, y = pred)) +
+  geom_vline(xintercept = 0, lty = 2, alpha = .75)+
+  geom_density_ridges(alpha = .5, scale = .7) +
+  facet_wrap(~factor, scales = "free")+
+  labs(y = "", x = "Estimate")+
+  theme_minimal()+
+  theme(panel.border = element_rect(color = "black",fill = NA,size = 1))
+```
+
+Supplementary Figure \@ref(fig:attselp) visualizes the results. Out of the 13 predictor variables we analysed, we selected `time point`, `group`, and `time spent in research` to be relevant in addition to the random intercept term. When inspecting the projected posterior distribution for `time spent in research`, we found that less experienced apes performed better. With respect to `group`, in comparison to the reference group, the Gorillas, the Chimpanzee group B performed worse while the Bonobos performed better. The results for `time point` mirrored the results above in that they suggested a better performance at later time points.
+
+```{r attselp, fig.height=4,fig.width=10, fig.cap = "Predictor selection for attention-following. A) Elpd and RMSE values (with standard error) for predictors, ordered by importance (left to right) according to the cross-validated projection prediction model. Note that the random intercept term was forced to be the last one to be included. B) Projections for the selected predictors based on the submodel. Reference level for group are Gorillas.", out.width="100%"}
+ggarrange(pattsel, pattpro, labels = c("A","B"), widths = c(1,1))
+```
+
 ### Summary
 
 ```{r}
@@ -3127,7 +3156,9 @@ ro <- bind_rows(
   mutate(ranking_fulldata = recode(ranking_fulldata, 
                                    "Study participation (time point)" = "Study part. (time point)",
                                    "Study participation (day)" = "Study part. (day)",
-                                   "Time spent in research" = "Time in research"))
+                                   "Time spent in research" = "Time in research"))%>%
+  mutate(task = factor(task, levels = c("Population-to-sample","Probabilistic-reasoning","Communicative-cues", "Ignore-visible-food", "Self-ordered-search","Attention-following" )))
+  
 
 
 ppicomp <- ggplot(ro,aes(x = fct_reorder(ranking_fulldata,sum), y = size, col = type ))+
@@ -3172,7 +3203,8 @@ proj_samples_sum <- bind_rows(
   summarise(mean = mean(value),
             lci = hdi_lower(value),
             uci = hdi_upper(value))%>%
-  mutate(factor = ifelse(factor == "other predictors", "Other predictors", factor))
+  mutate(factor = ifelse(factor == "other predictors", "Other predictors", factor))%>%
+  mutate(task = factor(task, levels = c("Population-to-sample","Probabilistic-reasoning","Communicative-cues", "Ignore-visible-food", "Self-ordered-search","Attention-following" )))
 
 
 ppipreds <- ggplot(proj_samples_sum, aes(x = mean, y = pred, col = task))+
@@ -3334,7 +3366,14 @@ plsm_rasch <- state_means_rasch%>%
 plsm_rasch
 ```
 
+There is no direct equivalent to latent state estimates in the brms approach. To assess chnage over time, we can use easisnes estimates over time ... 
+
+Vielleicht nochmal zur Klärung: die item easiness parameter sind jetzt trial-weise (also pro "Item" aka trial) geschätzt. Für den ersten trial ist die easiness = 0. Die "easiness parameter" der Zeitpunkte sind die state means. Also in dem Sinne identisch zum Mplus Modell. Aber: die state means sind abhängig von den item easiness Werten und diese sind hier anders als die thresholds im GRM modell in Mplus, die absoluten Werte sind also nicht vergleichbar, da anders skaliert. Ihre Bedeutung ist vergleichbar (höherer Wert = höhere mittlere Fähigkeit = höhere Lösungswahrscheinlichkeit).
 Supplementary Figure \@ref(fig:lsplotrasch) shows ... 
+
+
+Correlations between latent states. 
+
 
 ```{r}
 plsc_rasch <- cor_rasch%>%
@@ -3365,6 +3404,8 @@ plsc_rasch
 ```
 
 Supplementary Figure \@ref(fig:lsplotrasch) shows ... 
+
+Values are higher when we do pairwise estimation, not all tasks together due to the strong influence of the the LKJ prior for small sample sizes 
 
 ### Latent state trait models
 
@@ -3537,7 +3578,6 @@ Supplementary Figure \@ref(fig:lstmplotcomp) shows ...
 #     search = "Self-ordered-search",
 #     pop = "Population-to-sample",
 #     quant = "Quantity-discrimination",
-#     reas = "XProbabilistic-reasoning",
 #     vfood = "Ignore-visible-food"
 #   ),
 #   a = recode(a,
@@ -3550,7 +3590,6 @@ Supplementary Figure \@ref(fig:lstmplotcomp) shows ...
 #     search = "Self-ordered-search",
 #     pop = "Population-to-sample",
 #     quant = "Quantity-discrimination",
-#     reas = "XProbabilistic-reasoning",
 #     vfood = "Ignore-visible-food"
 #   ))%>%
 #    rowwise()%>%
@@ -3586,10 +3625,38 @@ p_cor_bin <- cor_mult_bin%>%
   #scale_y_discrete(limits=rev, breaks = c(1:10))+
   #scale_x_discrete(breaks = c(1:9))+
   theme_few()+
-  theme(legend.position =  c(0.15, 0.8), legend.direction = "vertical", legend.title = element_blank(), legend.background = element_blank())
+  theme(legend.position =  c(0.15, 0.8), legend.direction = "vertical", legend.background = element_blank())
 ```
 
-```{r corbinplot, fig.height=8, fig.width=10, fig.cap = "Correlations between trait estimates based on a binomial model. Bold correlations are different from zero as judged by the 95\\% CrI.", out.width="100%"}
-p_cor_bin
+```{r}
+pcro_diff <- cor_mult_bin %>%
+  select(task, task_1, Estimate, order, order_1)%>%
+  left_join(cor_mod%>%
+              select(task, task_1, est)
+            )%>%
+  filter(task != task_1)%>%
+  mutate(diff = est - Estimate)%>%
+  ggplot(aes(y = factor(order), x = factor(order_1), fill = diff))+
+  geom_tile(color = "white")+
+  labs(x = "", y = "")+
+  scale_fill_gradient2(high = "#4477AA", low = "#DDCC77", mid = "white", 
+  midpoint = 0, limit = c(-1,1), space = "Lab", 
+  name="Difference btw.\ncorrelations")+
+#  ggtitle("brms binomial model")+
+  geom_text(aes(label = round(diff, 2)), size = 3)+
+  scale_y_discrete(breaks = c(1:9),labels = c(str_remove(str_remove(sort(unique(cor_mult_bin$task)), "Z"),"X")))+
+  scale_x_discrete(guide = guide_axis(angle = 90), labels = c(str_remove(str_remove(sort(unique(cor_mult_bin$task_1)), "Z"),"X")))+
+  #scale_y_discrete(limits=rev, breaks = c(1:10))+
+  #scale_x_discrete(breaks = c(1:9))+
+  theme_few()+
+  theme(legend.position =  c(0.15, 0.8), legend.direction = "vertical", legend.background = element_blank())
+
+
+```
+
+
+
+```{r corbinplot, fig.height=7, fig.width=14, fig.cap = "A) Correlations between trait estimates based on a binomial model. Bold correlations are different from zero as judged by the 95\\% CrI. B) Difference in correlation coefficients (SEM - binomial). ", out.width="100%"}
+plot_grid(p_cor_bin, pcro_diff, labels = c("A", "B"))
 ```
 Supplementary Figure \@ref(fig:corbinplot) shows ... 

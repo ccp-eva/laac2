@@ -275,16 +275,71 @@ for (i in c("pop", "reas" , "comm", "vfood", "search", "attent" )) {
 
 saveRDS(cor_bin, "../saves/ls_cor_bin_ex_infants.rds")
 
-#cor_bin <- readRDS("../saves/ls_cor_bin.rds")
+cor_bin <- readRDS("../saves/ls_cor_bin.rds")
 cor_bin_ex_inf <- readRDS("../saves/ls_cor_bin_ex_infants.rds")
+
+```
+
+## For individual timepoints to avoid shrinkage 
+
+```{r}
+# pairwise_recur <- function(n, start = 1) {
+#   if (n == start) return()
+#   nrows <- factorial(n) / (factorial(2) * factorial(n-2))
+#   res <- matrix(nrow = nrows, ncol = 2)
+#   rbind(
+#     cbind(rep(start, times = n - start),
+#           1 + start:(n-1)),
+#     pairwise_recur(n, start = start + 1)
+#   )
+# }
+# 
+# x <- pairwise_recur(10)
+# 
+# pairs <- x%>%as_tibble()%>%rowwise()%>%mutate(pair = pmap(list(V1, V2), c))%>%pull(pair)
+
+cor_rasch_ind_tp <- tibble()
+
+test_lsc <- long %>%filter(task == "vfood")
+
+for (i in pairs) {
+  
+  tpd <- test_lsc %>%filter(time_point %in% unlist(i))
+  
+  state <-  brm(code ~ 0 + time_cat + trial + (0 + time_cat | subject),
+                 data = tpd,
+                 family = brmsfamily(family="bernoulli", link="logit"),
+                 chains = 3, # to speed up sampling --> increase later
+                 cores = 3,
+                 #threads = threading(8),
+                 #backend = "cmdstanr",
+                 iter=3000)
+  
+  results <- summary(state)
+  
+  cor_state <- results$random$subject%>%as_tibble(rownames = "cor")%>%
+  filter(grepl("cor", cor))%>%
+  mutate(cor = str_remove(cor, "cor\\(time_cat"),
+         cor = str_remove(cor, "\\)"),
+         cor = str_remove(cor, "time_cat"))%>%
+  tidyr::separate(cor, sep = ",", into = c("a", "b"))%>%
+  mutate(a = as.numeric(a), 
+         b = as.numeric(b))
+  
+  cor_rasch_ind_tp <- bind_rows(cor_rasch_ind_tp, cor_state)
+  
+}
+
+saveRDS(cor_rasch_ind_tp, "../saves/cor_rasch_ind_tp.rds")
 
 ```
 
 
 
 ```{r}
-plsc_bin <- cor_bin_ex_inf%>%
-  mutate(task = factor(task, levels = c("attent",  "comm", "vfood", "pop", "reas","search")))%>%
+plsc_bin_2 <- cor_bin%>%
+  filter(task == "vfood")%>%
+  #mutate(task = factor(task, levels = c("attent",  "comm", "vfood", "pop", "reas","search")))%>%
   ggplot(aes(y = factor(b), x = factor(a), fill = Estimate))+
     geom_tile(color = "white")+
   labs(x = "", y = "")+
@@ -297,9 +352,10 @@ plsc_bin <- cor_bin_ex_inf%>%
     breaks = c(0, 0.5, 1)
   ) +
   geom_text(aes(label = round(Estimate, 2)), size = 2)+
-  scale_y_discrete(breaks = c(2,10))+
+  scale_y_discrete(breaks = c(2,10), limits=rev)+
   scale_x_discrete(breaks = c(1,9))+
-  facet_wrap(~task, nrow = 1)+
+  #facet_wrap(~task, nrow = 1)+
+  ggtitle("All tp Rasch")+
   theme_few()+
   theme(legend.position = c(0.975,0.25), legend.direction = "vertical", legend.title = element_blank(), legend.background = element_blank(), 
         #strip.text = element_blank(),
@@ -307,11 +363,11 @@ plsc_bin <- cor_bin_ex_inf%>%
 ```
 
 ```{r }
-plot_grid(plsc_bin, plsc2, align = "v",axis = "l", rel_heights = c(1,1), ncol = 1)
+plot_grid(plsc_bin, plsc,plsc_bin_2, align = "v",axis = "l", rel_heights = c(1,1,1), ncol = 1)
 ```
 
 ```{r}
-ggsave("../visuals/ls_comp_bin.pdf", height = 6, width = 14, scale = 0.9)
+ggsave("../visuals/ls_comp_ind.pdf", height = 14, width = 8, scale = 0.9)
 ```
 
 # Multi-task LSTMs Rasch
@@ -464,17 +520,6 @@ lstv_con_rel%>%filter(param == "consistency", !grepl("7", task))%>%mutate(type =
   ),
 
 con_sum%>%mutate(
-  type ="brms_binomial",
-  task = recode(task,
-       "pop" = "Population-to-sample",
-       "comm" = "Communicative-cues",
-       "reas" = "Probabilistic-reasoning",
-       "vfood" = "Ignore-visible-food",
-       "search" = "Self-ordered-search",
-       "attent" = "Attention-following")
-  ),
-
-con_sum_bin%>%mutate(
   type ="brms_rasch",
   task = recode(task,
        "pop" = "Population-to-sample",
@@ -483,7 +528,18 @@ con_sum_bin%>%mutate(
        "vfood" = "Ignore-visible-food",
        "search" = "Self-ordered-search",
        "attent" = "Attention-following")
-  )
+   )#,
+# 
+# con_sum_bin%>%mutate(
+#   type ="brms_rasch",
+#   task = recode(task,
+#        "pop" = "Population-to-sample",
+#        "comm" = "Communicative-cues",
+#        "reas" = "Probabilistic-reasoning",
+#        "vfood" = "Ignore-visible-food",
+#        "search" = "Self-ordered-search",
+#        "attent" = "Attention-following")
+#   )
 )%>%
   ggplot(aes(x = task, y = con_m))+
   geom_pointrange(aes(ymin= con_lci, ymax = con_uci, col = type), position = position_dodge(width = 0.2))+

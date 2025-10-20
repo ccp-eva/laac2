@@ -244,7 +244,7 @@ Preregistration: The study design and general analysis plan were pre-registered 
 
 Variation fuels evolution. Individual differences in cognitive abilities are essential for understanding what evolves (Thornton \& Lukas, 2012; Völter, Tinklenberg, Call, \& Seed, 2018). These differences reveal which aspects of cognition are invariant and which are malleable. They also shed light on the broader structure of the cognitive architecture by identifying relationships between different cognitive abilities. Moreover, they help identify the socio-ecological factors shaping cognition during both ontogeny and phylogeny.
 
-Broadly speaking, great ape cognition is marked by substantial individual variability across functional domains, such as tool use, communication, social cognition, causal reasoning, and reasoning about quantities. This variability has been observed in both captive and wild settings (Berdugo, Cohen, Davis, Matsuzawa, \& Carvalho, 2023; Bohn et al., 2023; Fröhlich, Wittig, \& Pika, 2019; Herrmann, Hernández-Lloreda, Call, Hare, \& Tomasello, 2010; Watson et al., 2018) and suggests significant plasticity in cognitive abilities, presumably shaped by social and ecological influences. As noted above, such individual differences can be used to study the structure of great ape cognition and its origins (Völter et al., 2018).
+Broadly speaking, great ape cognition is marked by substantial individual variability across functional domains, such as tool use, communication, social cognition, causal reasoning, and reasoning about quantities. This variability has been observed in both captive and wild settings (Berdugo, Cohen, Davis, Matsuzawa, \& Carvalho, 2025; Bohn et al., 2023; Fröhlich, Wittig, \& Pika, 2019; Herrmann, Hernández-Lloreda, Call, Hare, \& Tomasello, 2010; Watson et al., 2018) and suggests significant plasticity in cognitive abilities, presumably shaped by social and ecological influences. As noted above, such individual differences can be used to study the structure of great ape cognition and its origins (Völter et al., 2018).
 
 Despite their importance, few studies have explored the broader structure of individual differences in great apes. Most work has focused on finding something akin to general intelligence or a \emph{g}-factor (Burkart, Schubiger, \& Schaik, 2017; Deaner, Van Schaik, \& Johnson, 2006; Reader, Hager, \& Laland, 2011). Using the Primate Cognition Test Battery (PCTB) (Herrmann, Call, Hernández-Lloreda, Hare, \& Tomasello, 2007), Herrmann et al. (2010) found no evidence for a single \emph{g}-factor in chimpanzees. Instead, they observed a bifactorial structure, with one factor linked to spatial tasks and the other to social and physical tasks. Similar findings have been reported for other primates (Fichtel, Dinter, \& Kappeler, 2020; Schmitt, Pankau, \& Fischer, 2012). By contrast, Hopkins, Russell, and Schaeffer (2014) used the PCTB to test a different sample of chimpanzees and identified a \emph{g}-factor, which was later found to relate to measures of self-control (Beran \& Hopkins, 2018). However, this study did not test whether the proposed structure (a single \emph{g}-factor) fit the data well. In a subsequent re-analysis, Kaufman, Reynolds, and Kaufman (2019) combined datasets collected with the PCTB and found the single \emph{g}-factor model inadequate. Only multidimensional models accurately described the data. Beyond general cognitive abilities, Völter, Reindl, et al. (2022) investigated the structure of executive functions in chimpanzees using a multi-trait, multi-method approach. Their results showed limited evidence for the structure proposed for executive functions in humans.
 
@@ -378,7 +378,7 @@ Finally, when zooming out a bit, a notable cluster including all non-social task
 
 \subsection{Predictability}\label{predictability}
 
-In this section, we analysed which external variables accounted for inter- and intra-individual differences in task performance. That is, we asked which of the predictor variables described above predicted performance in the different tasks. Given the large number of predictor variables (14), this question translates to a variable selection problem: selecting a subset of variables from a larger pool. We used the projection predictive inference (Piironen, Paasiniemi, \& Vehtari, 2020) approach because it is a state-of-the-art procedure that provides an excellent trade-off between model complexity and accuracy (Pavone, Piironen, Bürkner, \& Vehtari, 2020). The projection prediction approach is a two-step process: The first step consists of building the best predictive model possible, called the reference model. In our case, the reference model is a Bayesian multilevel regression model -- fit via \texttt{brms} (Bürkner, 2017) -- including all available predictors (Catalina, Bürkner, \& Vehtari, 2020). In the second step, the goal is to replace the posterior distribution of the reference model with a simpler distribution containing fewer predictors compared to the reference model. The importance of a predictor is assessed by inspecting the mean log-predictive density (\texttt{elpd}) and root-mean-squared error (\texttt{rmse}) of models containing the predictor compared to models that lack it.
+In this section, we analysed which external variables accounted for inter- and intra-individual differences in task performance. That is, we asked which of the predictor variables described above predicted performance in the different tasks. Given the large number of predictor variables (14), this question translates to a variable selection problem: selecting a subset of variables from a larger pool. We used the projection predictive inference (Piironen, Paasiniemi, \& Vehtari, 2020) approach because it is a state-of-the-art procedure that provides an excellent trade-off between model complexity and accuracy (Pavone, Piironen, Bürkner, \& Vehtari, 2023). The projection prediction approach is a two-step process: The first step consists of building the best predictive model possible, called the reference model. In our case, the reference model is a Bayesian multilevel regression model -- fit via \texttt{brms} (Bürkner, 2017) -- including all available predictors (Catalina, Bürkner, \& Vehtari, 2022). In the second step, the goal is to replace the posterior distribution of the reference model with a simpler distribution containing fewer predictors compared to the reference model. The importance of a predictor is assessed by inspecting the mean log-predictive density (\texttt{elpd}) and root-mean-squared error (\texttt{rmse}) of models containing the predictor compared to models that lack it.
 
 The output of the procedure is a ranking of the different predictors. That is, for each task, we get a ranking of how important a predictor is for constructing the simpler replacement distribution. In addition, we can make a qualitative assessment of whether or not a predictor is relevant or not. In addition to the global assessment, we also inspected the projected posterior distribution of the predictors classified as relevant to see how they influenced performance. In the supplementary material we provide a detailed description of the procedure including how the different variables were handled and how the importance of each predictor was assessed.
 
@@ -438,8 +438,8 @@ Beran, M. J. (2015). The comparative science of {``self-control''}: What are we 
 \bibitem[\citeproctext]{ref-beran2018self}
 Beran, M. J., \& Hopkins, W. D. (2018). Self-control in chimpanzees relates to general intelligence. \emph{Current Biology}, \emph{28}(4), 574--579.
 
-\bibitem[\citeproctext]{ref-berdugo2023stable}
-Berdugo, S., Cohen, E., Davis, A., Matsuzawa, T., \& Carvalho, S. (2023). Stable long-term individual variation in chimpanzee technological efficiency. \emph{bioRxiv}, 2023--2011.
+\bibitem[\citeproctext]{ref-berdugo2025reliable}
+Berdugo, S., Cohen, E., Davis, A., Matsuzawa, T., \& Carvalho, S. (2025). Reliable long-term individual variation in wild chimpanzee technological efficiency. \emph{Nature Human Behaviour}, \emph{9}(3), 472--480.
 
 \bibitem[\citeproctext]{ref-berio2023great}
 Berio, L., \& Moore, R. (2023). Great ape enculturation studies: A neglected resource in cognitive development research. \emph{Biology \& Philosophy}, \emph{38}(2), 17.
@@ -457,7 +457,7 @@ Boogert, N. J., Madden, J. R., Morand-Ferron, J., \& Thornton, A. (2018). Measur
 Brosnan, S. F., Hopper, L. M., Richey, S., Freeman, H. D., Talbot, C. F., Gosling, S. D., \ldots{} Schapiro, S. J. (2015). Personality influences responses to inequity and contrast in chimpanzees. \emph{Animal Behaviour}, \emph{101}, 75--87.
 
 \bibitem[\citeproctext]{ref-burkart2017evolution}
-Burkart, J. M., Schubiger, M. N., \& Schaik, C. P. van. (2017). The evolution of general intelligence. \emph{Behavioral and Brain Sciences}, \emph{40}.
+Burkart, J. M., Schubiger, M. N., \& Schaik, C. P. van. (2017). The evolution of general intelligence. \emph{Behavioral and Brain Sciences}, \emph{40}, e195.
 
 \bibitem[\citeproctext]{ref-R-brms_a}
 Bürkner, P.-C. (2017). {brms}: An {R} package for {Bayesian} multilevel models using {Stan}. \emph{Journal of Statistical Software}, \emph{80}(1), 1--28.
@@ -465,8 +465,8 @@ Bürkner, P.-C. (2017). {brms}: An {R} package for {Bayesian} multilevel models 
 \bibitem[\citeproctext]{ref-carter2014personality}
 Carter, A. J., Marshall, H. H., Heinsohn, R., \& Cowlishaw, G. (2014). Personality predicts the propensity for social learning in a wild primate. \emph{PeerJ}, \emph{2}, e283.
 
-\bibitem[\citeproctext]{ref-catalina2020projection}
-Catalina, A., Bürkner, P.-C., \& Vehtari, A. (2020). Projection predictive inference for generalized linear and additive multilevel models. \emph{arXiv Preprint arXiv:2010.06994}.
+\bibitem[\citeproctext]{ref-catalina2022projection}
+Catalina, A., Bürkner, P.-C., \& Vehtari, A. (2022). Projection predictive inference for generalized linear and additive multilevel models. \emph{International Conference on Artificial Intelligence and Statistics}, 4446--4461. PMLR.
 
 \bibitem[\citeproctext]{ref-cauchoix2018repeatability}
 Cauchoix, M., Chow, P., Van Horik, J., Atance, C., Barbeau, E., Barragan-Jason, G., et al.others. (2018). The repeatability of cognitive performance: A meta-analysis. \emph{Philosophical Transactions of the Royal Society B: Biological Sciences}, \emph{373}(1756), 20170281.
@@ -487,7 +487,7 @@ Eckert, J., Call, J., Hermes, J., Herrmann, E., \& Rakoczy, H. (2018). Intuitive
 Fichtel, C., Dinter, K., \& Kappeler, P. M. (2020). The lemur baseline: How lemurs compare to monkeys and apes in the primate cognition test battery. \emph{PeerJ}, \emph{8}, e10025.
 
 \bibitem[\citeproctext]{ref-fried2018measurement}
-Fried, E. I., \& Flake, J. K. (2018). Measurement matters. \emph{APS Observer}, \emph{31}(3).
+Fried, E. I., \& Flake, J. (2018). Measurement matters. \emph{APS Observer}, \emph{31}(3), 29--31.
 
 \bibitem[\citeproctext]{ref-frohlich2019ontogeny}
 Fröhlich, M., Wittig, R. M., \& Pika, S. (2019). The ontogeny of intentional communication in chimpanzees in the wild. \emph{Developmental Science}, \emph{22}(1), e12716.
@@ -529,7 +529,7 @@ Kaigaishi, Y., Nakamichi, M., \& Yamada, K. (2019). High but not low tolerance p
 Kaminski, J., Call, J., \& Tomasello, M. (2004). Body orientation and face orientation: Two factors controlling apes' begging behavior from humans. \emph{Animal Cognition}, \emph{7}, 216--223.
 
 \bibitem[\citeproctext]{ref-kaufman2019structure}
-Kaufman, A. B., Reynolds, M. R., \& Kaufman, A. S. (2019). The structure of ape (hominoidea) intelligence. \emph{Journal of Comparative Psychology}, \emph{133}(1), 92.
+Kaufman, A. B., Reynolds, M. R., \& Kaufman, A. S. (2019). The structure of ape (hominoidea) intelligence. \emph{Journal of Comparative Psychology}, \emph{133}(1), 92--105.
 
 \bibitem[\citeproctext]{ref-lacreuse2020age}
 Lacreuse, A., Raz, N., Schmidtke, D., Hopkins, W. D., \& Herndon, J. G. (2020). Age-related decline in executive function as a hallmark of cognitive ageing in primates: An overview of cognitive and neurobiological studies. \emph{Philosophical Transactions of the Royal Society B}, \emph{375}(1811), 20190618.
@@ -544,16 +544,16 @@ ManyPrimates, Aguenounon, G., Allritz, M., Altschul, D. M., Ballesta, S., Beaud,
 ManyPrimates, Altschul, D. M., Beran, M. J., Bohn, M., Call, J., DeTroy, S., et al.others. (2019). Establishing an infrastructure for collaboration in primate cognition research. \emph{PLoS One}, \emph{14}(10), e0223675.
 
 \bibitem[\citeproctext]{ref-matzel2017individual}
-Matzel, L. D., \& Sauce, B. (2017). Individual differences: Case studies of rodent and primate intelligence. \emph{Journal of Experimental Psychology: Animal Learning and Cognition}, \emph{43}(4), 325.
+Matzel, L. D., \& Sauce, B. (2017). Individual differences: Case studies of rodent and primate intelligence. \emph{Journal of Experimental Psychology: Animal Learning and Cognition}, \emph{43}(4), 325--340.
 
-\bibitem[\citeproctext]{ref-pavone2020using}
-Pavone, F., Piironen, J., Bürkner, P.-C., \& Vehtari, A. (2020). \emph{Using reference models in variable selection}. Retrieved from \url{https://arxiv.org/abs/2004.13118}
+\bibitem[\citeproctext]{ref-pavone2023using}
+Pavone, F., Piironen, J., Bürkner, P.-C., \& Vehtari, A. (2023). Using reference models in variable selection. \emph{Computational Statistics}, \emph{38}(1), 349--371.
 
 \bibitem[\citeproctext]{ref-piantadosi2016extraordinary}
 Piantadosi, S. T., \& Kidd, C. (2016). Extraordinary intelligence and the care of infants. \emph{Proceedings of the National Academy of Sciences}, \emph{113}(25), 6874--6879.
 
 \bibitem[\citeproctext]{ref-piironen2018projective}
-Piironen, J., Paasiniemi, M., \& Vehtari, A. (2020). {Projective inference in high-dimensional problems: Prediction and feature selection}. \emph{Electronic Journal of Statistics}, \emph{14}(1), 2155--2197. \url{https://doi.org/10.1214/20-EJS1711}
+Piironen, J., Paasiniemi, M., \& Vehtari, A. (2020). {Projective inference in high-dimensional problems: Prediction and feature selection}. \emph{Electronic Journal of Statistics}, \emph{14}(1), 2155--2197.
 
 \bibitem[\citeproctext]{ref-poirier2020general}
 Poirier, M.-A., Kozlovsky, D. Y., Morand-Ferron, J., \& Careau, V. (2020). How general is cognitive ability in non-human animals? A meta-analytical and multi-level reanalysis approach. \emph{Proceedings of the Royal Society B}, \emph{287}(1940), 20201853.
@@ -604,7 +604,7 @@ Völter, C. J., Reindl, E., Felsche, E., Civelek, Z., Whalen, A., Lugosi, Z., \l
 Völter, C. J., Tinklenberg, B., Call, J., \& Seed, A. M. (2018). Comparative psychometrics: Establishing what differs is central to understanding what evolves. \emph{Philosophical Transactions of the Royal Society B: Biological Sciences}, \emph{373}(1756), 20170283.
 
 \bibitem[\citeproctext]{ref-volter2022inhibitory}
-Völter, C. J., Tinklenberg, B., Call, J., \& Seed, A. M. (2022). Inhibitory control and cue relevance modulate chimpanzees'(pan troglodytes) performance in a spatial foraging task. \emph{Journal of Comparative Psychology}, \emph{136}(2), 105.
+Völter, C. J., Tinklenberg, B., Call, J., \& Seed, A. M. (2022). Inhibitory control and cue relevance modulate chimpanzees'(pan troglodytes) performance in a spatial foraging task. \emph{Journal of Comparative Psychology}, \emph{136}(2), 105--120.
 
 \bibitem[\citeproctext]{ref-watson2018chimpanzees}
 Watson, S. K., Vale, G. L., Hopper, L. M., Dean, L. G., Kendal, R. L., Price, E. E., et al.others. (2018). Chimpanzees demonstrate individual differences in social information use. \emph{Animal Cognition}, \emph{21}, 639--650.
