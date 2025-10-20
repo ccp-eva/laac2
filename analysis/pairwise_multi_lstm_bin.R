@@ -20,6 +20,7 @@ long_bin <- long%>%
   ungroup()
 
 long_bin_all <- long_bin%>%
+  filter(task != "reas")%>%
   mutate(phase = ifelse(task %in% c("cause", "delay", "gaze", "inference", "quant"), 1, 2))%>%
   mutate(time_point = ifelse(phase == 1, time_point - 4, time_point))%>%
   filter(time_point > 0)%>%
@@ -31,6 +32,8 @@ pairwise_Multi_LST_bin <- tibble()
 
 for (i in pairs) {
 
+print(unlist(i))
+  
 model <-  brm(sum|trials(n) ~ 0 + time_cat + task + time_cat:task + 
                   (0 + time_cat + time_cat:task || subject) + (0 + task | subject),
                   data = long_bin_all%>%filter(task %in% unlist(i)),
@@ -40,7 +43,7 @@ model <-  brm(sum|trials(n) ~ 0 + time_cat + task + time_cat:task +
                   backend = "cmdstanr",
                   threads = threading(8),
                   control = list(adapt_delta = 0.95, max_treedepth = 20),
-                  iter=8000) # decreased for model testing
+                  iter=4000) # decreased for model testing
 
 
 pair_cor <- summary(model)$random$subject%>%as_tibble(rownames = "param")%>%
