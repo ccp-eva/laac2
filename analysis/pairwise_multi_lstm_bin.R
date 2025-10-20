@@ -33,7 +33,7 @@ for (i in pairs) {
 
 model <-  brm(sum|trials(n) ~ 0 + time_cat + task + time_cat:task + 
                   (0 + time_cat + time_cat:task || subject) + (0 + task | subject),
-                  data = long_bin_all%>%filter(task %in% pairs[,1]),
+                  data = long_bin_all%>%filter(task %in% i[,1]),
                   family = binomial(),
                   chains = 4, # to speed up sampling --> increase later
                   cores = 4,

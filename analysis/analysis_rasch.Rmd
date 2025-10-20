@@ -731,3 +731,74 @@ plot_grid(p_cor_bin, pcor_mod_a)
 ```{r}
 ggsave("../visuals/cor_comp_bin.pdf",width = 14, height = 6, scale = 1)
 ```
+
+## Pairwise correlations between tasks
+
+```{r}
+pair_cor_mult_bin <- readRDS("../saves/pairwise_multi_lst_bin.rds")%>%
+    mutate(param = str_remove(param, "cor\\("),
+         param = str_remove(param, "\\)"),
+         param = str_remove_all(param, "task"))%>%
+  tidyr::separate(param, sep = ",", into = c("a", "b"))%>%
+  mutate(Estimate = ifelse(a == "search" | b == "search", Estimate*-1, Estimate))%>%
+  mutate(b = recode(b,
+    attent = "ZAttention-following",
+    gaze = "ZGaze-following",
+    cause = "Causal-inference",
+    inference = "Inference-by-exclusion",
+    delay = "Delay-of-gratification",
+    comm = "ZCommunicative-cues",
+    search = "Self-ordered-search",
+    pop = "Population-to-sample",
+    quant = "Quantity-discrimination",
+    reas = "XProbabilistic-reasoning",
+    vfood = "Ignore-visible-food"
+  ),
+  a = recode(a,
+    attent = "ZAttention-following",
+    gaze = "ZGaze-following",
+    cause = "Causal-inference",
+    inference = "Inference-by-exclusion",
+    delay = "Delay-of-gratification",
+    comm = "ZCommunicative-cues",
+    search = "Self-ordered-search",
+    pop = "Population-to-sample",
+    quant = "Quantity-discrimination",
+    reas = "XProbabilistic-reasoning",
+    vfood = "Ignore-visible-food"
+  ))%>%
+   rowwise()%>%
+  mutate(id = paste(sort(c(b, a)), collapse = "_"))%>%
+  separate(id, into = c("task", "task_1"), sep = "_")%>%
+  add_row(task_1 = "Ignore-visible-food", task = "Ignore-visible-food", Estimate = 0)%>%
+   add_row(task = "ZCommunicative-cues",task_1 = "ZCommunicative-cues", Estimate = 0)%>%
+  arrange(task, task_1)%>%
+  mutate(
+    zero = 0, 
+    sig = ifelse(between(zero, `l-95% CI`, `u-95% CI`), "plain", "bold"),
+    sig = ifelse(is.na(sig), "plain", sig))%>%
+  mutate(order = as.numeric(factor(task)),
+         order_1 = as.numeric(factor(task_1)))
+
+saveRDS(pair_cor_mult_bin, "../saves/pair_cor_mult_bin.rds")
+
+pair_cor_mult_bin <- readRDS("../saves/pair_cor_mult_bin.rds")
+```
+
+```{r}
+p_pair_cor_bin <- pair_cor_mult_bin%>%
+  ggplot(aes(y = factor(order), x = factor(order_1), fill = Estimate))+
+  geom_tile(color = "white")+
+  labs(x = "", y = "")+
+  scale_fill_gradient2(low = "#CC6677", high = "#117733", mid = "white", 
+  midpoint = 0, limit = c(-1,1), space = "Lab", 
+  name="Correlation")+
+  ggtitle("brms binomial model")+
+  geom_text(aes(label = round(Estimate, 2), fontface = sig), size = 3)+
+  scale_y_discrete(breaks = c(1:9),labels = c(str_remove(str_remove(sort(unique(cor_mult_bin$task)), "Z"),"X")))+
+  scale_x_discrete(guide = guide_axis(angle = 90), labels = c(str_remove(str_remove(sort(unique(cor_mult_bin$task_1)), "Z"),"X")))+
+  #scale_y_discrete(limits=rev, breaks = c(1:10))+
+  #scale_x_discrete(breaks = c(1:9))+
+  theme_few()+
+  theme(legend.position =  c(0.15, 0.8), legend.direction = "vertical", legend.title = element_blank(), legend.background = element_blank())
+```
