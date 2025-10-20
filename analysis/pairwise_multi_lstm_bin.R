@@ -25,7 +25,7 @@ long_bin_all <- long_bin%>%
   filter(time_point > 0)%>%
   mutate(time_cat = as.factor(time_point))
 
-pairs <- combn(unique(long_bin_all$task), 2)
+pairs <- combn(unique(long_bin_all$task), 2, simplify = F)
 
 pairwise_Multi_LST_bin <- tibble()
 
@@ -33,7 +33,7 @@ for (i in pairs) {
 
 model <-  brm(sum|trials(n) ~ 0 + time_cat + task + time_cat:task + 
                   (0 + time_cat + time_cat:task || subject) + (0 + task | subject),
-                  data = long_bin_all%>%filter(task %in% i[,1]),
+                  data = long_bin_all%>%filter(task %in% unlist(i)),
                   family = binomial(),
                   chains = 4, # to speed up sampling --> increase later
                   cores = 4,
