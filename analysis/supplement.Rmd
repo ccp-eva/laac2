@@ -3273,6 +3273,37 @@ long[long$task == "search", "code"] <- car::recode(long[long$task == "search", "
 
 ## Rasch model analysis
 
+```{r}
+# run functions first
+fun_KR20 <- function(responses) {
+  # Get number of items (N) and individuals
+  n_items <- ncol(responses)
+  n_persons <- nrow(responses)
+  # get p_j for each item
+  p <- colMeans(responses, na.rm=T)
+  # Get total scores (X)
+  x <- rowSums(responses, na.rm = T)
+  # observed score variance
+  var_x <- var(x) * (n_persons - 1) / n_persons
+  # Apply KR-20 formula
+  rel <- (n_items / (n_items - 1)) * (1 - sum(p * (1 - p)) / var_x)
+  rel
+}
+
+
+fun_sep_rel <- function(model, timepoint) {
+  pers_params <- ranef(model)$subject[,,timepoint]%>%as_tibble(rownames = "subject")
+  true <- summary(model)$random$subject[timepoint,"Estimate"]^2
+  var_EAP <- var(pers_params$Estimate)
+  Mean_SE <- mean(pers_params$Est.Error^2)
+  # nach TAM Paket (bzw. nach Adams unter der Annahme:  var_EAP = true - Mean_SE bzw. true = var_EAP + Mean_SE)
+  rel <- var_EAP / (var_EAP + Mean_SE)
+  rel
+}
+```
+
+
+
 Alternative analytical approach. 
 
 Pros: 
@@ -3283,51 +3314,69 @@ Cons:
 
 ### Latent state models
 ```{r}
-# # Latent state correlations rasch model
-# state_means_rasch <- tibble()
-# cor_rasch <- tibble()
-# 
-# for (i in c("pop", "reas" , "comm", "vfood", "search", "attent" )) {
-#   
-#   task <- long %>%filter(task == i)
-#   
-#   state <-  brm(code ~ 0 + time_cat + trial + (0 + time_cat | subject),
-#                  data = task,
-#                  family = brmsfamily(family="bernoulli", link="logit"),
-#                  chains = 4,
-#                  cores = 4,
-#                  #threads = threading(8),
-#                  #backend = "cmdstanr",
-#                  iter=3000)
-#   
-#   
-#   results <- summary(state)
-#   
-#   state_means <- results$fixed%>%as_tibble(rownames = "time_point")%>%filter(grepl("time_cat", time_point))%>%mutate(task = i)
-#   
-#   state_means_rasch <- bind_rows(state_means_rasch, state_means)
-#   
-#   cor_state <- results$random$subject[11:55,]%>%as_tibble(rownames = "cor")%>%
-#   mutate(cor = str_remove(cor, "cor\\(time_cat"),
-#          cor = str_remove(cor, "\\)"),
-#          cor = str_remove(cor, "time_cat"))%>%
-#   tidyr::separate(cor, sep = ",", into = c("a", "b"))%>%
-#   mutate(a = as.numeric(a), 
-#          b = as.numeric(b))%>%
-#     mutate(task = i)
-#   
-#   cor_rasch <- bind_rows(cor_rasch, cor_state)
-#   
-# }
-# 
-# saveRDS(cor_rasch, "../saves/latent_state_cor_rasch.rds")
-# saveRDS(state_means_rasch, "../saves/latent_state_means_rasch.rds")
+# Latent state correlations rasch model
+state_means_rasch <- tibble()
+cor_rasch <- tibble()
+rel_rasch <- tibble()
 
+# Set up results matrix for reliability
+Ntp <- 10
+timepoints <- seq(1,Ntp,1)
+tasks <- c("attent", "comm", "pop", "reas",  "search",  "vfood")
+sep_rel <- data.frame(task= rep(tasks, each = Ntp), time_point = rep(1:Ntp,length(tasks)), sep_rel_EAP = rep(NA,Ntp*length(tasks)))
+
+for (i in c("pop", "reas" , "comm", "vfood", "search", "attent" )) {
+
+  taskd <- long %>%filter(task == i)
+
+  state <-  brm(code ~ 0 + time_cat + trial + (0 + time_cat | subject),
+                 data = taskd,
+                 family = brmsfamily(family="bernoulli", link="logit"),
+                 chains = 4,
+                 cores = 4,
+                 threads = threading(5),
+                 backend = "cmdstanr",
+                 iter=4000)
+
+
+  results <- summary(state)
+
+  state_means <- results$fixed%>%as_tibble(rownames = "time_point")%>%filter(grepl("time_cat", time_point))%>%mutate(task = i)
+
+  state_means_rasch <- bind_rows(state_means_rasch, state_means)
+
+  cor_state <- results$random$subject[11:55,]%>%as_tibble(rownames = "cor")%>%
+  mutate(cor = str_remove(cor, "cor\\(time_cat"),
+         cor = str_remove(cor, "\\)"),
+         cor = str_remove(cor, "time_cat"))%>%
+  tidyr::separate(cor, sep = ",", into = c("a", "b"))%>%
+  mutate(a = as.numeric(a),
+         b = as.numeric(b))%>%
+    mutate(task = i)
+
+  cor_rasch <- bind_rows(cor_rasch, cor_state)
+  
+  for (j in unique(taskd$time_point)) {
+    
+    rel <-  fun_sep_rel(state, 2)
+    
+    rel_tp <- rel%>%as_tibble(rownames = "rel")%>%mutate(task = i, time_point = j)
+    
+    rel_rasch <- bind_rows(rel_rasch, rel_tp)
+  }
+  
+}
+
+saveRDS(rel_rasch, "../saves/latent_state_rel_rasch.rds")
+saveRDS(cor_rasch, "../saves/latent_state_cor_rasch.rds")
+saveRDS(state_means_rasch, "../saves/latent_state_means_rasch.rds")
+
+rel_rasch <- readRDS("../saves/latent_state_rel_rasch.rds")
 cor_rasch <- readRDS("../saves/latent_state_cor_rasch.rds")
 state_means_rasch <- readRDS("../saves/latent_state_means_rasch.rds")
 
 
-
+ranef(model)$subject[, , 3]
 ```
 
 
@@ -3374,6 +3423,39 @@ Supplementary Figure \@ref(fig:lsplotrasch) shows ...
 
 Correlations between latent states. 
 
+
+
+
+
+```{r}
+# Set up results matrix
+Ntp <- 10
+timepoints <- seq(1,Ntp,1)
+tasks <- c("attent", "comm", "pop", "reas",  "search",  "vfood")
+sep_rel <- data.frame(task= rep(tasks, each = Ntp), time_point = rep(1:Ntp,length(tasks)), sep_rel_EAP = rep(NA,Ntp*length(tasks)))
+
+# Estimate latent state models and compute reliability
+for (t in 1:length(tasks)){
+
+  task <- long %>%
+    filter(str_detect(task, tasks[t]))
+  
+  state <-  brm(code ~ 0 + time_cat + trial + (0 + time_cat | subject),
+                data = task,
+                family = brmsfamily(family="bernoulli", link="logit"),
+                chains = 2, # to speed up sampling --> increase later
+                iter=4000)
+  
+  for (i in 1:length(timepoints)){
+    
+    sep_rel[sep_rel$task == tasks[t] & sep_rel$time_point == timepoints[i],
+            "sep_rel_EAP"] <-  fun_sep_rel(model = state, timepoint = timepoints[i])
+  }
+}
+```
+
+
+Reliability
 
 ```{r}
 plsc_rasch <- cor_rasch%>%

@@ -716,7 +716,7 @@ p_cor_bin <- cor_mult_bin%>%
   name="Correlation")+
   ggtitle("brms binomial model")+
   geom_text(aes(label = round(Estimate, 2), fontface = sig), size = 3)+
-  scale_y_discrete(breaks = c(1:10),labels = c(str_remove(str_remove(sort(unique(cor_mult_bin$task)), "Z"),"X")))+
+  scale_y_discrete(breaks = c(1:9),labels = c(str_remove(str_remove(sort(unique(cor_mult_bin$task)), "Z"),"X")))+
   scale_x_discrete(guide = guide_axis(angle = 90), labels = c(str_remove(str_remove(sort(unique(cor_mult_bin$task_1)), "Z"),"X")))+
   #scale_y_discrete(limits=rev, breaks = c(1:10))+
   #scale_x_discrete(breaks = c(1:9))+
@@ -793,7 +793,7 @@ p_pair_cor_bin <- pair_cor_mult_bin%>%
   scale_fill_gradient2(low = "#CC6677", high = "#117733", mid = "white", 
   midpoint = 0, limit = c(-1,1), space = "Lab", 
   name="Correlation")+
-  ggtitle("brms binomial model")+
+  ggtitle("Pairwise brms binomial model")+
   geom_text(aes(label = round(Estimate, 2), fontface = sig), size = 3)+
   scale_y_discrete(breaks = c(1:9),labels = c(str_remove(str_remove(sort(unique(cor_mult_bin$task)), "Z"),"X")))+
   scale_x_discrete(guide = guide_axis(angle = 90), labels = c(str_remove(str_remove(sort(unique(cor_mult_bin$task_1)), "Z"),"X")))+
@@ -801,4 +801,12 @@ p_pair_cor_bin <- pair_cor_mult_bin%>%
   #scale_x_discrete(breaks = c(1:9))+
   theme_few()+
   theme(legend.position =  c(0.15, 0.8), legend.direction = "vertical", legend.title = element_blank(), legend.background = element_blank())
+```
+
+```{r}
+plot_grid(p_pair_cor_bin, p_cor_bin, pcor_mod_a, nrow = 1)
+```
+
+```{r}
+ggsave("../visuals/cor_comp_bin_pair.pdf",width = 20, height = 7, scale = 1)
 ```
