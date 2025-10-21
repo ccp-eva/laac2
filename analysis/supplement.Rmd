@@ -3355,16 +3355,16 @@ for (i in c("pop", "reas" , "comm", "vfood", "search", "attent" )) {
     mutate(task = i)
 
   cor_rasch <- bind_rows(cor_rasch, cor_state)
-  
+
   for (j in unique(taskd$time_point)) {
-    
-    rel <-  fun_sep_rel(state, 2)
-    
-    rel_tp <- rel%>%as_tibble(rownames = "rel")%>%mutate(task = i, time_point = j)
-    
+
+    rel <-  fun_sep_rel(state, j)
+
+    rel_tp <- rel%>%as_tibble()%>%mutate(task = i, time_point = j)
+
     rel_rasch <- bind_rows(rel_rasch, rel_tp)
   }
-  
+
 }
 
 saveRDS(rel_rasch, "../saves/latent_state_rel_rasch.rds")
@@ -3374,9 +3374,6 @@ saveRDS(state_means_rasch, "../saves/latent_state_means_rasch.rds")
 rel_rasch <- readRDS("../saves/latent_state_rel_rasch.rds")
 cor_rasch <- readRDS("../saves/latent_state_cor_rasch.rds")
 state_means_rasch <- readRDS("../saves/latent_state_means_rasch.rds")
-
-
-ranef(model)$subject[, , 3]
 ```
 
 
@@ -3410,6 +3407,38 @@ plsm_rasch <- state_means_rasch%>%
     strip.text = element_text(size = 8)      # Smaller plot title
     )
 ```
+
+```{r}
+rel_rasch%>%
+  mutate(task = recode(task,
+       "pop" = "Population-to-sample",
+       "comm" = "Communicative-cues",
+       "reas" = "Probabilistic-reasoning",
+       "vfood" = "Ignore-visible-food",
+       "search" = "Self-ordered-search",
+       "attent" = "Attention-following"))%>%
+  mutate(task = factor(task, levels = c("Population-to-sample","Probabilistic-reasoning","Communicative-cues", "Ignore-visible-food", "Self-ordered-search","Attention-following" )))%>%
+  ggplot(., aes(x = time_point, y = value))+
+  #geom_hline(aes(yintercept = ref), lty = 3, alpha = .75)+
+  labs(x = "Time point",y = "Reliability (person separation)")+
+  geom_line(aes(group = task),alpha = .75)+
+  #geom_line(data = lsep%>%filter(time_point > 14), aes(group = task, x = time_point),position = position_dodge(width = 0.2), alpha = .75)+
+  geom_point(alpha = .75)+
+  facet_grid(~task)+
+  #scale_shape_manual(values = c(16,4), name = "", labels = c("includes 0", "different from 0"))+
+  #geom_vline(xintercept = 14.5, size = 1)+
+  scale_x_continuous(breaks = c(1,10), labels = c(1,10))+
+  scale_y_continuous(breaks = c(0,1), labels = c(0,1), limits = c(0,1))+
+  theme_few()+
+  theme(legend.direction = "vertical", legend.position = c(0.075, 0.9), legend.box = "horizontal", legend.background = element_blank(), strip.background = element_blank(),
+  #strip.text.y = element_blank(), axis.title.x = element_blank(), axis.ticks.x = element_blank(), axis.text.x = element_blank(),
+    axis.text = element_text(size = 8),       # Smaller axis text
+    axis.title = element_text(size = 10),     # Smaller axis titles
+    legend.text = element_text(size = 6),     # Smaller legend text
+    strip.text = element_text(size = 8)      # Smaller plot title
+    )
+```
+
 
 ```{r lseplotrasch, fig.height = 3, fig.width=8, fig.cap = "Latent means and reliability estimates with 95\\% CrI for each time point based on Rasch-model.", out.width="100%"}
 plsm_rasch
