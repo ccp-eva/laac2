@@ -24,7 +24,7 @@ dmod <- d2%>%filter(task == "vfood")
   
   LST <- update(fit_empty, recompile = FALSE, 
                 newdata = dmod,
-                chains = 2,
+                chains = 4,
                 iter=1)
   
   # Edit code
@@ -59,12 +59,12 @@ dmod <- d2%>%filter(task == "vfood")
   # Fit with modified model
   fit <- update(LST, recompile = FALSE, 
                 newdata = dtask,
-                chains = 8,
-                cores = 8,
+                chains = 4,
+                cores = 4,
                 backend = "cmdstanr",
                 threads = threading(5),
                 control = list(adapt_delta = 0.95, max_treedepth = 20),
-                iter=10000)
+                iter=8000)
 
   saveRDS(fit, paste0("../saves/constraint_lst2_",i,".rds"))
   

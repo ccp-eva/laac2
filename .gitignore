@@ -21,6 +21,14 @@ saves/multi_lst1_bin.rds
 saves/multi_lst2_bin.rds
 saves/multi_lst_bin_ex_infants.rds
 
+
+saves/constraint_lst2_attent.rds
+saves/constraint_lst2_comm.rds
+saves/constraint_lst2_pop.rds
+saves/constraint_lst2_reas.rds
+saves/constraint_lst2_search.rds
+saves/constraint_lst2_vfood.rds
+
 outputs/output_old/*
 
 paper/submission/*

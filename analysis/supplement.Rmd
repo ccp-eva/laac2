@@ -3519,82 +3519,131 @@ Values are higher when we do pairwise estimation, not all tasks together due to 
 
 #Multi_LST2 <- readRDS("../saves/multi_lst2.rds")
 #Multi_LST2_bin <- readRDS("../saves/multi_lst2_bin.rds")
+
+c_lst2_attent <- readRDS("../saves/constraint_lst2_attent.rds")
+c_lst2_search <- readRDS("../saves/constraint_lst2_search.rds")
+c_lst2_vfood <- readRDS("../saves/constraint_lst2_vfood.rds")
+c_lst2_reas <- readRDS("../saves/constraint_lst2_reas.rds")
+c_lst2_pop <- readRDS("../saves/constraint_lst2_pop.rds")
+c_lst2_comm <- readRDS("../saves/constraint_lst2_comm.rds")
+
 ```
 
 ```{r}
-# # rasch
-# con_samp_raw <- posterior_samples(Multi_LST2, pars = "^sd_subject", add_chain = T)%>%
-#   sample_n(5000)%>%
-#   pivot_longer(names_to = "param", values_to = "value", cols = -c(chain, iter))
-# 
-# con_samp <- con_samp_raw%>%
-#   mutate(t = str_remove(param, "sd_subject\\__"),
-#          t = str_remove(t, "task"))%>%
-#   separate(t, into = c("tp", "task"), sep = "\\:")%>%
-#   filter(grepl("cat", tp))%>%
-#   mutate(task = ifelse(is.na(task), "attent", task),
-#          time_point = str_remove(tp, "time_cat"),
-#          tp_samp = value)%>%
-#   select(task, time_point, tp_samp, chain, iter)%>%
-#   left_join(
-#     con_samp_raw%>%
-#     filter(!grepl("time_cat", param))%>%
-#     mutate(task = str_remove(param, "sd_subject\\__task"))%>%
-#     mutate(trait_samp = value)%>%
-#     select(task, trait_samp, chain, iter)
-#   )%>%
-#   rowwise()%>%
-#   mutate(
-#     con = trait_samp / (trait_samp+tp_samp)
-#   )
-# 
-# 
-# con_sum <- con_samp%>%
-#   group_by(task)%>%
-#   summarise(con_m = estimate_mode(con), 
-#             con_lci = hdi_lower(con), 
-#             con_uci = hdi_upper(con))
-# 
-# saveRDS(con_sum, "../saves/consistency_sample.rds")
+# rasch
+con_samp_raw <- posterior_samples(Multi_LST2, pars = "^sd_subject", add_chain = T)%>%
+  sample_n(5000)%>%
+  pivot_longer(names_to = "param", values_to = "value", cols = -c(chain, iter))
+
+con_samp <- con_samp_raw%>%
+  mutate(t = str_remove(param, "sd_subject\\__"),
+         t = str_remove(t, "task"))%>%
+  separate(t, into = c("tp", "task"), sep = "\\:")%>%
+  filter(grepl("cat", tp))%>%
+  mutate(task = ifelse(is.na(task), "attent", task),
+         time_point = str_remove(tp, "time_cat"),
+         tp_samp = value)%>%
+  select(task, time_point, tp_samp, chain, iter)%>%
+  left_join(
+    con_samp_raw%>%
+    filter(!grepl("time_cat", param))%>%
+    mutate(task = str_remove(param, "sd_subject\\__task"))%>%
+    mutate(trait_samp = value)%>%
+    select(task, trait_samp, chain, iter)
+  )%>%
+  rowwise()%>%
+  mutate(
+    con = trait_samp / (trait_samp+tp_samp)
+  )
+
+
+con_sum <- con_samp%>%
+  group_by(task)%>%
+  summarise(con_m = estimate_mode(con),
+            con_lci = hdi_lower(con),
+            con_uci = hdi_upper(con))
+
+saveRDS(con_sum, "../saves/consistency_sample.rds")
 
 con_sum <- readRDS("../saves/consistency_sample.rds")
 
-# # binomial
-# con_samp_raw_bin <- posterior_samples(Multi_LST2_bin, pars = "^sd_subject", add_chain = T)%>%
-#   sample_n(5000)%>%
-#   pivot_longer(names_to = "param", values_to = "value", cols = -c(chain, iter))
-# 
-# con_samp_bin <- con_samp_raw_bin%>%
-#   mutate(t = str_remove(param, "sd_subject\\__"),
-#          t = str_remove(t, "task"))%>%
-#   separate(t, into = c("tp", "task"), sep = "\\:")%>%
-#   filter(grepl("cat", tp))%>%
-#   mutate(task = ifelse(is.na(task), "attent", task),
-#          time_point = str_remove(tp, "time_cat"),
-#          tp_samp = value)%>%
-#   select(task, time_point, tp_samp, chain, iter)%>%
-#   left_join(
-#     con_samp_raw_bin%>%
-#     filter(!grepl("time_cat", param))%>%
-#     mutate(task = str_remove(param, "sd_subject\\__task"))%>%
-#     mutate(trait_samp = value)%>%
-#     select(task, trait_samp, chain, iter)
-#   )%>%
-#   rowwise()%>%
-#   mutate(
-#     con = trait_samp / (trait_samp+tp_samp)
-#   )
-# 
-# 
-# con_sum_bin <- con_samp_bin%>%
-#   group_by(task)%>%
-#   summarise(con_m = estimate_mode(con), 
-#             con_lci = hdi_lower(con), 
-#             con_uci = hdi_upper(con))
-# 
-# saveRDS(con_sum_bin, "../saves/consistency_bin_sample.rds")
-# 
+# binomial
+con_samp_raw_bin <- posterior_samples(Multi_LST2_bin, pars = "^sd_subject", add_chain = T)%>%
+  sample_n(5000)%>%
+  pivot_longer(names_to = "param", values_to = "value", cols = -c(chain, iter))
+
+con_samp_bin <- con_samp_raw_bin%>%
+  mutate(t = str_remove(param, "sd_subject\\__"),
+         t = str_remove(t, "task"))%>%
+  separate(t, into = c("tp", "task"), sep = "\\:")%>%
+  filter(grepl("cat", tp))%>%
+  mutate(task = ifelse(is.na(task), "attent", task),
+         time_point = str_remove(tp, "time_cat"),
+         tp_samp = value)%>%
+  select(task, time_point, tp_samp, chain, iter)%>%
+  left_join(
+    con_samp_raw_bin%>%
+    filter(!grepl("time_cat", param))%>%
+    mutate(task = str_remove(param, "sd_subject\\__task"))%>%
+    mutate(trait_samp = value)%>%
+    select(task, trait_samp, chain, iter)
+  )%>%
+  rowwise()%>%
+  mutate(
+    con = trait_samp / (trait_samp+tp_samp)
+  )
+
+saveRDS(con_sum_bin, "../saves/consistency_bin_sample.rds")
+
 con_sum_bin <- readRDS("../saves/consistency_bin_sample.rds")
+
+# constraint
+
+
+con_samp_raw_constr <- bind_rows(
+
+con_samp_const_comm <- posterior_samples(c_lst2_comm, pars = "^sd_subject", add_chain = T)%>%
+  sample_n(5000)%>%
+  mutate(task = "comm"),
+
+con_samp_const_attent <- posterior_samples(c_lst2_attent, pars = "^sd_subject", add_chain = T)%>%
+  sample_n(5000)%>%
+  mutate(task = "attent"),
+
+con_samp_const_search <- posterior_samples(c_lst2_search, pars = "^sd_subject", add_chain = T)%>%
+  sample_n(5000)%>%
+  mutate(task = "search"),
+
+con_samp_const_vfood <- posterior_samples(c_lst2_vfood, pars = "^sd_subject", add_chain = T)%>%
+  sample_n(5000)%>%
+  mutate(task = "vfood"),
+
+con_samp_const_reas <- posterior_samples(c_lst2_reas, pars = "^sd_subject", add_chain = T)%>%
+  sample_n(5000)%>%
+  mutate(task = "reas"),
+
+con_samp_const_pop <- posterior_samples(c_lst2_pop, pars = "^sd_subject", add_chain = T)%>%
+  sample_n(5000)%>%
+  mutate(task = "pop")
+)%>%
+  rowwise()%>%
+  mutate(con = sd_subject__trait / ( sd_subject__trait + sd_subject__time_cat1))%>%
+  ungroup()
+
+
+con_sum_constr <- con_samp_raw_constr%>%
+  group_by(task)%>%
+  summarise(con_m = estimate_mode(con),
+            con_lci = hdi_lower(con),
+            con_uci = hdi_upper(con))
+  
+
+saveRDS(con_sum_constr, "../saves/consistency_constr_sample.rds")
+
+con_sum_constr <- readRDS("../saves/consistency_constr_sample.rds")
+
+
+
 ```
 
 ```{r}
