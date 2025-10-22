@@ -3273,6 +3273,8 @@ long[long$task == "search", "code"] <- car::recode(long[long$task == "search", "
 
 ## Rasch model analysis
 
+An alternative way to estimating the parameters of interest than the SEM approach described above is an item-response approach which assumes that each tasks can be described by a Rasch (1PL) model, meaning that all items (trials) measure the same latent ability with the same discrimination but potentially varying difficulty. The benefit of this approach is that it makes full use of whatever data there is available for a given task,, time point and subject and does not e.g. require differentially collapsing scores for test-halves. The downside is that the resulting estimates show greater uncertainty compared to the SEM estimates. Furthermore, to reap the benefits of this approach it requires imposing additional constraints which we outline below. Most importantly, however, we think that the parameters estimated via the SEM approach are conceptually better aligned with the questions we are asking. Nonetheless, we see the appeal of this approach (in particular the ease of implementation via open source software packages such as `brms`) and we therefore want to present it here as an alternative. Overall, the two approaches yield very similar results.    
+
 ```{r}
 # run functions first
 fun_KR20 <- function(responses) {
@@ -3303,73 +3305,64 @@ fun_sep_rel <- function(model, timepoint) {
 ```
 
 
-
-Alternative analytical approach. 
-
-Pros: 
-
-Cons:
-* more uncertainty in the estimates
-* To estimate the correlations between tasks, it requires selecting the same number of time points from the two studies and treating them as if they were the same. In practice this meant that we selected the last 10 time points from the 14 time points of phase 2 of the study by @bohn2023great and re-coded them so that time point 4 was matched with time point 1 from the current study, 5 with 2 and so on. This is problematic because it neglects the temporal dynamics happening in the study prior to the 4th time point. Furthermore, the time difference between two time points was different in the two studies (2 weeks in @bohn2023great and 8 weeks in the current study).
-
 ### Latent state models
 ```{r}
-# Latent state correlations rasch model
-state_means_rasch <- tibble()
-cor_rasch <- tibble()
-rel_rasch <- tibble()
-
-# Set up results matrix for reliability
-Ntp <- 10
-timepoints <- seq(1,Ntp,1)
-tasks <- c("attent", "comm", "pop", "reas",  "search",  "vfood")
-sep_rel <- data.frame(task= rep(tasks, each = Ntp), time_point = rep(1:Ntp,length(tasks)), sep_rel_EAP = rep(NA,Ntp*length(tasks)))
-
-for (i in c("pop", "reas" , "comm", "vfood", "search", "attent" )) {
-
-  taskd <- long %>%filter(task == i)
-
-  state <-  brm(code ~ 0 + time_cat + trial + (0 + time_cat | subject),
-                 data = taskd,
-                 family = brmsfamily(family="bernoulli", link="logit"),
-                 chains = 4,
-                 cores = 4,
-                 threads = threading(5),
-                 backend = "cmdstanr",
-                 iter=4000)
-
-
-  results <- summary(state)
-
-  state_means <- results$fixed%>%as_tibble(rownames = "time_point")%>%filter(grepl("time_cat", time_point))%>%mutate(task = i)
-
-  state_means_rasch <- bind_rows(state_means_rasch, state_means)
-
-  cor_state <- results$random$subject[11:55,]%>%as_tibble(rownames = "cor")%>%
-  mutate(cor = str_remove(cor, "cor\\(time_cat"),
-         cor = str_remove(cor, "\\)"),
-         cor = str_remove(cor, "time_cat"))%>%
-  tidyr::separate(cor, sep = ",", into = c("a", "b"))%>%
-  mutate(a = as.numeric(a),
-         b = as.numeric(b))%>%
-    mutate(task = i)
-
-  cor_rasch <- bind_rows(cor_rasch, cor_state)
-
-  for (j in unique(taskd$time_point)) {
-
-    rel <-  fun_sep_rel(state, j)
-
-    rel_tp <- rel%>%as_tibble()%>%mutate(task = i, time_point = j)
-
-    rel_rasch <- bind_rows(rel_rasch, rel_tp)
-  }
-
-}
-
-saveRDS(rel_rasch, "../saves/latent_state_rel_rasch.rds")
-saveRDS(cor_rasch, "../saves/latent_state_cor_rasch.rds")
-saveRDS(state_means_rasch, "../saves/latent_state_means_rasch.rds")
+# # Latent state correlations rasch model
+# state_means_rasch <- tibble()
+# cor_rasch <- tibble()
+# rel_rasch <- tibble()
+# 
+# # Set up results matrix for reliability
+# Ntp <- 10
+# timepoints <- seq(1,Ntp,1)
+# tasks <- c("attent", "comm", "pop", "reas",  "search",  "vfood")
+# sep_rel <- data.frame(task= rep(tasks, each = Ntp), time_point = rep(1:Ntp,length(tasks)), sep_rel_EAP = rep(NA,Ntp*length(tasks)))
+# 
+# for (i in c("pop", "reas" , "comm", "vfood", "search", "attent" )) {
+# 
+#   taskd <- long %>%filter(task == i)
+# 
+#   state <-  brm(code ~ 0 + time_cat + trial + (0 + time_cat | subject),
+#                  data = taskd,
+#                  family = brmsfamily(family="bernoulli", link="logit"),
+#                  chains = 4,
+#                  cores = 4,
+#                  threads = threading(5),
+#                  backend = "cmdstanr",
+#                  iter=4000)
+# 
+# 
+#   results <- summary(state)
+# 
+#   state_means <- results$fixed%>%as_tibble(rownames = "time_point")%>%filter(grepl("time_cat", time_point))%>%mutate(task = i)
+# 
+#   state_means_rasch <- bind_rows(state_means_rasch, state_means)
+# 
+#   cor_state <- results$random$subject[11:55,]%>%as_tibble(rownames = "cor")%>%
+#   mutate(cor = str_remove(cor, "cor\\(time_cat"),
+#          cor = str_remove(cor, "\\)"),
+#          cor = str_remove(cor, "time_cat"))%>%
+#   tidyr::separate(cor, sep = ",", into = c("a", "b"))%>%
+#   mutate(a = as.numeric(a),
+#          b = as.numeric(b))%>%
+#     mutate(task = i)
+# 
+#   cor_rasch <- bind_rows(cor_rasch, cor_state)
+# 
+#   for (j in unique(taskd$time_point)) {
+# 
+#     rel <-  fun_sep_rel(state, j)
+# 
+#     rel_tp <- rel%>%as_tibble()%>%mutate(task = i, time_point = j)
+# 
+#     rel_rasch <- bind_rows(rel_rasch, rel_tp)
+#   }
+# 
+# }
+# 
+# saveRDS(rel_rasch, "../saves/latent_state_rel_rasch.rds")
+# saveRDS(cor_rasch, "../saves/latent_state_cor_rasch.rds")
+# saveRDS(state_means_rasch, "../saves/latent_state_means_rasch.rds")
 
 rel_rasch <- readRDS("../saves/latent_state_rel_rasch.rds")
 cor_rasch <- readRDS("../saves/latent_state_cor_rasch.rds")
@@ -3409,7 +3402,7 @@ plsm_rasch <- state_means_rasch%>%
 ```
 
 ```{r}
-rel_rasch%>%
+pls_rel <- rel_rasch%>%
   mutate(task = recode(task,
        "pop" = "Population-to-sample",
        "comm" = "Communicative-cues",
@@ -3431,7 +3424,7 @@ rel_rasch%>%
   scale_y_continuous(breaks = c(0,1), labels = c(0,1), limits = c(0,1))+
   theme_few()+
   theme(legend.direction = "vertical", legend.position = c(0.075, 0.9), legend.box = "horizontal", legend.background = element_blank(), strip.background = element_blank(),
-  #strip.text.y = element_blank(), axis.title.x = element_blank(), axis.ticks.x = element_blank(), axis.text.x = element_blank(),
+  strip.text.x = element_blank(), axis.title.x = element_blank(), axis.ticks.x = element_blank(), axis.text.x = element_blank(),
     axis.text = element_text(size = 8),       # Smaller axis text
     axis.title = element_text(size = 10),     # Smaller axis titles
     legend.text = element_text(size = 6),     # Smaller legend text
@@ -3440,8 +3433,8 @@ rel_rasch%>%
 ```
 
 
-```{r lseplotrasch, fig.height = 3, fig.width=8, fig.cap = "Latent means and reliability estimates with 95\\% CrI for each time point based on Rasch-model.", out.width="100%"}
-plsm_rasch
+```{r lseplotrasch, fig.height = 5, fig.width=8, fig.cap = "Latent means and reliability estimates with 95\\% CrI for each time point based on Rasch-model.", out.width="100%"}
+plot_grid(plsm_rasch, pls_rel, ncol = 1,labels = c("A", "B"), align = "v",axis = "l", rel_heights = c(1,1))
 ```
 
 There is no direct equivalent to latent state estimates in the brms approach. To assess chnage over time, we can use easisnes estimates over time ... 
@@ -3764,6 +3757,8 @@ pcro_diff <- cor_mult_bin %>%
 
 
 ```
+
+* To estimate the correlations between tasks, it requires selecting the same number of time points from the two studies and treating them as if they were the same. In practice this meant that we selected the last 10 time points from the 14 time points of phase 2 of the study by @bohn2023great and re-coded them so that time point 4 was matched with time point 1 from the current study, 5 with 2 and so on. This is problematic because it neglects the temporal dynamics happening in the study prior to the 4th time point. Furthermore, the time difference between two time points was different in the two studies (2 weeks in @bohn2023great and 8 weeks in the current study).
 
 
 
