@@ -3273,7 +3273,7 @@ long[long$task == "search", "code"] <- car::recode(long[long$task == "search", "
 
 ## Rasch model analysis
 
-An alternative way to estimating the parameters of interest than the SEM approach described above is an item-response approach which assumes that each tasks can be described by a Rasch (1PL) model, meaning that all items (trials) measure the same latent ability with the same discrimination but potentially varying difficulty. The benefit of this approach is that it makes full use of whatever data there is available for a given task,, time point and subject and does not e.g. require differentially collapsing scores for test-halves. The downside is that the resulting estimates show greater uncertainty compared to the SEM estimates. Furthermore, to reap the benefits of this approach it requires imposing additional constraints which we outline below. Most importantly, however, we think that the parameters estimated via the SEM approach are conceptually better aligned with the questions we are asking. Nonetheless, we see the appeal of this approach (in particular the ease of implementation via open source software packages such as `brms`) and we therefore want to present it here as an alternative. Overall, the two approaches yield very similar results.    
+An alternative way to estimating the parameters of interest than the SEM approach described above is an item-response approach which assumes that each tasks can be described by a Rasch (1PL) model, meaning that all items (trials) measure the same latent ability with the same discrimination but potentially varying difficulty. The benefit of this approach is that it makes full use of whatever data there is available for a given task,, time point and subject and does not e.g. require differentially collapsing scores for test-halves. The downside is that the resulting estimates show greater uncertainty compared to the SEM estimates. Furthermore, to reap the benefits of this approach it requires imposing additional constraints which we outline below. Most importantly, however, we think that the parameters estimated via the SEM approach are conceptually better aligned with the questions we are asking. Nonetheless, we see the appeal of this approach (in particular the ease of implementation via open source software packages such as `brms`) and we therefore want to present it here as an alternative. Overall, the two approaches yield very similar results. [Jana: please expand/adjust]   
 
 ```{r}
 # run functions first
@@ -3292,10 +3292,18 @@ fun_KR20 <- function(responses) {
   rel
 }
 
-
 fun_sep_rel <- function(model, timepoint) {
   pers_params <- ranef(model)$subject[,,timepoint]%>%as_tibble(rownames = "subject")
   true <- summary(model)$random$subject[timepoint,"Estimate"]^2
+  var_EAP <- var(pers_params$Estimate)
+  Mean_SE <- mean(pers_params$Est.Error^2)
+  # nach TAM Paket (bzw. nach Adams unter der Annahme:  var_EAP = true - Mean_SE bzw. true = var_EAP + Mean_SE)
+  rel <- var_EAP / (var_EAP + Mean_SE)
+  rel
+}
+
+fun_sep_rel_LST <- function(model) {
+  pers_params <- ranef(model)$subject[,,"trait"]%>%as_tibble(rownames = "subject")
   var_EAP <- var(pers_params$Estimate)
   Mean_SE <- mean(pers_params$Est.Error^2)
   # nach TAM Paket (bzw. nach Adams unter der Annahme:  var_EAP = true - Mean_SE bzw. true = var_EAP + Mean_SE)
@@ -3312,11 +3320,6 @@ fun_sep_rel <- function(model, timepoint) {
 # cor_rasch <- tibble()
 # rel_rasch <- tibble()
 # 
-# # Set up results matrix for reliability
-# Ntp <- 10
-# timepoints <- seq(1,Ntp,1)
-# tasks <- c("attent", "comm", "pop", "reas",  "search",  "vfood")
-# sep_rel <- data.frame(task= rep(tasks, each = Ntp), time_point = rep(1:Ntp,length(tasks)), sep_rel_EAP = rep(NA,Ntp*length(tasks)))
 # 
 # for (i in c("pop", "reas" , "comm", "vfood", "search", "attent" )) {
 # 
@@ -3370,6 +3373,16 @@ state_means_rasch <- readRDS("../saves/latent_state_means_rasch.rds")
 ```
 
 
+We begin by fitting the equivalent to Latent State models to the data from each task. The `brms` formula for this model is: `code ~ 0 + time_cat + trial + (0 + time_cat | subject)`, where `code` is the response (0/1; incorrect/correct), `time_cat` is a categorical indicator of time point (1 to 10) and `trial` is a categorical indicator of trial within each time point. 
+
+Parameterized as such, this model estimates an easiness parameter for each item (i.e. trial) as well as an easiness parameter for each time point, which is equivalent to a latent sate mean and which allows for assessing mean change over time. However, in contrast to the SEM approach, the absolute values of this parameter are not comparable across tasks. These latent state means are shown in Supplementary Figure \@ref(fig:lsplotrasch)A. 
+
+
+
+Supplementary Figure \@ref(fig:lsplotrasch) shows ... 
+
+
+
 ```{r}
 plsm_rasch <- state_means_rasch%>%
   mutate(task = recode(task,
@@ -3402,7 +3415,8 @@ plsm_rasch <- state_means_rasch%>%
 ```
 
 ```{r}
-pls_rel <- rel_rasch%>%
+pls_rel <- bind_rows(
+rel_rasch%>%
   mutate(task = recode(task,
        "pop" = "Population-to-sample",
        "comm" = "Communicative-cues",
@@ -3410,16 +3424,22 @@ pls_rel <- rel_rasch%>%
        "vfood" = "Ignore-visible-food",
        "search" = "Self-ordered-search",
        "attent" = "Attention-following"))%>%
-  mutate(task = factor(task, levels = c("Population-to-sample","Probabilistic-reasoning","Communicative-cues", "Ignore-visible-food", "Self-ordered-search","Attention-following" )))%>%
-  ggplot(., aes(x = time_point, y = value))+
+  mutate(task = factor(task, levels = c("Population-to-sample","Probabilistic-reasoning","Communicative-cues", "Ignore-visible-food", "Self-ordered-search","Attention-following" )),
+                       model = "Rasch (brms)"),
+         
+   plsr%>%
+     rename(value = est)%>%
+     mutate(model = "SEM (MPLUS)")
+   
+   )%>%
+  ggplot(., aes(x = time_point, y = value, col = model))+
   #geom_hline(aes(yintercept = ref), lty = 3, alpha = .75)+
   labs(x = "Time point",y = "Reliability (person separation)")+
-  geom_line(aes(group = task),alpha = .75)+
+  geom_line(aes(group = model, col = model),alpha = .75)+
   #geom_line(data = lsep%>%filter(time_point > 14), aes(group = task, x = time_point),position = position_dodge(width = 0.2), alpha = .75)+
-  geom_point(alpha = .75)+
+  geom_pointrange(aes(ymin = lower_2.5ci, ymax = upper_2.5ci), alpha = .75)+
   facet_grid(~task)+
-  #scale_shape_manual(values = c(16,4), name = "", labels = c("includes 0", "different from 0"))+
-  #geom_vline(xintercept = 14.5, size = 1)+
+  scale_color_colorblind(name = "")+
   scale_x_continuous(breaks = c(1,10), labels = c(1,10))+
   scale_y_continuous(breaks = c(0,1), labels = c(0,1), limits = c(0,1))+
   theme_few()+
@@ -3433,49 +3453,15 @@ pls_rel <- rel_rasch%>%
 ```
 
 
-```{r lseplotrasch, fig.height = 5, fig.width=8, fig.cap = "Latent means and reliability estimates with 95\\% CrI for each time point based on Rasch-model.", out.width="100%"}
+```{r lseplotrasch, fig.height = 6, fig.width=10, fig.cap = "Latent means and reliability estimates with 95\\% CrI for each time point based on Rasch-model.", out.width="100%"}
 plot_grid(plsm_rasch, pls_rel, ncol = 1,labels = c("A", "B"), align = "v",axis = "l", rel_heights = c(1,1))
 ```
 
-There is no direct equivalent to latent state estimates in the brms approach. To assess chnage over time, we can use easisnes estimates over time ... 
 
-Vielleicht nochmal zur Klärung: die item easiness parameter sind jetzt trial-weise (also pro "Item" aka trial) geschätzt. Für den ersten trial ist die easiness = 0. Die "easiness parameter" der Zeitpunkte sind die state means. Also in dem Sinne identisch zum Mplus Modell. Aber: die state means sind abhängig von den item easiness Werten und diese sind hier anders als die thresholds im GRM modell in Mplus, die absoluten Werte sind also nicht vergleichbar, da anders skaliert. Ihre Bedeutung ist vergleichbar (höherer Wert = höhere mittlere Fähigkeit = höhere Lösungswahrscheinlichkeit).
-Supplementary Figure \@ref(fig:lsplotrasch) shows ... 
+
 
 
 Correlations between latent states. 
-
-
-
-
-
-```{r}
-# Set up results matrix
-Ntp <- 10
-timepoints <- seq(1,Ntp,1)
-tasks <- c("attent", "comm", "pop", "reas",  "search",  "vfood")
-sep_rel <- data.frame(task= rep(tasks, each = Ntp), time_point = rep(1:Ntp,length(tasks)), sep_rel_EAP = rep(NA,Ntp*length(tasks)))
-
-# Estimate latent state models and compute reliability
-for (t in 1:length(tasks)){
-
-  task <- long %>%
-    filter(str_detect(task, tasks[t]))
-  
-  state <-  brm(code ~ 0 + time_cat + trial + (0 + time_cat | subject),
-                data = task,
-                family = brmsfamily(family="bernoulli", link="logit"),
-                chains = 2, # to speed up sampling --> increase later
-                iter=4000)
-  
-  for (i in 1:length(timepoints)){
-    
-    sep_rel[sep_rel$task == tasks[t] & sep_rel$time_point == timepoints[i],
-            "sep_rel_EAP"] <-  fun_sep_rel(model = state, timepoint = timepoints[i])
-  }
-}
-```
-
 
 Reliability
 
@@ -3514,141 +3500,63 @@ Values are higher when we do pairwise estimation, not all tasks together due to 
 ### Latent state trait models
 
 ```{r}
-# run script multi_lstm2.R for Rasch model 
-# run script multi_lstm2_bin.R for binomial model
-
-#Multi_LST2 <- readRDS("../saves/multi_lst2.rds")
-#Multi_LST2_bin <- readRDS("../saves/multi_lst2_bin.rds")
-
-c_lst2_attent <- readRDS("../saves/constraint_lst2_attent.rds")
-c_lst2_search <- readRDS("../saves/constraint_lst2_search.rds")
-c_lst2_vfood <- readRDS("../saves/constraint_lst2_vfood.rds")
-c_lst2_reas <- readRDS("../saves/constraint_lst2_reas.rds")
-c_lst2_pop <- readRDS("../saves/constraint_lst2_pop.rds")
-c_lst2_comm <- readRDS("../saves/constraint_lst2_comm.rds")
+# c_lst2_attent <- readRDS("../saves/constraint_lst2_attent.rds")
+# c_lst2_search <- readRDS("../saves/constraint_lst2_search.rds")
+# c_lst2_vfood <- readRDS("../saves/constraint_lst2_vfood.rds")
+# c_lst2_reas <- readRDS("../saves/constraint_lst2_reas.rds")
+# c_lst2_pop <- readRDS("../saves/constraint_lst2_pop.rds")
+# c_lst2_comm <- readRDS("../saves/constraint_lst2_comm.rds")
 
 ```
 
 ```{r}
-# rasch
-con_samp_raw <- posterior_samples(Multi_LST2, pars = "^sd_subject", add_chain = T)%>%
-  sample_n(5000)%>%
-  pivot_longer(names_to = "param", values_to = "value", cols = -c(chain, iter))
-
-con_samp <- con_samp_raw%>%
-  mutate(t = str_remove(param, "sd_subject\\__"),
-         t = str_remove(t, "task"))%>%
-  separate(t, into = c("tp", "task"), sep = "\\:")%>%
-  filter(grepl("cat", tp))%>%
-  mutate(task = ifelse(is.na(task), "attent", task),
-         time_point = str_remove(tp, "time_cat"),
-         tp_samp = value)%>%
-  select(task, time_point, tp_samp, chain, iter)%>%
-  left_join(
-    con_samp_raw%>%
-    filter(!grepl("time_cat", param))%>%
-    mutate(task = str_remove(param, "sd_subject\\__task"))%>%
-    mutate(trait_samp = value)%>%
-    select(task, trait_samp, chain, iter)
-  )%>%
-  rowwise()%>%
-  mutate(
-    con = trait_samp / (trait_samp+tp_samp)
-  )
-
-
-con_sum <- con_samp%>%
-  group_by(task)%>%
-  summarise(con_m = estimate_mode(con),
-            con_lci = hdi_lower(con),
-            con_uci = hdi_upper(con))
-
-saveRDS(con_sum, "../saves/consistency_sample.rds")
-
-con_sum <- readRDS("../saves/consistency_sample.rds")
-
-# binomial
-con_samp_raw_bin <- posterior_samples(Multi_LST2_bin, pars = "^sd_subject", add_chain = T)%>%
-  sample_n(5000)%>%
-  pivot_longer(names_to = "param", values_to = "value", cols = -c(chain, iter))
-
-con_samp_bin <- con_samp_raw_bin%>%
-  mutate(t = str_remove(param, "sd_subject\\__"),
-         t = str_remove(t, "task"))%>%
-  separate(t, into = c("tp", "task"), sep = "\\:")%>%
-  filter(grepl("cat", tp))%>%
-  mutate(task = ifelse(is.na(task), "attent", task),
-         time_point = str_remove(tp, "time_cat"),
-         tp_samp = value)%>%
-  select(task, time_point, tp_samp, chain, iter)%>%
-  left_join(
-    con_samp_raw_bin%>%
-    filter(!grepl("time_cat", param))%>%
-    mutate(task = str_remove(param, "sd_subject\\__task"))%>%
-    mutate(trait_samp = value)%>%
-    select(task, trait_samp, chain, iter)
-  )%>%
-  rowwise()%>%
-  mutate(
-    con = trait_samp / (trait_samp+tp_samp)
-  )
-
-saveRDS(con_sum_bin, "../saves/consistency_bin_sample.rds")
-
-con_sum_bin <- readRDS("../saves/consistency_bin_sample.rds")
-
-# constraint
-
-
-con_samp_raw_constr <- bind_rows(
-
-con_samp_const_comm <- posterior_samples(c_lst2_comm, pars = "^sd_subject", add_chain = T)%>%
-  sample_n(5000)%>%
-  mutate(task = "comm"),
-
-con_samp_const_attent <- posterior_samples(c_lst2_attent, pars = "^sd_subject", add_chain = T)%>%
-  sample_n(5000)%>%
-  mutate(task = "attent"),
-
-con_samp_const_search <- posterior_samples(c_lst2_search, pars = "^sd_subject", add_chain = T)%>%
-  sample_n(5000)%>%
-  mutate(task = "search"),
-
-con_samp_const_vfood <- posterior_samples(c_lst2_vfood, pars = "^sd_subject", add_chain = T)%>%
-  sample_n(5000)%>%
-  mutate(task = "vfood"),
-
-con_samp_const_reas <- posterior_samples(c_lst2_reas, pars = "^sd_subject", add_chain = T)%>%
-  sample_n(5000)%>%
-  mutate(task = "reas"),
-
-con_samp_const_pop <- posterior_samples(c_lst2_pop, pars = "^sd_subject", add_chain = T)%>%
-  sample_n(5000)%>%
-  mutate(task = "pop")
-)%>%
-  rowwise()%>%
-  mutate(con = sd_subject__trait / ( sd_subject__trait + sd_subject__time_cat1))%>%
-  ungroup()
-
-
-con_sum_constr <- con_samp_raw_constr%>%
-  group_by(task)%>%
-  summarise(con_m = estimate_mode(con),
-            con_lci = hdi_lower(con),
-            con_uci = hdi_upper(con))
-  
-
-saveRDS(con_sum_constr, "../saves/consistency_constr_sample.rds")
+# # constraint
+# con_samp_raw_constr <- bind_rows(
+# 
+# con_samp_const_comm <- posterior_samples(c_lst2_comm, pars = "^sd_subject", add_chain = T)%>%
+#   sample_n(5000)%>%
+#   mutate(task = "comm"),
+# 
+# con_samp_const_attent <- posterior_samples(c_lst2_attent, pars = "^sd_subject", add_chain = T)%>%
+#   sample_n(5000)%>%
+#   mutate(task = "attent"),
+# 
+# con_samp_const_search <- posterior_samples(c_lst2_search, pars = "^sd_subject", add_chain = T)%>%
+#   sample_n(5000)%>%
+#   mutate(task = "search"),
+# 
+# con_samp_const_vfood <- posterior_samples(c_lst2_vfood, pars = "^sd_subject", add_chain = T)%>%
+#   sample_n(5000)%>%
+#   mutate(task = "vfood"),
+# 
+# con_samp_const_reas <- posterior_samples(c_lst2_reas, pars = "^sd_subject", add_chain = T)%>%
+#   sample_n(5000)%>%
+#   mutate(task = "reas"),
+# 
+# con_samp_const_pop <- posterior_samples(c_lst2_pop, pars = "^sd_subject", add_chain = T)%>%
+#   sample_n(5000)%>%
+#   mutate(task = "pop")
+# )%>%
+#   rowwise()%>%
+#   mutate(con = sd_subject__trait / ( sd_subject__trait + sd_subject__time_cat1))%>%
+#   ungroup()
+# 
+# 
+# con_sum_constr <- con_samp_raw_constr%>%
+#   group_by(task)%>%
+#   summarise(con_m = estimate_mode(con),
+#             con_lci = hdi_lower(con),
+#             con_uci = hdi_upper(con))
+#   
+# 
+# saveRDS(con_sum_constr, "../saves/consistency_constr_sample.rds")
 
 con_sum_constr <- readRDS("../saves/consistency_constr_sample.rds")
-
-
-
 ```
 
 ```{r}
 con_comp <- bind_rows(
-lstv_con_rel%>%filter(param == "consistency", !grepl("7", task))%>%mutate(type ="mplus_sem")%>%
+lstv_con_rel%>%filter(param == "consistency", !grepl("7", task))%>%mutate(type ="SEM (MPLUS)")%>%
   select(-param)%>%
   dplyr::rename(con_lci = lower_2.5ci,
                 con_uci = upper_2.5ci, 
@@ -3663,19 +3571,8 @@ lstv_con_rel%>%filter(param == "consistency", !grepl("7", task))%>%mutate(type =
        "attention" = "Attention-following")
   ),
 
-con_sum%>%mutate(
-  type ="brms_rasch",
-  task = recode(task,
-       "pop" = "Population-to-sample",
-       "comm" = "Communicative-cues",
-       "reas" = "Probabilistic-reasoning",
-       "vfood" = "Ignore-visible-food",
-       "search" = "Self-ordered-search",
-       "attent" = "Attention-following")
-   ),
-
-con_sum_bin%>%mutate(
-  type ="brms_binomial",
+con_sum_constr%>%mutate(
+  type ="Rasch (brms)",
   task = recode(task,
        "pop" = "Population-to-sample",
        "comm" = "Communicative-cues",
@@ -3699,6 +3596,10 @@ con_sum_bin%>%mutate(
 ```{r lstmplotcomp, fig.height=4,fig.width=10, fig.cap = "Consistency estiamtes for the different tasks by estimation methods.", out.width="100%"}
 con_comp
 ```
+```{r}
+ggsave("../visuals/con_overview.png", height = 4, width = 10, scale = 1, bg = "white")
+```
+
 
 Supplementary Figure \@ref(fig:lstmplotcomp) shows ... 
 
@@ -3806,6 +3707,8 @@ pcro_diff <- cor_mult_bin %>%
 
 
 ```
+
+Pairwise correlation becasue LKJ prior underestimate the correlation (we tried that out)
 
 * To estimate the correlations between tasks, it requires selecting the same number of time points from the two studies and treating them as if they were the same. In practice this meant that we selected the last 10 time points from the 14 time points of phase 2 of the study by @bohn2023great and re-coded them so that time point 4 was matched with time point 1 from the current study, 5 with 2 and so on. This is problematic because it neglects the temporal dynamics happening in the study prior to the 4th time point. Furthermore, the time difference between two time points was different in the two studies (2 weeks in @bohn2023great and 8 weeks in the current study).
 

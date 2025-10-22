@@ -3,6 +3,15 @@ library(tidyverse)
 library(stringr)
 library(brms)
 
+fun_sep_rel_LST <- function(model) {
+  pers_params <- ranef(model)$subject[,,"trait"]%>%as_tibble(rownames = "subject")
+  var_EAP <- var(pers_params$Estimate)
+  Mean_SE <- mean(pers_params$Est.Error^2)
+  # nach TAM Paket (bzw. nach Adams unter der Annahme:  var_EAP = true - Mean_SE bzw. true = var_EAP + Mean_SE)
+  rel <- var_EAP / (var_EAP + Mean_SE)
+  rel
+}
+
 long <- read.csv("../data/laac_complete.txt", sep="", na.strings="-99")
 
 # create categorical variables indicating time point and stable trait level
