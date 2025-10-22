@@ -3510,7 +3510,7 @@ Values are higher when we do pairwise estimation, not all tasks together due to 
 ```
 
 ```{r}
-# # constraint
+# # Consistency
 # con_samp_raw_constr <- bind_rows(
 # 
 # con_samp_const_comm <- posterior_samples(c_lst2_comm, pars = "^sd_subject", add_chain = T)%>%
@@ -3553,6 +3553,27 @@ Values are higher when we do pairwise estimation, not all tasks together due to 
 
 con_sum_constr <- readRDS("../saves/consistency_constr_sample.rds")
 ```
+
+```{r}
+# # reliability
+# rel_sum_constr <- bind_rows(
+#   fun_sep_rel_LST(c_lst2_comm)%>%as_tibble()%>%mutate(task = "comm"),
+#   fun_sep_rel_LST(c_lst2_attent)%>%as_tibble()%>%mutate(task = "attent"),
+#   fun_sep_rel_LST(c_lst2_search)%>%as_tibble()%>%mutate(task = "search"),
+#   fun_sep_rel_LST(c_lst2_vfood)%>%as_tibble()%>%mutate(task = "vfood"),
+#   fun_sep_rel_LST(c_lst2_reas)%>%as_tibble()%>%mutate(task = "reas"),
+#   fun_sep_rel_LST(c_lst2_comm)%>%as_tibble()%>%mutate(task = "pop")
+# )
+# 
+# 
+# rel_sum_constr <- rel_sum_constr%>%dplyr::rename(rel = value)
+# 
+# saveRDS(rel_sum_constr, "../saves/rel_sum_constr.rds")
+
+rel_sum_constr <- readRDS("../saves/rel_sum_constr.rds")
+ 
+```
+
 
 ```{r}
 con_comp <- bind_rows(
