@@ -3315,9 +3315,8 @@ fun_sep_rel_LST <- function(model) {
 
 ### Latent state models
 ```{r}
-# # Latent state correlations rasch model
+# # Latent state rasch model
 # state_means_rasch <- tibble()
-# cor_rasch <- tibble()
 # rel_rasch <- tibble()
 # 
 # 
@@ -3372,16 +3371,63 @@ cor_rasch <- readRDS("../saves/latent_state_cor_rasch.rds")
 state_means_rasch <- readRDS("../saves/latent_state_means_rasch.rds")
 ```
 
+```{r}
+
+d2 <- long%>%filter(!task %in% c("cause", "delay", "gaze", "inference", "quant"))
+
+for (j in unique(d2$task)) {
+  
+pairs <- combn(c(1:10), 2, simplify = F)
+
+cor_rasch_ind_tp <- tibble()
+
+test_lsc <- long %>%filter(task == j)
+
+for (i in pairs) {
+  
+  tpd <- test_lsc %>%filter(time_point %in% unlist(i))
+  
+  state <-  brm(code ~ 0 + time_cat + trial + (0 + time_cat | subject),
+                 data = tpd,
+                 family = brmsfamily(family="bernoulli", link="logit"),
+                 chains = 4, # to speed up sampling --> increase later
+                 cores = 4,
+                 threads = threading(8),
+                 backend = "cmdstanr",
+                 iter=4000)
+  
+  results <- summary(state)
+  
+  cor_state <- results$random$subject%>%as_tibble(rownames = "cor")%>%
+  filter(grepl("cor", cor))%>%
+  mutate(cor = str_remove(cor, "cor\\(time_cat"),
+         cor = str_remove(cor, "\\)"),
+         cor = str_remove(cor, "time_cat"))%>%
+  tidyr::separate(cor, sep = ",", into = c("a", "b"))%>%
+  mutate(a = as.numeric(a), 
+         b = as.numeric(b),
+         task = j)
+  
+  cor_rasch_ind_tp <- bind_rows(cor_rasch_ind_tp, cor_state)
+  
+  }
+
+
+}
+
+saveRDS(cor_rasch_ind_tp, "../saves/cor_rasch_ind_tp.rds")
+
+
+
+```
+
+
 
 We begin by fitting the equivalent to Latent State models to the data from each task. The `brms` formula for this model is: `code ~ 0 + time_cat + trial + (0 + time_cat | subject)`, where `code` is the response (0/1; incorrect/correct), `time_cat` is a categorical indicator of time point (1 to 10) and `trial` is a categorical indicator of trial within each time point. 
 
-Parameterized as such, this model estimates an easiness parameter for each item (i.e. trial) as well as an easiness parameter for each time point, which is equivalent to a latent sate mean and which allows for assessing mean change over time. However, in contrast to the SEM approach, the absolute values of this parameter are not comparable across tasks. These latent state means are shown in Supplementary Figure \@ref(fig:lsplotrasch)A. 
+Parameterized as such, this model estimates an easiness parameter for each item (i.e. trial) as well as an easiness parameter for each time point, which is equivalent to a latent sate mean and which allows for assessing mean change over time. However, in contrast to the SEM approach, the absolute values of this parameter are not comparable across tasks. These latent state means are shown in Supplementary Figure \@ref(fig:lsplotrasch)A. Additionally, it is possible to compute the reliability of the latent state estimates for each time point [see @adams2005reliability; @moosbrugger2007testtheorie]. Note that this conception of reliability is different from the SEM approach. It quantifies how reliably individuals can be separated from one another based on the trait estimates; in the SEM approach, reliability is a property of the measurement instrument (test-half in our case). Thus, these values cannot be compared directly across methods. 
 
-
-
-Supplementary Figure \@ref(fig:lsplotrasch) shows ... 
-
-
+Finally, we estimate the correlations between latent states as an indicator of stability of individual differences across time points. Here the interpretation is the same as in the SEM approach. A problem for estimating these correlations is that the LKJ prior, however chosen, has a very strong influence on the results for sample sizes as small as the one in our study. To go around this problem, we fit pairwise models for all combinations of time points to estimate the correlations because in such models the prior over the covariance matrix is uniform.
 
 ```{r}
 plsm_rasch <- state_means_rasch%>%
@@ -3458,7 +3504,7 @@ plot_grid(plsm_rasch, pls_rel, ncol = 1,labels = c("A", "B"), align = "v",axis =
 ```
 
 
-
+Supplementary Figure \@ref(fig:lsplotrasch) shows ... 
 
 
 Correlations between latent states. 
@@ -3583,7 +3629,8 @@ lstv_con_rel%>%filter(param == "consistency", !grepl("7", task))%>%mutate(type =
                 con_uci = upper_2.5ci, 
                 con_m = value)%>%
   mutate(
-      task = recode(task,
+    param = "Consistency",  
+    task = recode(task,
        "pop-to-sample" = "Population-to-sample",
        "communication" = "Communicative-cues",
        "reasoning" = "Probabilistic-reasoning",
@@ -3593,6 +3640,7 @@ lstv_con_rel%>%filter(param == "consistency", !grepl("7", task))%>%mutate(type =
   ),
 
 con_sum_constr%>%mutate(
+  param = "Consistency",
   type ="Rasch (brms)",
   task = recode(task,
        "pop" = "Population-to-sample",
@@ -3600,25 +3648,42 @@ con_sum_constr%>%mutate(
        "reas" = "Probabilistic-reasoning",
        "vfood" = "Ignore-visible-food",
        "search" = "Self-ordered-search",
-       "attent" = "Attention-following")
-  )
+       "attent" = "Attention-following")),
+
+
+rel_sum_constr%>%mutate(
+  param = "Reliability\n(of Trait)",
+  type ="Rasch (brms)",
+  task = recode(task,
+       "pop" = "Population-to-sample",
+       "comm" = "Communicative-cues",
+       "reas" = "Probabilistic-reasoning",
+       "vfood" = "Ignore-visible-food",
+       "search" = "Self-ordered-search",
+       "attent" = "Attention-following"))%>%
+  rename(con_m = rel)
+
 )%>%
-  ggplot(aes(x = task, y = con_m))+
-  geom_pointrange(aes(ymin= con_lci, ymax = con_uci, col = type), position = position_dodge(width = 0.2))+
+  ggplot(aes(x = param, y = con_m))+
+  geom_pointrange(aes(ymin= con_lci, ymax = con_uci, col = type), position = position_dodge(width = 0.5))+
   theme_few()+
   ylim(0,1)+
-  labs(x = "", y = "Consistency estimate")+
+  labs(x = "", y = "Estimate")+
   scale_color_colorblind(name = "")+
-  theme(legend.direction = "vertical", legend.position = c(0.2, 0.25), legend.box = "horizontal", legend.background = element_blank()
+  facet_grid(~task)+
+  theme(legend.direction = "vertical", legend.position = c(0.07, 0.25), legend.box = "horizontal", legend.background = element_blank()
     )
 ```
-
 
 ```{r lstmplotcomp, fig.height=4,fig.width=10, fig.cap = "Consistency estiamtes for the different tasks by estimation methods.", out.width="100%"}
 con_comp
 ```
+
+
+
+
 ```{r}
-ggsave("../visuals/con_overview.png", height = 4, width = 10, scale = 1, bg = "white")
+#ggsave("../visuals/con_overview.png", height = 4, width = 10, scale = 1, bg = "white")
 ```
 
 
