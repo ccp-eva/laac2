@@ -296,7 +296,7 @@ cor_bin_ex_inf <- readRDS("../saves/ls_cor_bin_ex_infants.rds")
 # 
 # x <- pairwise_recur(10)
 # 
-# pairs <- x%>%as_tibble()%>%rowwise()%>%mutate(pair = pmap(list(V1, V2), c))%>%pull(pair)
+pairs <- x%>%as_tibble()%>%rowwise()%>%mutate(pair = pmap(list(V1, V2), c))%>%pull(pair)
 
 cor_rasch_ind_tp <- tibble()
 

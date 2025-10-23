@@ -3422,8 +3422,6 @@ cor_ls_rasch <- readRDS("../saves/cor_ls_rasch.rds")
 
 ```
 
-
-
 We begin by fitting the equivalent to Latent State models to the data from each task. The `brms` formula for this model is: `code ~ 0 + time_cat + trial + (0 + time_cat | subject)`, where `code` is the response (0/1; incorrect/correct), `time_cat` is a categorical indicator of time point (1 to 10) and `trial` is a categorical indicator of trial within each time point. 
 
 Parameterized as such, this model estimates an easiness parameter for each item (i.e. trial) as well as an easiness parameter for each time point, which is equivalent to a latent sate mean and which allows for assessing mean change over time. However, in contrast to the SEM approach, the absolute values of this parameter are not comparable across tasks. These latent state means are shown in Supplementary Figure \@ref(fig:lsplotrasch)A. Additionally, it is possible to compute the reliability of the latent state estimates for each time point [see @adams2005reliability; @moosbrugger2007testtheorie]. Note that this conception of reliability is different from the SEM approach. It quantifies how reliably individuals can be separated from one another based on the trait estimates; in the SEM approach, reliability is a property of the measurement instrument (test-half in our case). Thus, these values cannot be compared directly across methods. 
@@ -3474,17 +3472,16 @@ rel_rasch%>%
   mutate(task = factor(task, levels = c("Population-to-sample","Probabilistic-reasoning","Communicative-cues", "Ignore-visible-food", "Self-ordered-search","Attention-following" )),
                        model = "Rasch (brms)"),
          
-   plsr%>%
-     rename(value = est)%>%
-     mutate(model = "SEM (MPLUS)")
+   # plsr%>%
+   #   rename(value = est)%>%
+   #   mutate(model = "SEM (MPLUS)")
    
    )%>%
   ggplot(., aes(x = time_point, y = value, col = model))+
-  #geom_hline(aes(yintercept = ref), lty = 3, alpha = .75)+
   labs(x = "Time point",y = "Reliability (person separation)")+
-  geom_line(aes(group = model, col = model),alpha = .75)+
-  #geom_line(data = lsep%>%filter(time_point > 14), aes(group = task, x = time_point),position = position_dodge(width = 0.2), alpha = .75)+
-  geom_pointrange(aes(ymin = lower_2.5ci, ymax = upper_2.5ci), alpha = .75)+
+  geom_line(aes(group = model),alpha = .75)+
+  geom_point(alpha = .75)+
+  #geom_pointrange(aes(ymin = lower_2.5ci, ymax = upper_2.5ci), alpha = .75)+
   facet_grid(~task)+
   scale_color_colorblind(name = "")+
   scale_x_continuous(breaks = c(1,10), labels = c(1,10))+
@@ -3500,17 +3497,14 @@ rel_rasch%>%
 ```
 
 
-```{r lseplotrasch, fig.height = 6, fig.width=10, fig.cap = "Latent means and reliability estimates with 95\\% CrI for each time point based on Rasch-model.", out.width="100%"}
+```{r lseplotrasch, fig.height = 6, fig.width=10, fig.cap = "Latent state means and trait reliability estimates with 95\\% CrI for each time point estimated assuming a Rasch model for each task and time point.", out.width="100%"}
 plot_grid(plsm_rasch, pls_rel, ncol = 1,labels = c("A", "B"), align = "v",axis = "l", rel_heights = c(1,1))
 ```
 
 
-Supplementary Figure \@ref(fig:lsplotrasch) shows ... 
+Supplementary Figure \@ref(fig:lseplotrasch) shows the latent state means and the trait reliabilities. The temporal dynamics in the latent trait estimates are comparable to the SEM results, even though the Rasch-based estimates seem more variable. The reliability estimates are higher compared to the SEM approach, however, please note that they have a different interpretation because the refer to the separability of individuals (trait reliability) and not the reliability of the measurement instrument. 
 
-
-Correlations between latent states. 
-
-Reliability
+The pattern of latent state correlations in Supplementary Figure \@ref(fig:lscorplotrasch) are also similar to the ones reported above for the SEM approach reported above. For example, we see very high correlations in the population-to-sample task across time points, strong correlations emerging for attention-following from time point 6 onward and low or even negative correlations for probabilistic-reasoning. The overall pattern is, however, less clean for the Rasch approach, as there are outliers such as the high correlation between timep point 1 and 2 for ignore-visible-food or a low correlation between time point 2 and 10 for communicative cues.    
 
 ```{r}
 plsc_rasch <- cor_ls_rasch%>%
@@ -3536,15 +3530,13 @@ plsc_rasch <- cor_ls_rasch%>%
   theme(legend.position = c(0.9,0.85), legend.direction = "vertical", legend.title = element_blank(), legend.background = element_blank())
 ```
 
-```{r lsplotrasch, fig.height=4, fig.cap = "Correlations between latent state estimates based on the Rasch model for the different tasks.", out.width="100%"}
+```{r lscorplotrasch, fig.height=4, fig.cap = "Correlations between latent states estimated assuming a Rasch model for each task and time point. Correlations have been estimated via pairwise models for all possible time points.", out.width="100%"}
 plsc_rasch
 ```
 
-Supplementary Figure \@ref(fig:lsplotrasch) shows ... 
-
-Values are higher when we do pairwise estimation, not all tasks together due to the strong influence of the the LKJ prior for small sample sizes 
-
 ### Latent state trait models
+
+Same constraint as above
 
 ```{r}
 # c_lst2_attent <- readRDS("../saves/constraint_lst2_attent.rds")
@@ -3679,8 +3671,6 @@ rel_sum_constr%>%mutate(
 ```{r lstmplotcomp, fig.height=4,fig.width=10, fig.cap = "Consistency estiamtes for the different tasks by estimation methods.", out.width="100%"}
 con_comp
 ```
-
-
 
 
 ```{r}
