@@ -3372,16 +3372,17 @@ state_means_rasch <- readRDS("../saves/latent_state_means_rasch.rds")
 ```
 
 ```{r}
+# pairwise correlations between latent states for Rasch models
 
 d2 <- long%>%filter(!task %in% c("cause", "delay", "gaze", "inference", "quant"))
+
+cor_rasch_ind_tp <- tibble()
 
 for (j in unique(d2$task)) {
   
 pairs <- combn(c(1:10), 2, simplify = F)
 
-cor_rasch_ind_tp <- tibble()
-
-test_lsc <- long %>%filter(task == j)
+test_lsc <- d2 %>%filter(task == j)
 
 for (i in pairs) {
   
@@ -3390,7 +3391,7 @@ for (i in pairs) {
   state <-  brm(code ~ 0 + time_cat + trial + (0 + time_cat | subject),
                  data = tpd,
                  family = brmsfamily(family="bernoulli", link="logit"),
-                 chains = 4, # to speed up sampling --> increase later
+                 chains = 4, 
                  cores = 4,
                  threads = threading(8),
                  backend = "cmdstanr",
@@ -3415,9 +3416,9 @@ for (i in pairs) {
 
 }
 
-saveRDS(cor_rasch_ind_tp, "../saves/cor_rasch_ind_tp.rds")
+saveRDS(cor_rasch_ind_tp, "../saves/cor_ls_rasch.rds")
 
-
+cor_ls_rasch <- readRDS("../saves/cor_ls_rasch.rds")
 
 ```
 
@@ -3427,7 +3428,7 @@ We begin by fitting the equivalent to Latent State models to the data from each 
 
 Parameterized as such, this model estimates an easiness parameter for each item (i.e. trial) as well as an easiness parameter for each time point, which is equivalent to a latent sate mean and which allows for assessing mean change over time. However, in contrast to the SEM approach, the absolute values of this parameter are not comparable across tasks. These latent state means are shown in Supplementary Figure \@ref(fig:lsplotrasch)A. Additionally, it is possible to compute the reliability of the latent state estimates for each time point [see @adams2005reliability; @moosbrugger2007testtheorie]. Note that this conception of reliability is different from the SEM approach. It quantifies how reliably individuals can be separated from one another based on the trait estimates; in the SEM approach, reliability is a property of the measurement instrument (test-half in our case). Thus, these values cannot be compared directly across methods. 
 
-Finally, we estimate the correlations between latent states as an indicator of stability of individual differences across time points. Here the interpretation is the same as in the SEM approach. A problem for estimating these correlations is that the LKJ prior, however chosen, has a very strong influence on the results for sample sizes as small as the one in our study. To go around this problem, we fit pairwise models for all combinations of time points to estimate the correlations because in such models the prior over the covariance matrix is uniform.
+Finally, we estimate the correlations between latent states as an indicator of stability of individual differences across time points. Here the interpretation is the same as in the SEM approach. A problem for estimating these correlations is that the LKJ prior, however chosen, has a very strong influence on the results for sample sizes as small as the one in our study [Jana: do you have a reference for that?]. To go around this problem, we fit pairwise models for all combinations of time points to estimate the correlations because in such models the prior over the covariance matrix is uniform.
 
 ```{r}
 plsm_rasch <- state_means_rasch%>%
@@ -3512,7 +3513,7 @@ Correlations between latent states.
 Reliability
 
 ```{r}
-plsc_rasch <- cor_rasch%>%
+plsc_rasch <- cor_ls_rasch%>%
   mutate(task = recode(task,
        "pop" = "Population-to-sample",
        "comm" = "Communicative-cues",
