@@ -87,6 +87,8 @@ pairwise_cor_rasch <- tibble()
     filter(grepl("cor\\(", param))
   
   pairwise_cor_rasch <- bind_rows(pairwise_cor_rasch, pair_cor)
+  
+  saveRDS(pairwise_cor_rasch, "../saves/pairwise_cor_rasch.rds")
 
 }
 
