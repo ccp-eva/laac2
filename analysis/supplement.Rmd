@@ -3374,49 +3374,49 @@ state_means_rasch <- readRDS("../saves/latent_state_means_rasch.rds")
 ```{r}
 # pairwise correlations between latent states for Rasch models
 
-d2 <- long%>%filter(!task %in% c("cause", "delay", "gaze", "inference", "quant"))
-
-cor_rasch_ind_tp <- tibble()
-
-for (j in unique(d2$task)) {
-  
-pairs <- combn(c(1:10), 2, simplify = F)
-
-test_lsc <- d2 %>%filter(task == j)
-
-for (i in pairs) {
-  
-  tpd <- test_lsc %>%filter(time_point %in% unlist(i))
-  
-  state <-  brm(code ~ 0 + time_cat + trial + (0 + time_cat | subject),
-                 data = tpd,
-                 family = brmsfamily(family="bernoulli", link="logit"),
-                 chains = 4, 
-                 cores = 4,
-                 threads = threading(8),
-                 backend = "cmdstanr",
-                 iter=4000)
-  
-  results <- summary(state)
-  
-  cor_state <- results$random$subject%>%as_tibble(rownames = "cor")%>%
-  filter(grepl("cor", cor))%>%
-  mutate(cor = str_remove(cor, "cor\\(time_cat"),
-         cor = str_remove(cor, "\\)"),
-         cor = str_remove(cor, "time_cat"))%>%
-  tidyr::separate(cor, sep = ",", into = c("a", "b"))%>%
-  mutate(a = as.numeric(a), 
-         b = as.numeric(b),
-         task = j)
-  
-  cor_rasch_ind_tp <- bind_rows(cor_rasch_ind_tp, cor_state)
-  
-  }
-
-
-}
-
-saveRDS(cor_rasch_ind_tp, "../saves/cor_ls_rasch.rds")
+# d2 <- long%>%filter(!task %in% c("cause", "delay", "gaze", "inference", "quant"))
+# 
+# cor_rasch_ind_tp <- tibble()
+# 
+# for (j in unique(d2$task)) {
+#   
+# pairs <- combn(c(1:10), 2, simplify = F)
+# 
+# test_lsc <- d2 %>%filter(task == j)
+# 
+# for (i in pairs) {
+#   
+#   tpd <- test_lsc %>%filter(time_point %in% unlist(i))
+#   
+#   state <-  brm(code ~ 0 + time_cat + trial + (0 + time_cat | subject),
+#                  data = tpd,
+#                  family = brmsfamily(family="bernoulli", link="logit"),
+#                  chains = 4, 
+#                  cores = 4,
+#                  threads = threading(8),
+#                  backend = "cmdstanr",
+#                  iter=4000)
+#   
+#   results <- summary(state)
+#   
+#   cor_state <- results$random$subject%>%as_tibble(rownames = "cor")%>%
+#   filter(grepl("cor", cor))%>%
+#   mutate(cor = str_remove(cor, "cor\\(time_cat"),
+#          cor = str_remove(cor, "\\)"),
+#          cor = str_remove(cor, "time_cat"))%>%
+#   tidyr::separate(cor, sep = ",", into = c("a", "b"))%>%
+#   mutate(a = as.numeric(a), 
+#          b = as.numeric(b),
+#          task = j)
+#   
+#   cor_rasch_ind_tp <- bind_rows(cor_rasch_ind_tp, cor_state)
+#   
+#   }
+# 
+# 
+# }
+# 
+# saveRDS(cor_rasch_ind_tp, "../saves/cor_ls_rasch.rds")
 
 cor_ls_rasch <- readRDS("../saves/cor_ls_rasch.rds")
 
@@ -3536,9 +3536,16 @@ plsc_rasch
 
 ### Latent state trait models
 
-Same constraint as above
+The LST models include an additional trait variable that captures an individuals time-invariant ability. Thus, the performance at any given time point can be decomposed into a stable trait component and a variable state component. To achieve this, we added a trait variable (a constant) as part of a random intercept term to the model (`(0 + trait | subject)`; formula of full model: `code ~ 0 + time_cat + trial + (0 + time_cat || subject) + (0 + trait | subject)`). Thus, `trait` reflects time-invariant differences between individuals. Like in the SEM approach, we constrained the models so that the variances of the state residual variables are invariant across time (see script `constraint_lstm2.R` for how this constraint was implemented). 
+
+From this model, we computed the consistency, that is the proportion of variance that ix explained by this trait variable. This value is comparable across the two approaches and we therefore visualize them jointly. In addition, we compute the reliability of the trait (person separability) As noted above, this values is not directly comparable to the reliability estimates sensu SEM.  
+
+Supplementary Figure \@ref(fig:lstmplotcomp) shows the consistency and reliability estimates for the LST model. In comparison to the SEM approach, consistency values were comparable but on average slightly lower. The trait reliability values are, on the other hand, very high.   
+
 
 ```{r}
+# run script `./analysis/constraint_lstm2.R`
+
 # c_lst2_attent <- readRDS("../saves/constraint_lst2_attent.rds")
 # c_lst2_search <- readRDS("../saves/constraint_lst2_search.rds")
 # c_lst2_vfood <- readRDS("../saves/constraint_lst2_vfood.rds")
@@ -3677,72 +3684,70 @@ con_comp
 #ggsave("../visuals/con_overview.png", height = 4, width = 10, scale = 1, bg = "white")
 ```
 
-
-Supplementary Figure \@ref(fig:lstmplotcomp) shows ... 
-
 ### Relations between tasks
 
-```{r}
-# run script all_multi_lstm_bin.R
-# Multi_LST_bin <- readRDS("../saves/multi_lst_bin.rds")
-# sum_mult_bin <- summary(Multi_LST_bin)
-```
+To estimate the correlations between the tasks, we fit pairwise LST models to the all possible combinations of tasks. This pairwise approach was again chosen to work around the strong influence of the LKJ prior on the correlation matrix described above. The Rasch model approach and its implementation in `brms` forced us to have the same number of time points for all tasks. All tasks from the present study had 10 time points, however, in @bohn2023great there were 14 time points per phase. The temporal spacing was also different in the two studies. Whereas there were 8 weeks between time points in the current study, there were 2 weeks in @bohn2023great. To nevertheless have the same number of time points, we selected the last 10 time points from phase 2 in @bohn2023great and all time points for the current study. We urge the reader to keep this caveat in mind when interpreting the results. 
 
+In the code, we added a variable denoting the task to the model, including all possible interactions with the other variables in the model. The `trait` variable in the random effects for subject was replaced with `task`; `brms` notation: `code ~ 0 + time_cat + trial + task + time_cat:task + trial:task + (0 + time_cat + time_cat:task || subject) + (0 + task | subject)`.
 
 ```{r}
-# cor_mult_bin <- sum_mult_bin$random$subject%>%as_tibble(rownames = "param")%>%
-#   filter(grepl("cor\\(", param))%>%
-#     mutate(param = str_remove(param, "cor\\("),
-#          param = str_remove(param, "\\)"),
-#          param = str_remove_all(param, "task"))%>%
-#   tidyr::separate(param, sep = ",", into = c("a", "b"))%>%
-#   filter(a != "reas", 
-#          b != "reas")%>%
-#   mutate(Estimate = ifelse(a == "search" | b == "search", Estimate*-1, Estimate))%>%
-#   mutate(b = recode(b,
-#     attent = "ZAttention-following",
-#     gaze = "ZGaze-following",
-#     cause = "Causal-inference",
-#     inference = "Inference-by-exclusion",
-#     delay = "Delay-of-gratification",
-#     comm = "ZCommunicative-cues",
-#     search = "Self-ordered-search",
-#     pop = "Population-to-sample",
-#     quant = "Quantity-discrimination",
-#     vfood = "Ignore-visible-food"
-#   ),
-#   a = recode(a,
-#     attent = "ZAttention-following",
-#     gaze = "ZGaze-following",
-#     cause = "Causal-inference",
-#     inference = "Inference-by-exclusion",
-#     delay = "Delay-of-gratification",
-#     comm = "ZCommunicative-cues",
-#     search = "Self-ordered-search",
-#     pop = "Population-to-sample",
-#     quant = "Quantity-discrimination",
-#     vfood = "Ignore-visible-food"
-#   ))%>%
-#    rowwise()%>%
-#   mutate(id = paste(sort(c(b, a)), collapse = "_"))%>%
-#   separate(id, into = c("task", "task_1"), sep = "_")%>%
-#   add_row(task_1 = "Ignore-visible-food", task = "Ignore-visible-food", Estimate = 0)%>%
-#    add_row(task = "ZCommunicative-cues",task_1 = "ZCommunicative-cues", Estimate = 0)%>%
-#   arrange(task, task_1)%>%
-#   mutate(
-#     zero = 0,
-#     sig = ifelse(between(zero, `l-95% CI`, `u-95% CI`), "plain", "bold"),
-#     sig = ifelse(is.na(sig), "plain", sig))%>%
-#   mutate(order = as.numeric(factor(task)),
-#          order_1 = as.numeric(factor(task_1)))
-# 
-# saveRDS(cor_mult_bin, "../saves/cor_mult_bin.rds")
+# Run script `./analysis/constraint_lstm_pairwise.R`
 
-cor_mult_bin <- readRDS("../saves/cor_mult_bin.rds")
+pairwise_cor_rasch <- readRDS("../saves/pairwise_cor_rasch.rds")
+
 ```
 
 ```{r}
-p_cor_bin <- cor_mult_bin%>%
+cor_mult <- pairwise_cor_rasch%>%
+    mutate(param = str_remove(param, "cor\\("),
+         param = str_remove(param, "\\)"),
+         param = str_remove_all(param, "task"))%>%
+  tidyr::separate(param, sep = ",", into = c("a", "b"))%>%
+  mutate(Estimate = ifelse(a == "search" | b == "search", Estimate*-1, Estimate))%>%
+  mutate(b = recode(b,
+    attent = "ZAttention-following",
+    gaze = "ZGaze-following",
+    cause = "Causal-inference",
+    inference = "Inference-by-exclusion",
+    delay = "Delay-of-gratification",
+    comm = "ZCommunicative-cues",
+    search = "Self-ordered-search",
+    pop = "Population-to-sample",
+    quant = "Quantity-discrimination",
+    vfood = "Ignore-visible-food"
+  ),
+  a = recode(a,
+    attent = "ZAttention-following",
+    gaze = "ZGaze-following",
+    cause = "Causal-inference",
+    inference = "Inference-by-exclusion",
+    delay = "Delay-of-gratification",
+    comm = "ZCommunicative-cues",
+    search = "Self-ordered-search",
+    pop = "Population-to-sample",
+    quant = "Quantity-discrimination",
+    vfood = "Ignore-visible-food"
+  ))%>%
+   rowwise()%>%
+  mutate(id = paste(sort(c(b, a)), collapse = "_"))%>%
+  separate(id, into = c("task", "task_1"), sep = "_")%>%
+  add_row(task_1 = "Ignore-visible-food", task = "Ignore-visible-food", Estimate = 0)%>%
+   add_row(task = "ZCommunicative-cues",task_1 = "ZCommunicative-cues", Estimate = 0)%>%
+  arrange(task, task_1)%>%
+  mutate(
+    zero = 0,
+    sig = ifelse(between(zero, `l-95% CI`, `u-95% CI`), "plain", "bold"),
+    sig = ifelse(is.na(sig), "plain", sig))%>%
+  mutate(order = as.numeric(factor(task)),
+         order_1 = as.numeric(factor(task_1)))
+
+saveRDS(cor_mult, "../saves/cor_mult.rds")
+
+cor_mult <- readRDS("../saves/cor_mult.rds")
+```
+
+```{r}
+p_cor <- cor_mult%>%
   ggplot(aes(y = factor(order), x = factor(order_1), fill = Estimate))+
   geom_tile(color = "white")+
   labs(x = "", y = "")+
@@ -3751,8 +3756,8 @@ p_cor_bin <- cor_mult_bin%>%
   name="Correlation")+
 #  ggtitle("brms binomial model")+
   geom_text(aes(label = round(Estimate, 2), fontface = sig), size = 3)+
-  scale_y_discrete(breaks = c(1:9),labels = c(str_remove(str_remove(sort(unique(cor_mult_bin$task)), "Z"),"X")))+
-  scale_x_discrete(guide = guide_axis(angle = 90), labels = c(str_remove(str_remove(sort(unique(cor_mult_bin$task_1)), "Z"),"X")))+
+  scale_y_discrete(breaks = c(1:9),labels = c(str_remove(str_remove(sort(unique(cor_mult$task)), "Z"),"X")))+
+  scale_x_discrete(guide = guide_axis(angle = 90), labels = c(str_remove(str_remove(sort(unique(cor_mult$task_1)), "Z"),"X")))+
   #scale_y_discrete(limits=rev, breaks = c(1:10))+
   #scale_x_discrete(breaks = c(1:9))+
   theme_few()+
@@ -3760,7 +3765,7 @@ p_cor_bin <- cor_mult_bin%>%
 ```
 
 ```{r}
-pcro_diff <- cor_mult_bin %>%
+pcor_diff <- cor_mult %>%
   select(task, task_1, Estimate, order, order_1)%>%
   left_join(cor_mod%>%
               select(task, task_1, est)
@@ -3785,13 +3790,15 @@ pcro_diff <- cor_mult_bin %>%
 
 ```
 
-Pairwise correlation becasue LKJ prior underestimate the correlation (we tried that out)
-
-* To estimate the correlations between tasks, it requires selecting the same number of time points from the two studies and treating them as if they were the same. In practice this meant that we selected the last 10 time points from the 14 time points of phase 2 of the study by @bohn2023great and re-coded them so that time point 4 was matched with time point 1 from the current study, 5 with 2 and so on. This is problematic because it neglects the temporal dynamics happening in the study prior to the 4th time point. Furthermore, the time difference between two time points was different in the two studies (2 weeks in @bohn2023great and 8 weeks in the current study).
-
-
 
 ```{r corbinplot, fig.height=7, fig.width=14, fig.cap = "A) Correlations between trait estimates based on a binomial model. Bold correlations are different from zero as judged by the 95\\% CrI. B) Difference in correlation coefficients (SEM - binomial). ", out.width="100%"}
-plot_grid(p_cor_bin, pcro_diff, labels = c("A", "B"))
+plot_grid(p_cor, pcor_diff, labels = c("A", "B"))
 ```
-Supplementary Figure \@ref(fig:corbinplot) shows ... 
+
+Supplementary Figure \@ref(fig:corbinplot) shows the correlations between tasks based on the Rasch model approach and the SEM approach as well as the difference between the two. While the overall patter is the same (e.g., positive correlations among non-social tasks; no correlations among social tasks, positive correlation between communicative-cues and causal-inference, etc., ...), the Rasch approach yields slightly stronger correlations (both positive and negative).
+
+
+
+
+
+

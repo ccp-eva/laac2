@@ -75,12 +75,15 @@ task <- long[long$task %in% c("search","vfood"),]
 fit_empty <-  brm(code ~ 0 + time_cat + trial + task + time_cat:task + trial:task
                   + (0 + time_cat + time_cat:task || subject) + (0 + task | subject),
                   data = task,
+                  backend = "cmdstanr",
                   family = brmsfamily(family="bernoulli", link="logit"),
                   chains = 0) 
 
 multi_LST <- update(fit_empty, recompile = FALSE, 
               newdata = task,
-              chains = 2,
+              backend = "cmdstanr",
+              threads = threading(8),
+              chains = 4,
               iter=1)
 
 # check design matrix of model
@@ -123,7 +126,12 @@ multi_LST$model <- structure(new_code, class = c("character", "brmsmodel"))
 multi_LST$fit@stanmodel <- rstan::stan_model(model_code = new_code)
 
 # Fit with modified model
-fit2 <- update(multi_LST, recompile = FALSE, chains = 2, iter = 2000)
+fit2 <- update(multi_LST, recompile = FALSE, chains = 4, cores = 4, iter = 2000, backend = "cmdstanr",  threads = threading(8))
 # für andere tasks: direkt hier mit Argument "newdata" einen anderen Datensatz nutzen, 
 # die vorherigen Schritte müssen nicht wiederholt werden
 summary(fit2)
+
+
+task2 <- long[long$task %in% c("search","pop"),]
+
+fit3 <- update(multi_LST, recompile = FALSE, chains = 2, iter = 2000, newdata = task2)

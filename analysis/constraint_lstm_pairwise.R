@@ -3,36 +3,40 @@ library(tidyverse)
 library(stringr)
 library(brms)
 
-long <- read.csv("../data/laac_complete.txt", sep="", na.strings="-99")
+long <- read.csv("../data/laac_complete.txt", sep="", na.strings="-99")%>%
+  filter(task != "reas")%>%
+  mutate(phase = ifelse(task %in% c("cause", "delay", "gaze", "inference", "quant"), 1, 2))%>%
+  mutate(time_point = ifelse(phase == 1, time_point - 4, time_point))%>%
+  filter(time_point > 0)%>%
+  mutate(time_cat = as.factor(time_point),
+         trial <- as.factor(trial))
 
-# create categorical variables indicating time point and stable trait level
-long$trial <- as.factor(long$trial)
-long$time_cat <- as.factor(long$time_point)
-long$trait <- 1
 # recode search task to binary response
 long[long$task == "search", "code"] <- car::recode(long[long$task == "search", "code"], '2=1')
 
 pairs <- combn(unique(long$task), 2, simplify = F)
 
-dmod <- long%>%filter(task %in% c("vfood", "comm"))
-
+task <- long%>%filter(task %in% unlist(pairs[43]))
 
 fit_empty <-  brm(code ~ 0 + time_cat + trial + task + time_cat:task + trial:task
                   + (0 + time_cat + time_cat:task || subject) + (0 + task | subject),
-                  data = dmod,
+                  data = task,
                   family = brmsfamily(family="bernoulli", link="logit"),
                   chains = 0) 
 
-pair_LST <- update(fit_empty, recompile = FALSE, 
-                    newdata = dmod,
-                    chains = 2,
+multi_LST <- update(fit_empty, recompile = FALSE, 
+                    newdata = task,
+                    chains = 4,
                     iter=1)
 
 # check design matrix of model
 stan_dat <- make_standata(fit_empty)
+# table(stan_dat$Z_2_1, stan_dat$Z_2_2)
+# table(stan_dat$Z_1_1, stan_dat$Z_1_11)
+# table(stan_dat$Z_1_2, stan_dat$Z_1_12, stan_dat$X[,"taskvfood"])
 
 # Edit code
-new_code <- capture.output(stancode(pair_LST))
+new_code <- capture.output(stancode(multi_LST))
 
 new_code <- paste(c(new_code[1:59],
                     "vector<lower=0>[2] sd_1;",
@@ -61,35 +65,29 @@ new_code <- paste(c(new_code[1:59],
                   collapse = "\n")
 
 # Replace the model object
-pair_LST$model <- structure(new_code, class = c("character", "brmsmodel"))
-pair_LST$fit@stanmodel <- rstan::stan_model(model_code = new_code)
+multi_LST$model <- structure(new_code, class = c("character", "brmsmodel"))
+multi_LST$fit@stanmodel <- rstan::stan_model(model_code = new_code)
 
+# # Fit with modified model
+#fit2 <- update(multi_LST, recompile = FALSE, chains = 4, cores = 4, iter = 2000, newdata = long%>%filter(task %in% unlist(pairs[45])))
+# # für andere tasks: direkt hier mit Argument "newdata" einen anderen Datensatz nutzen, 
+# # die vorherigen Schritte müssen nicht wiederholt werden
+#summary(fit2)
 
 pairwise_cor_rasch <- tibble()
-  
-  
-  for (i in pairs) {
-    
-  print(unlist(i))
-    
-  # Fit with modified model
-  model <- update(pair_LST, recompile = FALSE, 
-                newdata = long%>%filter(task %in% unlist(i)),
-                chains = 4,
-                cores = 4,
-                backend = "cmdstanr",
-                threads = threading(10),
-                control = list(adapt_delta = 0.95, max_treedepth = 20),
-                iter=4000)
 
-  
+  for (i in pairs) {
+
+  print(unlist(i))
+
+  model <- update(multi_LST, recompile = FALSE, chains = 4, cores = 4, iter = 2000,
+                    newdata = long%>%filter(task %in% unlist(i)))
+
   pair_cor <- summary(model)$random$subject%>%as_tibble(rownames = "param")%>%
     filter(grepl("cor\\(", param))
-  
+
   pairwise_cor_rasch <- bind_rows(pairwise_cor_rasch, pair_cor)
-  
+
   saveRDS(pairwise_cor_rasch, "../saves/pairwise_cor_rasch.rds")
 
 }
-
-saveRDS(pairwise_cor_rasch, "../saves/pairwise_cor_rasch.rds")
