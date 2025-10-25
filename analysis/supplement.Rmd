@@ -3675,7 +3675,7 @@ rel_sum_constr%>%mutate(
     )
 ```
 
-```{r lstmplotcomp, fig.height=4,fig.width=10, fig.cap = "Consistency estiamtes for the different tasks by estimation methods.", out.width="100%"}
+```{r lstmplotcomp, fig.height=4,fig.width=10, fig.cap = "Consistency estimates for the different tasks by estimation methods; reliability of trait estimates based on Rasch model.", out.width="100%"}
 con_comp
 ```
 
@@ -3684,7 +3684,7 @@ con_comp
 #ggsave("../visuals/con_overview.png", height = 4, width = 10, scale = 1, bg = "white")
 ```
 
-### Relations between tasks
+### Relations between trait estimates
 
 To estimate the correlations between the tasks, we fit pairwise LST models to the all possible combinations of tasks. This pairwise approach was again chosen to work around the strong influence of the LKJ prior on the correlation matrix described above. The Rasch model approach and its implementation in `brms` forced us to have the same number of time points for all tasks. All tasks from the present study had 10 time points, however, in @bohn2023great there were 14 time points per phase. The temporal spacing was also different in the two studies. Whereas there were 8 weeks between time points in the current study, there were 2 weeks in @bohn2023great. To nevertheless have the same number of time points, we selected the last 10 time points from phase 2 in @bohn2023great and all time points for the current study. We urge the reader to keep this caveat in mind when interpreting the results. 
 
@@ -3753,13 +3753,11 @@ p_cor <- cor_mult%>%
   labs(x = "", y = "")+
   scale_fill_gradient2(low = "#CC6677", high = "#117733", mid = "white", 
   midpoint = 0, limit = c(-1,1), space = "Lab", 
-  name="Correlation")+
+  name=element_blank())+
 #  ggtitle("brms binomial model")+
   geom_text(aes(label = round(Estimate, 2), fontface = sig), size = 3)+
   scale_y_discrete(breaks = c(1:9),labels = c(str_remove(str_remove(sort(unique(cor_mult$task)), "Z"),"X")))+
   scale_x_discrete(guide = guide_axis(angle = 90), labels = c(str_remove(str_remove(sort(unique(cor_mult$task_1)), "Z"),"X")))+
-  #scale_y_discrete(limits=rev, breaks = c(1:10))+
-  #scale_x_discrete(breaks = c(1:9))+
   theme_few()+
   theme(legend.position =  c(0.15, 0.8), legend.direction = "vertical", legend.background = element_blank())
 ```
@@ -3771,7 +3769,7 @@ pcor_diff <- cor_mult %>%
               select(task, task_1, est)
             )%>%
   filter(task != task_1)%>%
-  mutate(diff = est - Estimate)%>%
+  mutate(diff = Estimate - est)%>%
   ggplot(aes(y = factor(order), x = factor(order_1), fill = diff))+
   geom_tile(color = "white")+
   labs(x = "", y = "")+
@@ -3780,10 +3778,8 @@ pcor_diff <- cor_mult %>%
   name="Difference btw.\ncorrelations")+
 #  ggtitle("brms binomial model")+
   geom_text(aes(label = round(diff, 2)), size = 3)+
-  scale_y_discrete(breaks = c(1:9),labels = c(str_remove(str_remove(sort(unique(cor_mult_bin$task)), "Z"),"X")))+
-  scale_x_discrete(guide = guide_axis(angle = 90), labels = c(str_remove(str_remove(sort(unique(cor_mult_bin$task_1)), "Z"),"X")))+
-  #scale_y_discrete(limits=rev, breaks = c(1:10))+
-  #scale_x_discrete(breaks = c(1:9))+
+  scale_y_discrete(breaks = c(1:9),labels = c(str_remove(str_remove(sort(unique(cor_mult$task)), "Z"),"X")))+
+  scale_x_discrete(guide = guide_axis(angle = 90), labels = c(str_remove(str_remove(sort(unique(cor_mult$task_1)), "Z"),"X")))+
   theme_few()+
   theme(legend.position =  c(0.15, 0.8), legend.direction = "vertical", legend.background = element_blank())
 
@@ -3791,11 +3787,11 @@ pcor_diff <- cor_mult %>%
 ```
 
 
-```{r corbinplot, fig.height=7, fig.width=14, fig.cap = "A) Correlations between trait estimates based on a binomial model. Bold correlations are different from zero as judged by the 95\\% CrI. B) Difference in correlation coefficients (SEM - binomial). ", out.width="100%"}
-plot_grid(p_cor, pcor_diff, labels = c("A", "B"))
+```{r corbinplot, fig.height=7, fig.width=14, fig.cap = "A) Correlations between trait estimates based on Rasch model approach. Bold correlations are different from zero as judged by the 95\\% CrI. B) Correlations based on SEM approach. C) Difference in correlation coefficients (Rasch - SEM). ", out.width="100%"}
+plot_grid(p_cor, pcor_mod_a, pcor_diff, labels = c("A", "B", "C"), nrow = 1, align = "h")
 ```
 
-Supplementary Figure \@ref(fig:corbinplot) shows the correlations between tasks based on the Rasch model approach and the SEM approach as well as the difference between the two. While the overall patter is the same (e.g., positive correlations among non-social tasks; no correlations among social tasks, positive correlation between communicative-cues and causal-inference, etc., ...), the Rasch approach yields slightly stronger correlations (both positive and negative).
+Supplementary Figure \@ref(fig:corbinplot) shows the correlations between tasks based on the Rasch model approach and the SEM approach as well as the difference between the two. While the overall patter is the same (e.g., positive correlations among non-social tasks; no correlations among social tasks, positive correlation between communicative-cues and causal-inference, etc.), the Rasch approach yields slightly stronger correlations (both positive and negative).
 
 
 
