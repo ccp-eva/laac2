@@ -1759,7 +1759,7 @@ lstv_con_rel%>%mutate(type = "varying means")
     )
 ```
 
-```{r lsteplot, fig.height = 3, fig.width=8, fig.cap = "Posterior mean for model parameters (with 95\\% CrI) from LSTM for the four tasks based on data.", out.width="100%"}
+```{r lsteplot, fig.height = 3, fig.width=10, fig.cap = "Posterior mean for model parameters (with 95\\% CrI) from LSTM for the four tasks based on data.", out.width="100%"}
 plste
 ```
 
@@ -3273,10 +3273,10 @@ long[long$task == "search", "code"] <- car::recode(long[long$task == "search", "
 
 ## Rasch model analysis
 
-An alternative way to estimating the parameters of interest than the SEM approach described above is an item-response approach which assumes that each tasks can be described by a Rasch (1PL) model, meaning that all items (trials) measure the same latent ability with the same discrimination but potentially varying difficulty. The benefit of this approach is that it makes full use of whatever data there is available for a given task, time point and subject; it does not e.g. require differentially collapsing scores for test-halves. The downside is that the resulting estimates show greater uncertainty compared to the SEM estimates. Furthermore, to reap the benefits of this approach, it requires imposing additional constraints which we outline below. Most importantly, however, we think that the parameters estimated via the SEM approach are conceptually better aligned with the questions we are asking, in particular when it comes to reliability: as explained below, reliability in the Rasch model does not make a claim about the measurement instrument but about how well individuals can be separated from one another via the latent ability estimates that are obtained via the instrument. Nonetheless, we see the appeal of this approach (in particular the ease of implementation via open source software packages such as `brms`) and we therefore want to present it here as an alternative. Overall, the two approaches yield very similar results. [Jana: please expand/adjust]   
+An alternative way to estimating the parameters of interest than using the Graded Response model for test halves in a SEM-based approach, as described above, is using a Rasch (1PL) model on the individual trial data (dichotomous responses). The Rasch model assumes that all items (trials) measure the same latent ability with the same discrimination but potentially varying difficulty. The benefit of this approach is that it makes full use of whatever data there is available for a given task, time point and subject and does not require the computation of sum scores or differentially collapsing (ordered) categories. However, we think that the parameters estimated via the SEM-based GRM approach are conceptually better aligned with the questions we are asking, in particular when it comes to reliability. In the GRM, the obtained reliability estimates quantify the amount of reliable variance in the test halves (consisting of 6 trials) when accounting for stable latent ability and true occasion-specific variance (i.e., trait and state variance). In the Rasch model, reliability quantifies the proportion of true variance in ability estimates with respect to one latent ability factor, i.e., either a state variable or a trait variable (it quantifies person separation reliability, i.e., how well true inter-individual differences can be separated from one another via the latent ability estimates). Nonetheless, we see the appeal of the Rasch model and therefore additionally present results obtained from a Rasch analysis. Overall, the two approaches yield very similar results.  
 
 ```{r}
-# run functions first
+# functions reliability
 fun_KR20 <- function(responses) {
   # Get number of items (N) and individuals
   n_items <- ncol(responses)
@@ -3310,6 +3310,29 @@ fun_sep_rel_LST <- function(model) {
   rel <- var_EAP / (var_EAP + Mean_SE)
   rel
 }
+```
+
+```{r}
+# KR20
+
+tasks <- c("attent", "comm", "pop", "reas",  "search",  "vfood")
+time_point <- seq(1,10,1)
+KR20_rel <- data.frame(task= rep(tasks, each =10), time_point = rep(1:10,length(tasks)), KR20 = rep(NA,10*length(tasks)))
+
+# Compute KR-20 per task per time point 
+for (i in 1:60){
+tp <- long%>%
+  filter(task == KR20_rel[i,1] )%>%
+  filter(time_point == KR20_rel[i,2] )%>%
+  select(subject, trial, code)%>%
+  group_by(subject)%>%
+  pivot_wider(names_from = trial, values_from = code)%>%
+  ungroup()%>%
+  select(-subject)
+
+KR20_rel[i,3] <- fun_KR20(tp)
+}
+
 ```
 
 
@@ -3424,9 +3447,9 @@ cor_ls_rasch <- readRDS("../saves/cor_ls_rasch.rds")
 
 We begin by fitting the equivalent to Latent State models to the data from each task. The `brms` formula for this model is: `code ~ 0 + time_cat + trial + (0 + time_cat | subject)`, where `code` is the response (0/1; incorrect/correct), `time_cat` is a categorical indicator of time point (1 to 10) and `trial` is a categorical indicator of trial within each time point. 
 
-Parameterized as such, this model estimates an easiness parameter for each item (i.e. trial) as well as an easiness parameter for each time point, which is equivalent to a latent sate and which allows for assessing change over time. However, in contrast to the SEM approach, the absolute values of this parameter are not comparable across tasks. Additionally, it is possible to compute the reliability of the latent state estimates for each time point [see @adams2005reliability; @moosbrugger2007testtheorie]. As noted above, this conception of reliability is different from the SEM approach. It quantifies how reliably individuals can be separated from one another based on the trait estimates; in the SEM approach, reliability is a property of the measurement instrument (test-half in our case). Thus, these values cannot be compared directly across methods. 
+Parameterized as such, this model estimates an easiness parameter for each item (i.e. trial) as well as an easiness parameter for each time point. The latter is equivalent to a latent state mean and allows for assessing mean change over time. Note that the absolute values of this parameter are not directly comparable to the latent state means obtained in the GRM, however their pattern across time can be compared. Additionally, it is possible to compute the reliability of the latent state estimates for each time point. Here, we estimate person separation reliability in a Bayesian framework, that is, reliability for the expected a posteriori (EAP) estimate of the latent ability factor [see @adams2005reliability; @moosbrugger2007testtheorie]. In the latent state model, these refer to the reliabilities of the EAP estimates for each time-specific latent state ability factor. As noted above, this conception of reliability is different from the SEM-based approach, such that these values cannot be compared directly across methods. We also report the model-free KR20 reliability.
 
-Finally, we estimate the correlations between latent states as an indicator of stability of individual differences across time points. Here the interpretation is the same as in the SEM approach. A problem for estimating these correlations is that the default LKJ prior built in to `brms`. Regardless of which value is chosen, it has a very strong influence on the results for sample sizes as small as the one in our study [Jana: do you have a reference for that?]. To get around this problem, we fit pairwise models for all combinations of time points to estimate the correlations because in such models the prior over the covariance matrix is uniform.
+Finally, we estimate the correlations between latent states as an indicator of stability of individual differences across time points. Here the interpretation is the same as in the SEM-based approach. The default and recommended LKJ(1) prior for correlation matrices, as built into `brms`, is uniform over positive definite correlation matrices of a given size [see @Stan], which implies that marginal distributions of correlation parameters are increasingly concentrated over zero as the size of the correlation matrix increases. This behavior is problematic in sample sizes as small as the one in our study, which do not have the power to overrule this shrinkage. The same problem persists if we choose a different value, only that the marginal distribution then concentrates around a different value. To get around this problem, we fit pairwise models for all combinations of time points to estimate the correlations, because in such models the prior over the correlation matrix (which is of size 2x2) results in a marginal prior distribution that is uniform.
 
 ```{r}
 plsm_rasch <- state_means_rasch%>%
@@ -3439,8 +3462,10 @@ plsm_rasch <- state_means_rasch%>%
        "attent" = "Attention-following"))%>%
   mutate(task = factor(task, levels = c("Population-to-sample","Probabilistic-reasoning","Communicative-cues", "Ignore-visible-food", "Self-ordered-search","Attention-following" )))%>%
   mutate(time_point = str_remove(time_point, "time_cat"))%>%
+  group_by(task)%>%
+  mutate(ref = Estimate[1])%>%
   ggplot(., aes(x = time_point, y = Estimate))+
-  #geom_hline(aes(yintercept = ref), lty = 3, alpha = .75)+
+  geom_hline(aes(yintercept = ref), lty = 3, alpha = .75)+
   labs(x = "Time point",y = "Latent state mean (easiness)")+
   geom_line(aes(group = task),alpha = .75)+
   #geom_line(data = lsep%>%filter(time_point > 14), aes(group = task, x = time_point),position = position_dodge(width = 0.2), alpha = .75)+
@@ -3471,23 +3496,37 @@ rel_rasch%>%
        "attent" = "Attention-following"))%>%
   mutate(task = factor(task, levels = c("Population-to-sample","Probabilistic-reasoning","Communicative-cues", "Ignore-visible-food", "Self-ordered-search","Attention-following" )),
                        model = "Rasch (brms)"),
-         
+       
+
+KR20_rel%>%
+  mutate(task = recode(task,
+       "pop" = "Population-to-sample",
+       "comm" = "Communicative-cues",
+       "reas" = "Probabilistic-reasoning",
+       "vfood" = "Ignore-visible-food",
+       "search" = "Self-ordered-search",
+       "attent" = "Attention-following"))%>%
+  mutate(task = factor(task, levels = c("Population-to-sample","Probabilistic-reasoning","Communicative-cues", "Ignore-visible-food", "Self-ordered-search","Attention-following" )),
+                       model = "KR20 (model-free)")%>%
+   rename(value = KR20)
+  
+  
    # plsr%>%
    #   rename(value = est)%>%
    #   mutate(model = "SEM (MPLUS)")
    
-   )%>%
+   )%>%mutate(model = factor(model, levels = c("Rasch (brms)","KR20 (model-free)")))%>%
   ggplot(., aes(x = time_point, y = value, col = model))+
   labs(x = "Time point",y = "Reliability (person separation)")+
   geom_line(aes(group = model),alpha = .75)+
-  geom_point(alpha = .75)+
+  geom_point(alpha = .75, size = 3)+
   #geom_pointrange(aes(ymin = lower_2.5ci, ymax = upper_2.5ci), alpha = .75)+
   facet_grid(~task)+
-  scale_color_colorblind(name = "")+
+  scale_color_manual(name = "", values = c("#000000","#56B4E9"))+
   scale_x_continuous(breaks = c(1,10), labels = c(1,10))+
-  scale_y_continuous(breaks = c(0,1), labels = c(0,1), limits = c(0,1))+
+  scale_y_continuous(limits = c(0,1))+
   theme_few()+
-  theme(legend.direction = "vertical", legend.position = c(0.075, 0.9), legend.box = "horizontal", legend.background = element_blank(), strip.background = element_blank(),
+  theme(legend.direction = "vertical", legend.position = c(0.075, 0.2), legend.box = "horizontal", legend.background = element_blank(), strip.background = element_blank(),
   strip.text.x = element_blank(), axis.title.x = element_blank(), axis.ticks.x = element_blank(), axis.text.x = element_blank(),
     axis.text = element_text(size = 8),       # Smaller axis text
     axis.title = element_text(size = 10),     # Smaller axis titles
@@ -3497,12 +3536,12 @@ rel_rasch%>%
 ```
 
 
-```{r lseplotrasch, fig.height = 5, fig.width=10, fig.cap = "Latent state means and trait reliability estimates with 95\\% CrI for each time point estimated assuming a Rasch model for each task and time point.", out.width="100%"}
+```{r lseplotrasch, fig.height = 5, fig.width=10, fig.cap = "A) Latent state means estimates with 95\\% CrI for each time point estimated assuming a Rasch model for each task and time point. Dotted line denotes estimate of first time point. B) Model-based  and KR20 reliability for each time point.", out.width="100%"}
 plot_grid(plsm_rasch, pls_rel, ncol = 1,labels = c("A", "B"), align = "v",axis = "l", rel_heights = c(1,1))
 ```
 
 
-Supplementary Figure \@ref(fig:lseplotrasch) shows the latent state means and the trait reliabilities. The temporal dynamics in the latent trait estimates are comparable to the SEM results, even though the Rasch-based estimates seem more variable. The reliability estimates are higher compared to the SEM approach, however, please note that they have a different interpretation because they refer to the separability of individuals (trait reliability) and not the reliability of the measurement instrument. 
+Supplementary Figure \@ref(fig:lseplotrasch) shows the latent state means and the person-separation reliability estimates for the latent state variables. The patterns of change in the latent state means are comparable to the SEM results, even though the Rasch-based estimates seem more variable [Manuel, was genau meinst du damit?]. The reliability estimates are higher compared to the SEM approach, however, please note that they have a different interpretation. 
 
 The pattern of latent state correlations in Supplementary Figure \@ref(fig:lscorplotrasch) are also similar to the ones reported above. For example, we see very high correlations in the population-to-sample task across time points, strong correlations emerging for attention-following from time point 6 onward and low or even negative correlations for probabilistic-reasoning. The overall pattern is, however, less clean for the Rasch model approach, as there are more outliers such as the high correlation between time point 1 and 2 for ignore-visible-food or a low correlation between time point 2 and 10 for communicative cues.    
 
@@ -3530,7 +3569,7 @@ plsc_rasch <- cor_ls_rasch%>%
   theme(legend.position = c(0.9,0.85), legend.direction = "vertical", legend.title = element_blank(), legend.background = element_blank())
 ```
 
-```{r lscorplotrasch, fig.height=4, fig.cap = "Correlations between latent states estimated assuming a Rasch model for each task and time point. Correlations have been estimated via pairwise models for all possible time points.", out.width="100%"}
+```{r lscorplotrasch, fig.height=5, fig.width= 10, fig.cap = "Correlations between latent states estimated assuming a Rasch model for each task and time point. Correlations have been estimated via pairwise models for all possible time points.", out.width="100%"}
 plsc_rasch
 ```
 
@@ -3538,9 +3577,9 @@ plsc_rasch
 
 The LST models include an additional trait variable that captures an individuals time-invariant ability. Thus, the performance at any given time point can be decomposed into a stable trait component and a variable state component. To achieve this, we added a trait variable (a constant) as part of the random intercept for subject to the model (`(0 + trait | subject)`; formula of full model: `code ~ 0 + time_cat + trial + (0 + time_cat || subject) + (0 + trait | subject)`). Thus, `trait` reflects time-invariant differences between individuals. Like in the SEM approach, we constrained the models so that the variances of the state residual variables are invariant across time (see script `constraint_lstm2.R` for how this constraint was implemented in code). 
 
-From this model, we computed the consistency, that is, the proportion of variance that is explained by this trait variable. This value is comparable across the two approaches and we therefore visualize them jointly. In addition, we compute the reliability of the trait (person separability). As noted above, this values is not directly comparable to the reliability estimates sensu SEM.  
+From this model, we computed the consistency, that is, the proportion of true variance that is explained by the trait variable. This value is comparable across the two approaches and we therefore visualize them jointly. In addition, we compute the reliability of the trait (person separability for the stable trait ability factor). As noted above, this values is not directly comparable to the reliability estimates sensu SEM.  
 
-Supplementary Figure \@ref(fig:lstmplotcomp) shows the consistency and reliability estimates for the LST model. In comparison to the SEM approach, consistency values were comparable but on average slightly lower. The trait reliability values are, on the other hand, very high.   
+Supplementary Figure \@ref(fig:lstmplotcomp) shows the consistency and reliability estimates for the LST model. The pattern of consistency values is comparable to the ones obtained from the SEM-based appraoch but on average slightly lower. The trait reliability values are, on the other hand, very high.   
 
 ```{r}
 # run script `./analysis/constraint_lstm2.R`
@@ -3660,9 +3699,25 @@ rel_sum_constr%>%mutate(
        "vfood" = "Ignore-visible-food",
        "search" = "Self-ordered-search",
        "attent" = "Attention-following"))%>%
-  rename(con_m = rel)
+  rename(con_m = rel),
+
+KR20_rel%>%
+  mutate(
+  param = "Reliability\n(of Trait)",
+  type ="KR20 (model-free)",
+    task = recode(task,
+       "pop" = "Population-to-sample",
+       "comm" = "Communicative-cues",
+       "reas" = "Probabilistic-reasoning",
+       "vfood" = "Ignore-visible-food",
+       "search" = "Self-ordered-search",
+       "attent" = "Attention-following"))%>%
+  group_by(task, param, type)%>%
+  summarise(con_m = mean(KR20))%>%
+  mutate(task = factor(task, levels = c("Population-to-sample","Probabilistic-reasoning","Communicative-cues", "Ignore-visible-food", "Self-ordered-search","Attention-following" )))
 
 )%>%
+  mutate(type = factor(type, levels = c("Rasch (brms)","SEM (MPLUS)", "KR20 (model-free)")))%>%
   ggplot(aes(x = param, y = con_m))+
   geom_pointrange(aes(ymin= con_lci, ymax = con_uci, col = type), position = position_dodge(width = 0.5))+
   theme_few()+
@@ -3670,11 +3725,11 @@ rel_sum_constr%>%mutate(
   labs(x = "", y = "Estimate")+
   scale_color_colorblind(name = "")+
   facet_grid(~task)+
-  theme(legend.direction = "vertical", legend.position = c(0.07, 0.25), legend.box = "horizontal", legend.background = element_blank()
+  theme(legend.direction = "vertical", legend.position = c(0.075, 0.25), legend.box = "horizontal", legend.background = element_blank()
     )
 ```
 
-```{r lstmplotcomp, fig.height=3,fig.width=10, fig.cap = "Consistency estimates for the different tasks by estimation methods; reliability of trait estimates based on Rasch model.", out.width="100%"}
+```{r lstmplotcomp, fig.height=4,fig.width=12, fig.cap = "Consistency estimates for the different tasks by estimation methods; reliability of trait estimates based on Rasch model and the model-free KR20 method.", out.width="100%"}
 con_comp
 ```
 
@@ -3685,7 +3740,7 @@ con_comp
 
 ### Relations between trait estimates
 
-To estimate the correlations between the tasks, we fit pairwise LST models to the all possible combinations of tasks. This pairwise approach was again chosen to get around the strong influence of the LKJ prior on the correlation matrix described above. The Rasch model approach and its implementation in `brms` forced us to have the same number of time points for all tasks. All tasks from the present study had 10 time points, however, in @bohn2023great there were 14 time points per phase. The temporal spacing was also different in the two studies. Whereas there were 8 weeks between time points in the current study, there were 2 weeks in @bohn2023great. To nevertheless have the same number of time points, we selected the last 10 time points from phase 2 in @bohn2023great and all time points for the current study. We urge the reader to keep this caveat in mind when interpreting the results. 
+To estimate the correlations between the tasks, we fit pairwise LST models to all possible combinations of tasks. This pairwise approach was again chosen to get around the strong influence of the LKJ prior on the correlation matrix described above. The Rasch model approach and its implementation in `brms` forced us to have the same number of time points for all tasks. All tasks from the present study had 10 time points, however, in @bohn2023great there were 14 time points per phase. The temporal spacing was also different in the two studies. Whereas there were 8 weeks between time points in the current study, there were 2 weeks in @bohn2023great. To nevertheless have the same number of time points, we selected the last 10 time points from phase 2 in @bohn2023great and all time points for the current study. We urge the reader to keep this caveat in mind when interpreting the results. 
 
 In the code, we added a variable denoting the task to the model, including all possible interactions with the other variables in the model. The `trait` variable in the random effects for subject was replaced with `task`; `brms` notation: `code ~ 0 + time_cat + trial + task + time_cat:task + trial:task + (0 + time_cat + time_cat:task || subject) + (0 + task | subject)`.
 

@@ -13,6 +13,11 @@ saves/cvs_inh.rds
 saves/cvs_vis.rds
 saves/cvs_pop.rds
 
+analysis/auxilliary/*
+saves/auxilliary/*
+visuals/auxilliary/*
+data/auxilliary/*
+
 saves/multi_lst1.rds
 saves/multi_lst2.rds
 saves/multi_lst_cause_food_delay.rds
