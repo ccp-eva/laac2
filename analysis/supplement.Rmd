@@ -160,7 +160,7 @@ participants <- data_trial%>%
 
 ```
 
-A total of `r sum(participants$n)` great apes participated at least in one tasks at one time point. This included `r participants%>%filter(species == "bonobos")%>%pull(n)%>%sum()` Bonobos (`r participants%>%filter(species == "bonobos", sex == "f")%>%pull(n)` females, age `r participants%>%filter(species == "bonobos", sex == "f")%>%pull(minage)` to `r participants%>%filter(species == "bonobos", sex == "f")%>%pull(maxage)`), `r participants%>%filter(species == "chimpanzee")%>%pull(n)%>%sum()` Chimpanzees (`r participants%>%filter(species == "chimpanzee", sex == "f")%>%pull(n)` females, age `r participants%>%filter(species == "chimpanzee", sex == "f")%>%pull(minage)` to `r participants%>%filter(species == "chimpanzee", sex == "f")%>%pull(maxage)`), `r participants%>%filter(species == "gorillas")%>%pull(n)%>%sum()` Gorillas (`r participants%>%filter(species == "gorillas", sex == "f")%>%pull(n)` females, age `r participants%>%filter(species == "gorillas", sex == "f")%>%pull(minage)` to `r participants%>%filter(species == "gorillas", sex == "f")%>%pull(maxage)`), and `r participants%>%filter(species == "gorillas")%>%pull(n)%>%sum()` Orangutans (`r participants%>%filter(species == "orangs", sex == "f")%>%pull(n)` females, age `r participants%>%filter(species == "orangs", sex == "f")%>%pull(minage)` to `r participants%>%filter(species == "orangs", sex == "f")%>%pull(maxage)`). The sample size at the different time points ranged from `r min(tpn$total_n, na.rm = T)` to `r max(tpn$total_n, na.rm = T)` for the different species. Figure \@ref(fig:sample) visualizes the sample size across time points. We tried to test all apes at all time points but this was not always possible due to a lack of motivation or logistical constraints (e.g. construction works). All apes participated in cognitive research on a regular basis. Many of them had experience with the tasks we used in the current study (see [predictor variables](#time-spent-in-research)).
+A total of `r sum(participants$n)` great apes participated at least in one tasks at one time point. This included `r participants%>%filter(species == "bonobos")%>%pull(n)%>%sum()` Bonobos (`r participants%>%filter(species == "bonobos", sex == "f")%>%pull(n)` females, age `r participants%>%filter(species == "bonobos", sex == "f")%>%pull(minage)` to `r participants%>%filter(species == "bonobos", sex == "f")%>%pull(maxage)`), `r participants%>%filter(species == "chimpanzee")%>%pull(n)%>%sum()` Chimpanzees (`r participants%>%filter(species == "chimpanzee", sex == "f")%>%pull(n)` females, age `r participants%>%filter(species == "chimpanzee", sex == "f")%>%pull(minage)` to `r participants%>%filter(species == "chimpanzee", sex == "f")%>%pull(maxage)`), `r participants%>%filter(species == "gorillas")%>%pull(n)%>%sum()` Gorillas (`r participants%>%filter(species == "gorillas", sex == "f")%>%pull(n)` females, age `r participants%>%filter(species == "gorillas", sex == "f")%>%pull(minage)` to `r participants%>%filter(species == "gorillas", sex == "f")%>%pull(maxage)`), and `r participants%>%filter(species == "gorillas")%>%pull(n)%>%sum()` Orangutans (`r participants%>%filter(species == "orangs", sex == "f")%>%pull(n)` females, age `r participants%>%filter(species == "orangs", sex == "f")%>%pull(minage)` to `r participants%>%filter(species == "orangs", sex == "f")%>%pull(maxage)`). The total sample size at the different time points ranged from `r min(tpn$total_n, na.rm = T)` to `r max(tpn$total_n, na.rm = T)`. Figure \@ref(fig:sample) visualizes the sample size across time points. We tried to test all apes at all time points but this was not always possible due to a lack of motivation or logistical constraints (e.g. construction works). All apes participated in cognitive research on a regular basis. Many of them had experience with the tasks we used in the current study (see [predictor variables](#time-spent-in-research)).
 
 Apes were housed at the Wolfgang Köhler Primate Research Center located in Zoo Leipzig, Germany. They lived in groups, with one bonobo, gorilla and orangutan group, respectively, and two chimpanzee groups (group A and B). Research was noninvasive and strictly adhered to the legal requirements in Germany. Animal husbandry and research complied with the European Association of Zoos and Aquaria Minimum Standards for the Accommodation and Care of Animals in Zoos and Aquaria as well as the World Association of Zoos and Aquariums Ethical Guidelines for the Conduct of Research on Animals by Zoos and Aquariums. Participation was voluntary, all food was given in addition to the daily diet, and water was available ad libitum throughout the study. The study was approved by an internal ethics committee at the Max Planck Institute for Evolutionary Anthropology.
 
@@ -309,6 +309,7 @@ psex <- data_trial%>%
   ggplot(aes(x = group, y = Frequency, fill = sex))+
   geom_histogram(stat = "identity", position = position_dodge(), col = "black")+
   theme_minimal(base_size = 8)+
+  scale_y_continuous(limits = c(0, 15), breaks = c(1,5, 10, 15), labels = c(1,5, 10, 15))+
   labs(x="", y = "Frequency")+
   scale_fill_grey(name = "Sex")+
   theme(legend.position = c(0.8,0.7), legend.key.size = unit(0.3, "cm"))+
@@ -332,6 +333,7 @@ prearing <- data_trial%>%
   ggplot(aes(x = group, y = Frequency, fill = rearing))+
   geom_histogram(stat = "identity", position = position_dodge(preserve = "single"), col = "black")+
   theme_minimal(base_size = 8)+
+  scale_y_continuous(limits = c(0, 15), breaks = c(1,5, 10, 15), labels = c(1,5, 10, 15))+
   labs(x="", y = "Frequency")+
   scale_fill_viridis_d(name = "Rearing history")+
   theme(legend.position = c(0.8,0.7), legend.key.size = unit(0.3, "cm"))+
@@ -1036,7 +1038,7 @@ Correlations between the the different tasks were estimated for the latent trait
 
 ### Estimation {#estimation}
 
-Models were estimated with MPlus version 8.10 [@muthen1998mplus], using Bayesian Markov-Chain Monte-Carlo sampling, with the Mplus default priors [see simulation studies in the supplementary material of @bohn2023great]. Using inverse gamma priors `IG(0.001, 0.001)` for LST models did not substantially change the parameter estimates (see simulation study). Therefore, only the results using the MPlus default priors are reported. We used two chains with a minimum of 20,000 iterations per chain, with a thinning of 10 (corresponds to a minimum of 200,000 drawn samples per chain of which every 10th is used for the construction of the posterior distribution). The first half of each chain is discarded as burn-in. Convergence was assumed and estimation stopped when the Potential Scale Reduction (PSR) factor was well below a threshold of 1.01 for the first time after the minimum number of iterations was reached. Model syntax can be accessed by locating the respective model in the folder `outputs/` in the GitHub repository and opening the `.out` file using a text editor.
+Models were estimated with MPlus version 8.10 [@muthen1998mplus], using Bayesian Markov-Chain Monte-Carlo sampling, with the Mplus default priors [see simulation studies in the supplementary material of @bohn2023great]. Using inverse gamma priors `IG(0.001, 0.001)` for LST models did not substantially change the parameter estimates (see simulation study). Therefore, only the results using the MPlus default priors are reported. We used two chains with a minimum of 20,000 iterations per chain, with a thinning of 10 (corresponds to a minimum of 200,000 drawn samples per chain of which every 10th is used for the construction of the posterior distribution). The first half of each chain is discarded as burn-in. Convergence was assumed and estimation stopped when the Potential Scale Reduction (PSR) factor was well below a threshold of 1.01 for the first time after the minimum number of iterations was reached. Model syntax can be accessed by locating the respective model in the folder `outputs/` in the OSF project and opening the `.out` file using a text editor.
 
 Model fit was evaluated by computing Posterior Predicted P-values (PPP). PPP is the probability that the newly generated data are more extreme than the observed data, as measured by a specific test statistic or discrepancy function, in this case the chi-square fit function (that is, the likelihood ratio test between the specified structural equation model and an unrestricted mean and variance covariance model), see @asparouhov2010bayesian. The PPP is computed via the following steps: For a given MCMC iteration, a new data set is generated based on the model and the parameters of that iteration. Then the likelihood ratio chi-square test is applied to the real data as well as the newly generated data set to compute a fit index. The indices for the data and the generated data are then compared in size. If the value for the data is smaller, it is scored as 1 and if not, as 0. Averaging across these scores for the different iterations yields the PPP. Thus, values around .5 suggest a good model fit (no systematic difference between real and generated data) and very high and very low values suggest a poor model fit and / or model misspecification. In addition, we report the 95% CI of the difference between predicted and observed chi-square values, which should be centered around 0 for a good model fit.
 
@@ -1044,9 +1046,9 @@ In Mplus, every 10th iteration after burn-in is used to compute the PPP and the 
 
 ## Projection predictive inference {#projection-predictive-inference}
 
-The goal of this analysis was to select the predictor variables that are relevant for predicting performance in the different cognitive tasks over time. The selection of relevant predictor variables constitutes a variable selection problem, for which a range of different methods are available (e.g., shrinkage priors). We chose to use projection predictive inference because it is a state-of-the-art variable selection procedure that provides an excellent trade-off between model complexity and accuracy [@piironen2017comparison], especially when the goal is to identify a minimal subset of predictors that yield a good predictive model [@pavone2020using].
+The goal of this analysis was to select the predictor variables that are relevant for predicting performance in the different cognitive tasks over time. The selection of relevant predictor variables constitutes a variable selection problem, for which a range of different methods are available (e.g., shrinkage priors). We chose to use projection predictive inference because it is a state-of-the-art variable selection procedure that provides an excellent trade-off between model complexity and accuracy [@piironen2017comparison], especially when the goal is to identify a minimal subset of predictors that yield a good predictive model [@pavone2023using].
 
-An overview of different projection techniques and an introduction to the projection prediction approach for generalized linear models can be found in @piironen2018projective. In this work, we use the extension to the generalized linear multilevel model case provided by @catalina2020projection.  
+An overview of different projection techniques and an introduction to the projection prediction approach for generalized linear models can be found in @piironen2018projective. In this work, we use the extension to the generalized linear multilevel model case provided by @catalina2022projection.  
 The projection prediction approach can be viewed as a two-step process: The first step consists of building the best predictive model possible, called the reference model. In the context of this work, the reference model is a Bayesian multilevel regression model (repeated measurements nested in apes), including all available predictors. The reference model serves as a performance goal regarding the predictive quality for the smaller models constructed by the projection prediction procedure. 
 
 In the second step, the goal is to replace the posterior distribution of the reference model with a simpler distribution. The replacement is achieved via a forward step-wise addition of predictors that decrease the Kullback-Leibler (KL) divergence from the reference model to the projected model. Let the reference model and the projected model have parameters $\theta'$ and $\theta$ respectively. Then by the definition of the KL divergence, the following optimization problem is obtained:
@@ -1120,6 +1122,7 @@ perfplot
 
 ```{r}
 ggsave("../visuals/perf.png", height = 6, width = 12, scale = 1, bg = "white")
+ggsave("../visuals/perf.pdf", height = 6, width = 12, scale = 1, bg = "white")
 ```
 
 ```{r}
@@ -1828,11 +1831,12 @@ plsc
 
 
 ```{r }
-#plot_grid(lsm2, plsc2, plste2, ncol = 1, labels = c("A", "B", "C"), align = "v",axis = "l", rel_heights = c(1,1))
+plot_grid(lsm2, plsc2, plste2, ncol = 1, labels = c("A", "B", "C"), align = "v",axis = "l", rel_heights = c(1,1))
 ```
 
 ```{r}
-#ggsave("../visuals/ls_lst.png", height = 7, width = 12, scale = 1)
+ggsave("../visuals/ls_lst.png", height = 7, width = 12, scale = 1)
+ggsave("../visuals/ls_lst.pdf", height = 7, width = 12, scale = 1)
 ```
 
 
@@ -2066,10 +2070,11 @@ opcor_mod
 ```
 
 ```{r}
-#ggsave("../visuals/task_level_cor.png", height = 6, width = 8, scale = 1)
+ggsave("../visuals/task_level_cor.png", height = 6, width = 8, scale = 1)
+ggsave("../visuals/task_level_cor.pdf", height = 6, width = 8, scale = 1)
 ```
 
-For this analysis, we also included data from the tasks (excluding the switching task) reported in @bohn2023great because they tested the same individuals. The following descriptions are verbatim copies from the supplementary material of @bohn2023great.
+For this analysis, we also included data from the tasks (excluding the switching task) reported in @bohn2023great because they tested the same individuals. We did not include the switching task from @bohn2023great because it -- similar to the probabilistic-reasoning task from the current study -- did not produce meaningful results, neither on a group nor on an individual level. The following descriptions are verbatim copies from the supplementary material of @bohn2023great.
 
 ### Tasks from Bohn et al., 2023
 
@@ -3232,10 +3237,11 @@ ppipreds
 ```
 
 ```{r}
-#plot_grid(ppicomp, ppipreds, nrow = 1, labels = c("A", "B"), rel_widths = c(1,1))
+plot_grid(ppicomp, ppipreds, nrow = 1, labels = c("A", "B"), rel_widths = c(1,1))
 ```
 ```{r}
-#ggsave("../visuals/pred_sum.png", height = 6, width = 12, scale = 1, bg = "white")
+ggsave("../visuals/pred_sum.png", height = 6, width = 12, scale = 1, bg = "white")
+ggsave("../visuals/pred_sum.pdf", height = 6, width = 12, scale = 1, bg = "white")
 ```
 
 Supplementary Figure \@ref(fig:ppisum) summarizes the selected predictors across tasks. Supplementary Figure \@ref(fig:ppipreds) shows the projected posterior model estimates for the predictors that were selected as relevant. 
@@ -3541,7 +3547,7 @@ plot_grid(plsm_rasch, pls_rel, ncol = 1,labels = c("A", "B"), align = "v",axis =
 ```
 
 
-Supplementary Figure \@ref(fig:lseplotrasch) shows the latent state means and the person-separation reliability estimates for the latent state variables. The patterns of change in the latent state means are comparable to the SEM results, even though the Rasch-based estimates seem more variable [Manuel, was genau meinst du damit?]. The reliability estimates are higher compared to the SEM approach, however, please note that they have a different interpretation. 
+Supplementary Figure \@ref(fig:lseplotrasch) shows the latent state means and the person-separation reliability estimates for the latent state variables. The patterns of change in the latent state means are comparable to the SEM results, even though the Rasch-based estimates seem more variable. The reliability estimates are higher compared to the SEM approach, however, please note that they have a different interpretation. 
 
 The pattern of latent state correlations in Supplementary Figure \@ref(fig:lscorplotrasch) are also similar to the ones reported above. For example, we see very high correlations in the population-to-sample task across time points, strong correlations emerging for attention-following from time point 6 onward and low or even negative correlations for probabilistic-reasoning. The overall pattern is, however, less clean for the Rasch model approach, as there are more outliers such as the high correlation between time point 1 and 2 for ignore-visible-food or a low correlation between time point 2 and 10 for communicative cues.    
 
