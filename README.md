@@ -14,15 +14,17 @@
 ```
 .
 ├── analysis                    <-- code for analysis (in supplement.Rmd), reliability and social relations model
-├── data                        <-- data files
-├── documentation               <-- coding sheets
-├── outputs                     <-- SEM model outputs*
+├── data                                    <-- data files
+├── materials                   <-- documentation to replicate study, including a coding sheet*
+    └── videos                  <-- example videos for each task to replicate the procedure
+├── outputs                     <-- SEM model outputs**
 ├── paper                       <-- manuscript file and figures
 ├── saves                       <-- saved intermediate results from analysis
-├── utils
-├── videos                      <-- example videos for each task
+├── utils                       
 └── visuals                     <-- saved figures
 
 
-*for SEM model syntax, open the respective .out files with a text editor. 
+
+*the coding shet also shows the positioning of food rewards and condition (if applicable) for each task and trial
+**for SEM model syntax, open the respective .out files with a text editor. 
 ```

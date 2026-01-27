@@ -2125,7 +2125,7 @@ To assess correlations between learning rates, for each individual, we fit a mod
 Some individuals contributed very little data for some tasks (i.e. few trials on few time points), making it difficult to estimate the corresponding slope. To exclude such cases in which the slope could not be reliably estimated, we excluded all models that did not converge (i.e. Rhat values > 2 for the slope estimate).  
 
 ```{r}
-# long_bin_all <- read_csv("../data/data_binomial_modles_combined.csv")
+# long_bin_all <- read_csv("../data/data_binomial_models_combined.csv")
 # 
 # ds <- long_bin_all%>%mutate(id = paste(subject, task, sep = "_"))%>%
 #   filter(task != "reas")%>%
