@@ -14,7 +14,7 @@
 ```
 .
 ├── analysis                    <-- code for analysis (in supplement.Rmd), reliability and social relations model
-├── data                                    <-- data files
+├── data                        <-- data files
 ├── materials                   <-- documentation to replicate study, including a coding sheet*
     └── videos                  <-- example videos for each task to replicate the procedure
 ├── outputs                     <-- SEM model outputs**
