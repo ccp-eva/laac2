@@ -1,0 +1,35 @@
+DATA: 
+File is Trait.PV.implist.dat;
+Type = Imputation;
+
+VARIABLE: 
+
+Names are subject cause   gaze    delay   
+inf1    inf2    quant   food    comm   
+pop     reason  search  attent ; 
+
+usevariables =  cause   gaze    delay   
+	inf1    inf2    quant   food    comm   
+	pop     reason  search  attent ;
+
+
+Missing = All(-99);	
+
+ANALYSIS:
+
+Estimator = MLR;
+
+MODEL:
+
+cause   gaze    delay   inf1    inf2    with
+cause   gaze    delay   inf1    inf2;
+
+quant   food    comm   pop     reason  search  attent with
+quant   food    comm   pop     reason  search  attent;
+
+
+cause   gaze    delay   inf1    inf2    with
+quant   food    comm   pop     reason  search  attent;
+
+ 
+Output: stdyx ;

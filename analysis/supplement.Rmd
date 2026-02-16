@@ -2233,8 +2233,8 @@ In the following, we describe the Projection Prediction Inference results for ea
 ```{r}
 df_trials <- data_trial%>%
   #filter(task != "inhibit_searched")%>%
-  mutate(code2 = ifelse(task == "inhibit_searched" & code > 0, 0, 1),
-       code = ifelse(task == "inhibit_searched", code2, code),
+  mutate(code2 = ifelse(task == "Self-ordered-search" & code > 0, 0, 1),
+       code = ifelse(task == "Self-ordered-search", code2, code),
         )%>%
   group_by(subject, time_point,group,test_tp, task, rank, sex, rearing, age, time_in_leipzig, observer, sick_severity,test_day, le_present, le_mean, le_max, dist_present, dist_mean, dist_max, time_outdoors)%>%
   summarise(sick_severity = mean(sick_severity), 
@@ -2242,7 +2242,6 @@ df_trials <- data_trial%>%
             n = length(code))%>%
   mutate(observer = ifelse(is.na(observer), "no", "yes"))
 ```
-
 
 ```{r}
 # grp_size <- read_csv("../saves/srm_estimates.csv")%>%
@@ -2316,7 +2315,7 @@ df_trials <- data_trial%>%
 ```{r}
 # m_att <- brm(fm,
 #              family = binomial,
-#              data = df_trials_final%>%filter(task == "attention"),
+#              data = df_trials_final%>%filter(task == "Attention-following"),
 #               warmup = 1000, 
 #               iter = 4000, 
 #               cores = 4, 
@@ -2325,7 +2324,7 @@ df_trials <- data_trial%>%
 # 
 # m_com <- brm(fm,
 #              family = binomial,
-#              data = df_trials_final%>%filter(task == "communication"),
+#              data = df_trials_final%>%filter(task == "Communicative-cues"),
 #               warmup = 1000, 
 #               iter = 4000, 
 #               cores = 4, 
@@ -2334,7 +2333,7 @@ df_trials <- data_trial%>%
 # 
 # m_inh <- brm(fm,
 #              family = binomial,
-#              data = df_trials_final%>%filter(task == "inhibit_searched"),
+#              data = df_trials_final%>%filter(task == "Self-ordered-search"),
 #               warmup = 1000, 
 #               iter = 4000, 
 #               cores = 4, 
@@ -2343,7 +2342,7 @@ df_trials <- data_trial%>%
 # 
 # m_pop <- brm(fm,
 #              family = binomial,
-#              data = df_trials_final%>%filter(task == "population"),
+#              data = df_trials_final%>%filter(task == "Population-to-sample"),
 #               warmup = 1000, 
 #               iter = 4000, 
 #               cores = 4, 
@@ -2352,7 +2351,7 @@ df_trials <- data_trial%>%
 # 
 # m_vis <- brm(fm,
 #              family = binomial,
-#              data = df_trials_final%>%filter(task == "visible_food"),
+#              data = df_trials_final%>%filter(task == "Ignore-visible-food"),
 #               warmup = 1000, 
 #               iter = 4000, 
 #               cores = 4, 
