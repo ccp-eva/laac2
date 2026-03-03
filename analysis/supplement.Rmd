@@ -2594,7 +2594,7 @@ ggarrange(ppopsel, ppoppro, labels = c("A","B"), widths = c(1,1))
 #   filter(grepl(stat,se_term))%>%
 #   select(-se_term)%>%
 #   mutate(ranking_fulldata = factor(ifelse(ranking_fulldata == "(Intercept)","none",ranking_fulldata)),
-#          select = ifelse(ranking_fulldata  %in% c("(1 | subject)", "group", "time_point"), "yes", "no"))
+#          select = ifelse(ranking_fulldata  %in% c("(1 | subject)", "group", "time_point", "sex"), "yes", "no"))
 # 
 # saveRDS(com_varselp, "../saves/cvs_com_summary.rds")
 
