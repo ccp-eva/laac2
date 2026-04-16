@@ -1,4 +1,7 @@
 ---
+title: "Individual differences in great ape cognition across time and domains: stability, structure, and predictability"
+subtitle: "Supplementary Material"
+
 output:
   bookdown::pdf_document2:
     toc: yes
@@ -119,7 +122,7 @@ We then move on to our [analytical framework](#analytical-framework). First we d
 
 In the [results](#results) we first report on the [robustness, stability and reliability](#stability-and-reliability) of each task. Next, we investigate [relations between](#relations-between-tasks) trait variables computed for the different tasks. Here we also include the tasks described in @bohn2023great. Finally, we report how the different [predictors](#predictability) related to performance in the different tasks.
 
-All data sets, model outputs and analysis code are available in the associated online repository https://github.com/ccp-eva/laac2/. For a permanently archived version of the repository see the Zenodo link in the paper. The repository also contains additional documentation of the experimental procedures and example videos for the different tasks.
+All data sets, model outputs and analysis code are available in the associated online repository https://github.com/ccp-eva/laac2/. For a permanently archived version of the repository see the Zenodo link in the paper (https://doi.org/10.5281/zenodo.18384250). The repository also contains additional documentation of the experimental procedures and example videos for the different tasks.
 
 # Methods 
 
@@ -195,7 +198,7 @@ knitr::include_graphics("../visuals/setup.png")
 
 ## Tasks {#tasks}
 
-The tasks we selected are based on published procedures and are commonly used in the field of comparative psychology. The original publications often include control conditions to rule out alternative, cognitively less demanding ways to solve the tasks. We did not include such controls here and only ran the experimental conditions. For each task, we refer to the publication we used to model our procedure. We ask the reader to read these papers if they want to know more about control conditions and/or a detailed discussion of the nature of the underlying cognitive mechanisms. Example videos for each task can be found in the associated online repository in the associated online repository (https://github.com/ccp-eva/laac2/tree/master/materials/videos). The tasks are presented in the order in which they were administered (see upplementary Figure \@ref(fig:setup)). 
+The tasks we selected are based on published procedures and are commonly used in the field of comparative psychology. The original publications often include control conditions to rule out alternative, cognitively less demanding ways to solve the tasks. We did not include such controls here and only ran the experimental conditions. For each task, we refer to the publication we used to model our procedure. We ask the reader to read these papers if they want to know more about control conditions and/or a detailed discussion of the nature of the underlying cognitive mechanisms. Example videos for each task can be found in the associated online repository (https://github.com/ccp-eva/laac2/tree/master/materials/videos). The tasks are presented in the order in which they were administered (see upplementary Figure \@ref(fig:setup)). 
 
 ### Population-to-sample
 

@@ -81,7 +81,7 @@ tablelist         : no
 footnotelist      : no
 
 classoption       : "man"
-output            : papaja::apa6_docx
+output            : papaja::apa6_pdf
 ---
 
 ```{r , include = FALSE}
